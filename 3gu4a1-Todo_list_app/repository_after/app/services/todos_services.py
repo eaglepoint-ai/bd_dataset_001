@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 from fastapi import HTTPException, status
 from app.models.schemas import TodoCreate, TodoUpdate, TodoPatch
 from app.storage import memory

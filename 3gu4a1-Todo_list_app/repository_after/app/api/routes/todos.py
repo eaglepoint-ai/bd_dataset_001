@@ -1,8 +1,3 @@
-# ============================================
-# HTTP routes (CRUD) for the Todo resource.
-# Uses proper HTTP status codes and Pydantic v2 models.
-# ============================================
-
 from typing import List
 
 from fastapi import APIRouter, Query, status
