@@ -1,0 +1,46 @@
+# ======================
+# Evaluation artifacts
+# ======================
+evaluation/report/
+evaluation/report/**
+
+# ======================
+# Node / Frontend
+# ======================
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+
+# ======================
+# Python
+# ======================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+
+# ======================
+# Logs & temp files
+# ======================
+*.log
+*.tmp
+.DS_Store
+
+# ======================
+# IDE / Editor
+# ======================
+.vscode/
+.idea/
+
+# ======================
+# Reports / generated data
+# ======================
+report/
+*.json
+*.csv
+*.pkl
