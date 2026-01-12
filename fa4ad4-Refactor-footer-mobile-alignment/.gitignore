@@ -1,8 +1,7 @@
 # ======================
 # Evaluation artifacts
 # ======================
-evaluation/report/
-evaluation/report/**
+evaluation/reports/**
 
 # ======================
 # Node / Frontend
@@ -37,10 +36,4 @@ venv/
 .vscode/
 .idea/
 
-# ======================
-# Reports / generated data
-# ======================
-report/
-*.json
-*.csv
-*.pkl
+
