@@ -1,6 +1,12 @@
+version: '3.8'
+
 services:
-  app:
-    build: .
-    command: pytest -q tests
+  schema-validator:
+    image: node:20-alpine
+    working_dir: /workspace
     volumes:
-      - .:/app
+      - ./:/workspace
+    command: /bin/sh -c "echo 'Schema Validator Task Environment Ready'"
+    stdin_open: true
+    tty: true
+
