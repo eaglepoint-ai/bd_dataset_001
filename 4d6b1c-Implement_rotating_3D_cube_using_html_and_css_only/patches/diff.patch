@@ -1,0 +1,166 @@
+diff --git a/repository_before/.gitkeep b/repository_before/.gitkeep
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/repository_after/cube.html b/repository_after/cube.html
+new file mode 100644
+index 0000000..d696c00
+--- /dev/null
++++ b/repository_after/cube.html
+@@ -0,0 +1,157 @@
++<!DOCTYPE html>
++<html lang="en">
++  <head>
++    <meta charset="UTF-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <meta
++      name="description"
++      content="A pure CSS 3D rotating cube with glassmorphism effect"
++    />
++    <title>3D Rotating Glassmorphic Cube</title>
++    <style>
++      :root {
++        /* -- Configuration Variables -- */
++        --cube-size: 200px;
++        --cube-half-size: calc(var(--cube-size) / 2);
++
++        /* Animation */
++        --anim-duration: 10s;
++
++        /* Colors & Effects */
++        --bg-radial-inner: #111;
++        --bg-radial-outer: #000;
++        --glass-border: rgba(255, 255, 255, 0.3);
++        --glass-bg: rgba(255, 255, 255, 0.1);
++        --glass-shadow-inner: rgba(255, 255, 255, 0.5);
++        --text-color: rgba(255, 255, 255, 0.8);
++      }
++
++      /* Reset and basic styles */
++      * {
++        margin: 0;
++        padding: 0;
++        box-sizing: border-box;
++      }
++
++      body,
++      html {
++        width: 100%;
++        height: 100%;
++        display: flex;
++        justify-content: center;
++        align-items: center;
++        background: radial-gradient(
++          circle at center,
++          var(--bg-radial-inner) 0%,
++          var(--bg-radial-outer) 100%
++        );
++        perspective: 1200px; /* Essential for 3D effect: determines the distance to the z=0 plane */
++        overflow: hidden;
++        font-family: system-ui, -apple-system, sans-serif;
++      }
++
++      /* Main container for semantic structure */
++      main {
++        display: flex;
++        justify-content: center;
++        align-items: center;
++        width: 100%;
++        height: 100%;
++      }
++
++      /* 
++       * Scene Container 
++       * Holds the 3D space and manages the global rotation animation.
++       */
++      .scene {
++        width: var(--cube-size);
++        height: var(--cube-size);
++        position: relative;
++        transform-style: preserve-3d; /* Allows children to exist in 3D space */
++        animation: rotateCube var(--anim-duration) infinite linear;
++      }
++
++      /* Pause animation on hover for better accessibility/interaction */
++      .scene:hover {
++        animation-play-state: paused;
++      }
++
++      /* Common styles for all cube faces */
++      .cube-face {
++        position: absolute;
++        width: var(--cube-size);
++        height: var(--cube-size);
++        border: 2px solid var(--glass-border);
++        background: var(--glass-bg);
++        backdrop-filter: blur(8px); /* Creates the frosted glass effect */
++        box-shadow: inset 0 0 50px var(--glass-shadow-inner),
++          inset 0 0 20px var(--glass-shadow-inner);
++        display: flex;
++        justify-content: center;
++        align-items: center;
++        font-size: 2rem;
++        color: var(--text-color);
++        border-radius: 12px;
++
++        /* Ensure text is readable and faces are visible from both sides (optional) */
++        backface-visibility: visible;
++      }
++
++      /* 
++       * Positioning Faces 
++       * Each face is rotated and then translated outward by half the cube's size 
++       */
++      .front {
++        transform: rotateY(0deg) translateZ(var(--cube-half-size));
++      }
++      .back {
++        transform: rotateY(180deg) translateZ(var(--cube-half-size));
++      }
++      .right {
++        transform: rotateY(90deg) translateZ(var(--cube-half-size));
++      }
++      .left {
++        transform: rotateY(-90deg) translateZ(var(--cube-half-size));
++      }
++      .top {
++        transform: rotateX(90deg) translateZ(var(--cube-half-size));
++      }
++      .bottom {
++        transform: rotateX(-90deg) translateZ(var(--cube-half-size));
++      }
++
++      /* Keyframes for full 3D rotation */
++      @keyframes rotateCube {
++        0% {
++          transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
++        }
++        100% {
++          transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
++        }
++      }
++
++      /* Responsive Adjustments */
++      @media (max-width: 500px) {
++        :root {
++          --cube-size: 150px; /* Reduce size on smaller screens */
++        }
++        .cube-face {
++          font-size: 1.5rem;
++        }
++      }
++    </style>
++  </head>
++  <body>
++    <main>
++      <!-- ARIA label provides context for screen readers describing the visual element -->
++      <div class="scene" role="img" aria-label="A rotating 3D transparent cube">
++        <div class="cube-face front">Front</div>
++        <div class="cube-face back">Back</div>
++        <div class="cube-face right">Right</div>
++        <div class="cube-face left">Left</div>
++        <div class="cube-face top">Top</div>
++        <div class="cube-face bottom">Bottom</div>
++      </div>
++    </main>
++  </body>
++</html>
