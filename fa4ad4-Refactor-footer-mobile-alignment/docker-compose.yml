@@ -1,6 +1,29 @@
 services:
   app:
     build: .
-    command: pytest -q tests
+    volumes:
+      - .:/app
+    environment:
+      - REPO=repository_after
+
+  app-before:
+    build: .
+    command: npm test
+    volumes:
+      - .:/app
+    environment:
+      - REPO=repository_before
+
+  app-after:
+    build: .
+    command: npm test
+    volumes:
+      - .:/app
+    environment:
+      - REPO=repository_after
+
+  evaluation:
+    build: .
+    command: npm run evaluation
     volumes:
       - .:/app

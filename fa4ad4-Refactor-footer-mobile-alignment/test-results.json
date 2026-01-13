@@ -1,0 +1,263 @@
+{
+  "config": {
+    "configFile": "/app/playwright.config.ts",
+    "rootDir": "/app/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 4
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "json",
+        {
+          "outputFile": "test-results.json"
+        }
+      ],
+      [
+        "line",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/app/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.57.0",
+    "workers": 8,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "test_footer.spec.ts",
+      "file": "test_footer.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Mobile content centered",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 2,
+                  "error": {
+                    "message": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝",
+                    "stack": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝"
+                  },
+                  "errors": [
+                    {
+                      "message": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "Starting dev server for repository_before...\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-01-13T21:32:16.183Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "73abcba757b4bb6c4e6d-5b3074e668fb0e7d90da",
+          "file": "test_footer.spec.ts",
+          "line": 32,
+          "column": 5
+        },
+        {
+          "title": "Social icons below sections on mobile",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "failed",
+                  "duration": 1,
+                  "error": {
+                    "message": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝",
+                    "stack": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝"
+                  },
+                  "errors": [
+                    {
+                      "message": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "Starting dev server for repository_before...\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-01-13T21:32:16.777Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "73abcba757b4bb6c4e6d-e7a035eea004fb920a57",
+          "file": "test_footer.spec.ts",
+          "line": 58,
+          "column": 5
+        },
+        {
+          "title": "Desktop grid preserved",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 2,
+                  "status": "failed",
+                  "duration": 2,
+                  "error": {
+                    "message": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝",
+                    "stack": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝"
+                  },
+                  "errors": [
+                    {
+                      "message": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "Starting dev server for repository_before...\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-01-13T21:32:15.069Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "73abcba757b4bb6c4e6d-8973a8aac07aa7c51cad",
+          "file": "test_footer.spec.ts",
+          "line": 90,
+          "column": 5
+        },
+        {
+          "title": "Hover effects preserved",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 3,
+                  "status": "failed",
+                  "duration": 2,
+                  "error": {
+                    "message": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝",
+                    "stack": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝"
+                  },
+                  "errors": [
+                    {
+                      "message": "Error: browserType.launch: Executable doesn't exist at /ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell\n╔══════════════════════════════════════════════════════════════════════╗\n║ Looks like Playwright Test or Playwright was just updated to 1.57.0. ║\n║ Please update docker image as well.                                  ║\n║ -  current: mcr.microsoft.com/playwright:v1.40.0-jammy               ║\n║ - required: mcr.microsoft.com/playwright:v1.57.0-jammy               ║\n║                                                                      ║\n║ <3 Playwright Team                                                   ║\n╚══════════════════════════════════════════════════════════════════════╝"
+                    }
+                  ],
+                  "stdout": [
+                    {
+                      "text": "Starting dev server for repository_before...\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-01-13T21:32:15.065Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "73abcba757b4bb6c4e6d-18c82dc55ef97e61d717",
+          "file": "test_footer.spec.ts",
+          "line": 119,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-01-13T21:32:12.065Z",
+    "duration": 10134.768000000002,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

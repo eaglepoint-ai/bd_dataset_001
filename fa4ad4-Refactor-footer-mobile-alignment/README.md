@@ -1,42 +1,61 @@
+# Footer Mobile Alignment Refactoring
+
+This dataset task involves refactoring a React application to fix mobile responsiveness issues and migrating the codebase to TypeScript.
+
+## Folder Layout
+
+- `repository_before/` - Original JavaScript implementation
+- `repository_after/` - Refactored TypeScript implementation
+- `tests/` - Structural verification tests
+- `patches/` - Diff between before/after
+- `evaluation/` - Evaluation runner
+
 ## Problem Statement
 
-When the viewport is reduced to mobile sizes:
+The goal is to refactor the project to:
+1. **Fix Footer Mobile Alignment**: Center content with ~20% margins and reorder social icons.
+2. **Migrate to TypeScript**: Convert all components to `.tsx`, add `tsconfig.json`, and ensure proper typing.
 
-* All footer content (brand description, navigation links, and contact information) **shifts excessively to the left**, instead of remaining visually centered.  
-* **Social media icons** are positioned immediately after the brand description within the first column, disrupting the expected content flow on mobile layouts.  
-* Desktop layout must remain intact, preserving **grid structure, Tailwind CSS styling, hover effects, transitions, and semantic HTML**.  
+## Verification
 
-The solution must:
+Verification focuses on the **structural integrity** of the refactor rather than UI testing (which is assumed correct):
 
-* Implement a **mobile-first responsive design**.  
-* Ensure proper **spacing and alignment** on smaller screens.  
-* Maintain full responsiveness of the **footer’s bottom bar** (copyright and legal links).  
+- **TypeScript Migration**: Checks that all source files are `.tsx` or `.ts`.
+- **Configuration**: Checks for existence of `tsconfig.json`, `vite.config.ts`, etc.
+- **Dependencies**: checks for TypeScript packages in `package.json`.
 
+## Run with Docker
 
-## Issues to Fix
+### Build image
+```bash
+docker compose build
+```
 
-1. **Mobile Content Alignment Problem**  
-   * Center footer content on mobile viewports.  
-   * Apply approximately **20% margin** on the left and right to create visual breathing room while keeping content centered.  
+### Run tests (before – expected failures)
+```bash
+docker compose run --rm app-before
+```
+*Expected: Failures due to missing TypeScript config and .jsx files.*
 
-2. **Social Media Icons Placement**  
-   * Move the social media icons container to appear **below all other content sections** (Explore, Support, Visit Us) in mobile view.  
+### Run tests (after – expected pass)
+```bash
+docker compose run --rm app-after
+```
+*Expected: All structural checks PASS.*
 
+### Run evaluation
+```bash
+docker compose run --rm evaluation
+```
 
-## Requirements
+## Run Locally
 
-* Maintain all existing **Tailwind CSS utility classes and styling**.  
-* Preserve **hover effects, transitions, and color schemes**.  
-* Keep existing **grid structure** for desktop views (`md:grid-cols-2`, `lg:grid-cols-4`).  
-* Ensure the **bottom bar** (copyright and legal links) remains responsive and properly aligned.  
-* Follow a **mobile-first responsive approach**.  
-* Do **not alter semantic HTML** or remove any existing content.  
+```bash
+# Install dependencies
+npm install
+cd repository_before/demo-app && npm install
+cd repository_after/demo-app && npm install
 
-
-## Tech Stack
-
-* **React** (functional components)  
-* **Tailwind CSS** (utility-first styling)  
-* **Responsive design principles** (mobile-first approach)  
-* **CSS Grid & Flexbox** for layout management  
-* **Modern JavaScript / TypeScript**  
+# Run verification
+REPO=repository_after npm test
+```

@@ -1,0 +1,56 @@
+{
+  "run_id": "74liqlve",
+  "task_id": "fa4ad4",
+  "task_name": "Footer Mobile Alignment Refactor",
+  "started_at": "2026-01-13T22:03:12.677Z",
+  "finished_at": "2026-01-13T22:03:23.653Z",
+  "success": true,
+  "error": null,
+  "environment": {
+    "node_version": "v20.19.6",
+    "platform": "linux",
+    "os_release": "6.6.87.2-microsoft-standard-WSL2",
+    "architecture": "x64",
+    "hostname": "45adf6c3cb54",
+    "git_commit": "unknown",
+    "git_branch": "unknown"
+  },
+  "results": {
+    "before": {
+      "success": false,
+      "exit_code": 1,
+      "tests": [],
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 1,
+        "skipped": 0
+      },
+      "stdout": "\n> footer-mobile-alignment-tests@1.0.0 test\n> ts-node tests/test_structure.ts\n\n\n🔍 Starting Structural Validation for: repository_before\n📂 Path: /app/repository_before/demo-app\n\nrunning 'Structure: TypeScript Configuration' ... FAIL\n  └─ Missing TypeScript config files: tsconfig.json, vite.config.ts, tailwind.config.ts. Project must be fully TypeScript.\nrunning 'Structure: No JavaScript Source Files' ... FAIL\n  └─ Found Legacy JavaScript files: src/App.jsx, src/components/About.jsx, src/components/FeaturedCollection.jsx, src/components/Footer.jsx, src/components/Header.jsx, src/components/Hero.jsx, src/components/Newsletter.jsx, src/main.jsx. Migration to .ts/.tsx is incomplete.\nrunning 'Dependencies: TypeScript Installed' ... FAIL\n  └─ Dependency \"typescript\" is missing.\nrunning 'Refactor Quality: Footer Component Length' ... FAIL\n  └─ Footer component is too long (107 lines). Goal is < 100 lines.\n\n==================================================\nTEST SUMMARY\n==================================================\n❌ [1/4] Structure: TypeScript Configuration\n❌ [2/4] Structure: No JavaScript Source Files\n❌ [3/4] Dependencies: TypeScript Installed\n❌ [4/4] Refactor Quality: Footer Component Length\n--------------------------------------------------\nTotal: 4 | Passed: 0 | Failed: 4\nSuccess Rate: 0.0%\n==================================================\n",
+      "stderr": ""
+    },
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [],
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "\n> footer-mobile-alignment-tests@1.0.0 test\n> ts-node tests/test_structure.ts\n\n\n🔍 Starting Structural Validation for: repository_after\n📂 Path: /app/repository_after/demo-app\n\nrunning 'Structure: TypeScript Configuration' ... PASS\nrunning 'Structure: No JavaScript Source Files' ... PASS\nrunning 'Dependencies: TypeScript Installed' ... PASS\nrunning 'Refactor Quality: Footer Component Length' ... PASS\n\n==================================================\nTEST SUMMARY\n==================================================\n✅ [1/4] Structure: TypeScript Configuration\n✅ [2/4] Structure: No JavaScript Source Files\n✅ [3/4] Dependencies: TypeScript Installed\n✅ [4/4] Refactor Quality: Footer Component Length\n--------------------------------------------------\nTotal: 4 | Passed: 4 | Failed: 0\nSuccess Rate: 100.0%\n==================================================\n",
+      "stderr": ""
+    },
+    "comparison": {
+      "before_tests_passed": false,
+      "after_tests_passed": true,
+      "before_passed": 0,
+      "before_failed": 0,
+      "after_passed": 0,
+      "after_failed": 0
+    }
+  }
+}

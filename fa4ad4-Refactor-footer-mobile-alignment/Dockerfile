@@ -1,5 +1,18 @@
-FROM python:3.11-slim
+FROM node:20-slim
+
 WORKDIR /app
+
+# Copy project files
 COPY . /app
-RUN pip install --no-cache-dir -r requirements.txt
-CMD ["pytest", "-q", "tests"]
+
+# Install dependencies for root (tests/evaluation)
+RUN npm install
+
+# Install dependencies for repositories (needed for potential imports or just completeness)
+RUN cd repository_before/demo-app && npm install
+RUN cd repository_after/demo-app && npm install
+
+# Default command
+ENV REPO=repository_after
+# Run structural tests by default
+CMD ["npm", "test"]
