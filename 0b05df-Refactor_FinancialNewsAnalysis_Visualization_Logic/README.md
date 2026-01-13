@@ -1,92 +1,99 @@
-# project template
+# Refactor: FinancialNewsAnalysis Visualization Logic
 
-Starter scaffold for bd dataset task.
+This dataset task contains a `FinancialNewsAnalysis` class with repetitive plotting logic.
+The objective is **structural de-duplication** of the `visualize_stat_measures` method while preserving **exact visual output behavior**.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+## Problem Statement
 
----
+The `FinancialNewsAnalysis` class contains tightly coupled, repetitive plotting logic within the `visualize_stat_measures` method. The current implementation:
+- Violates the DRY principle with repeated `plt.figure()`, `plt.xlabel()`, `plt.ylabel()`, `plt.title()`, `plt.show()` patterns
+- Relies on implicit matplotlib state instead of explicit figure/axis objects
+- Mixes inline plotting code instead of using reusable helper methods
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+Refactoring is needed to extract private helper methods (`_create_figure`, `_configure_axis`, `_show_plot`, `_plot_histogram`, `_plot_bar`) that consolidate duplicated logic while preserving the public API and exact visual output.
 
-### Setup Steps
+## Folder Layout
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
+- `repository_before/` — original implementation with duplicated plotting code
+- `repository_after/` — refactored implementation with private helper methods
+- `tests/` — structural and behavioral equivalence tests
+- `evaluation/` — evaluation scripts and reports
+- `patches/` — diff between before/after
+- `instances/` — task instance metadata (JSON)
+- `trajectory/` — AI reasoning trajectory (Markdown)
 
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
+## Run with Docker
 
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+### Build image
+```bash
+docker compose build
 ```
 
-### Report Schema
-
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+### Run tests (before – expected some failures)
+```bash
+docker compose run --rm -e PYTHONPATH=/app/repository_before app pytest -q
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+**Expected behavior:**
+- Behavioral tests: ✅ PASS (public API works correctly)
+- Structural tests: ❌ FAIL (no helper methods, duplicated code)
 
----
+### Run tests (after – expected all pass)
+```bash
+docker compose run --rm -e PYTHONPATH=/app/repository_after app pytest -q
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+**Expected behavior:**
+- Behavioral tests: ✅ PASS (public API unchanged)
+- Structural tests: ✅ PASS (helper methods extracted, DRY principle followed)
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+### Run evaluation (compares both implementations)
+```bash
+docker compose run --rm app python evaluation/evaluation.py
+```
+
+This will:
+- Run tests for both before and after implementations
+- Verify structural requirements (helper methods, DRY principle)
+- Generate a report at `evaluation/YYYY-MM-DD/HH-MM-SS/report.json`
+
+## Run Locally
+
+### Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Run tests on repository_before
+```bash
+PYTHONPATH=repository_before pytest tests/ -v
+```
+
+### Run tests on repository_after
+```bash
+PYTHONPATH=repository_after pytest tests/ -v
+```
+
+## Regenerate Patch
+
+From repo root:
+```bash
+git diff --no-index repository_before/financial_news_analysis.py repository_after/financial_news_analysis.py > patches/diff.patch
+```
+
+## Test Categories
+
+### FAIL_TO_PASS (5 tests)
+These tests fail on `repository_before` and pass on `repository_after`:
+- `test_helper_methods_exist` — verifies private helpers are defined
+- `test_create_figure_returns_fig_and_ax` — verifies explicit figure/axis objects
+- `test_dry_principle_plot_histogram_reused` — verifies `_plot_histogram` called 2+ times
+- `test_no_duplicated_figure_creation` — verifies no direct `plt.figure()` calls
+- `test_helper_accepts_explicit_data` — verifies helpers accept data parameters
+
+### PASS_TO_PASS (4 tests)
+These tests pass on both implementations:
+- `test_public_api_exists` — verifies public methods exist
+- `test_descriptive_statistics_returns_tuple` — verifies return type
+- `test_data_loaded_correctly` — verifies CSV loading
+- `test_headline_length_calculated` — verifies computed column

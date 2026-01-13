@@ -4,6 +4,19 @@
     "base_commit": "repository_before",
     "test_patch": "tests/",
     "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/0b05df-Refactor_FinancialNewsAnalysis_Visualization_Logic",
-    "environment_setup": "Dockerfile"
-  }
+    "environment_setup": "Dockerfile",
+    "FAIL_TO_PASS": [
+        "tests/test_financial_news_analysis.py::test_helper_methods_exist",
+        "tests/test_financial_news_analysis.py::test_create_figure_returns_fig_and_ax",
+        "tests/test_financial_news_analysis.py::test_dry_principle_plot_histogram_reused",
+        "tests/test_financial_news_analysis.py::test_no_duplicated_figure_creation",
+        "tests/test_financial_news_analysis.py::test_helper_accepts_explicit_data"
+    ],
+    "PASS_TO_PASS": [
+        "tests/test_financial_news_analysis.py::test_public_api_exists",
+        "tests/test_financial_news_analysis.py::test_descriptive_statistics_returns_tuple",
+        "tests/test_financial_news_analysis.py::test_data_loaded_correctly",
+        "tests/test_financial_news_analysis.py::test_headline_length_calculated"
+    ]
+}
   
