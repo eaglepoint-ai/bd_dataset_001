@@ -1,0 +1,30 @@
+{
+  "name": "bda893-weather-component",
+  "version": "1.0.0",
+  "description": "Weather Component React 19 use() Hook evaluation",
+  "scripts": {
+    "dev": "vitest",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:before": "vitest run -t repository_before",
+    "test:after": "vitest run -t repository_after",
+    "evaluate": "tsx evaluation/evaluation.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.4",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitest/ui": "^4.0.17",
+    "jsdom": "^24.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.17"
+  },
+  "dependencies": {
+    "@testing-library/react": "^16.3.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  }
+}

@@ -1,0 +1,7 @@
+node_modules/
+*.log
+evaluation/reports/
+.DS_Store
+coverage/
+.nyc_output/
+*.tsbuildinfo

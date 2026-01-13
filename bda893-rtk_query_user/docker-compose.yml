@@ -1,6 +1,54 @@
+version: '3.8'
+
 services:
-  app:
-    build: .
-    command: pytest -q tests
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+    command: npm run test:run
+    profiles:
+      - tests
+
+  test-before:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+    command: npm run test:before
+    profiles:
+      - before
+
+  test-after:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+    command: npm run test:after
+    profiles:
+      - after
+
+  evaluate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+    command: npm run evaluate
+    profiles:
+      - evaluate

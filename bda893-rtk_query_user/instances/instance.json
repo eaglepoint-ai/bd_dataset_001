@@ -1,1 +1,8 @@
-{}
+{
+  "instance_id": "bda893-rtk_query_user",
+  "problem_statement": "The existing React component uses useState and useEffect for imperative data fetching, loading and error states are manually managed, increasing complexity and boilerplate and the implementation does not leverage React 19’s use() hook or the Suspense-first rendering model.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/bda893-rtk_query_user",
+  "environment_setup": "Dockerfile"
+}
