@@ -83,17 +83,24 @@ git diff --no-index repository_before/financial_news_analysis.py repository_afte
 
 ## Test Categories
 
-### FAIL_TO_PASS (5 tests)
+### FAIL_TO_PASS (8 tests)
 These tests fail on `repository_before` and pass on `repository_after`:
 - `test_helper_methods_exist` — verifies private helpers are defined
 - `test_create_figure_returns_fig_and_ax` — verifies explicit figure/axis objects
 - `test_dry_principle_plot_histogram_reused` — verifies `_plot_histogram` called 2+ times
 - `test_no_duplicated_figure_creation` — verifies no direct `plt.figure()` calls
 - `test_helper_accepts_explicit_data` — verifies helpers accept data parameters
+- `test_no_duplicated_show_calls` — verifies no direct `plt.show()` calls
+- `test_configure_axis_reused` — verifies `_configure_axis` is called by plotting helpers
+- `test_show_plot_reused` — verifies `_show_plot` is called by plotting helpers
 
-### PASS_TO_PASS (4 tests)
+### PASS_TO_PASS (8 tests)
 These tests pass on both implementations:
 - `test_public_api_exists` — verifies public methods exist
 - `test_descriptive_statistics_returns_tuple` — verifies return type
 - `test_data_loaded_correctly` — verifies CSV loading
 - `test_headline_length_calculated` — verifies computed column
+- `test_descriptive_statistics_headline_stats_structure` — verifies stats keys
+- `test_descriptive_statistics_publisher_counts` — verifies publisher counting
+- `test_descriptive_statistics_date_counts` — verifies date counting
+- `test_class_accepts_file_path` — verifies constructor accepts file path

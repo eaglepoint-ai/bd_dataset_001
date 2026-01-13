@@ -10,13 +10,20 @@
         "tests/test_financial_news_analysis.py::test_create_figure_returns_fig_and_ax",
         "tests/test_financial_news_analysis.py::test_dry_principle_plot_histogram_reused",
         "tests/test_financial_news_analysis.py::test_no_duplicated_figure_creation",
-        "tests/test_financial_news_analysis.py::test_helper_accepts_explicit_data"
+        "tests/test_financial_news_analysis.py::test_helper_accepts_explicit_data",
+        "tests/test_financial_news_analysis.py::test_no_duplicated_show_calls",
+        "tests/test_financial_news_analysis.py::test_configure_axis_reused",
+        "tests/test_financial_news_analysis.py::test_show_plot_reused"
     ],
     "PASS_TO_PASS": [
         "tests/test_financial_news_analysis.py::test_public_api_exists",
         "tests/test_financial_news_analysis.py::test_descriptive_statistics_returns_tuple",
         "tests/test_financial_news_analysis.py::test_data_loaded_correctly",
-        "tests/test_financial_news_analysis.py::test_headline_length_calculated"
+        "tests/test_financial_news_analysis.py::test_headline_length_calculated",
+        "tests/test_financial_news_analysis.py::test_descriptive_statistics_headline_stats_structure",
+        "tests/test_financial_news_analysis.py::test_descriptive_statistics_publisher_counts",
+        "tests/test_financial_news_analysis.py::test_descriptive_statistics_date_counts",
+        "tests/test_financial_news_analysis.py::test_class_accepts_file_path"
     ]
 }
   

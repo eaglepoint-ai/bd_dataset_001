@@ -259,6 +259,155 @@ def test_helper_accepts_explicit_data():
         cleanup_test_csv()
 
 
+def test_no_duplicated_show_calls():
+    """
+    Structural requirement: visualize_stat_measures must not contain duplicated plt.show() calls.
+    
+    This test will FAIL for repository_before (has 3 direct plt.show() calls)
+    and PASS for repository_after (uses _show_plot helper instead).
+    """
+    csv_path = create_test_csv()
+    try:
+        analysis = FinancialNewsAnalysis(csv_path)
+        
+        source = inspect.getsource(analysis.visualize_stat_measures)
+        
+        # Count direct plt.show() calls in visualize_stat_measures
+        show_calls = source.count('plt.show(')
+        
+        assert show_calls == 0, (
+            f"visualize_stat_measures contains {show_calls} direct plt.show() calls. "
+            f"Refactored code must use _show_plot helper instead of duplicating "
+            f"show logic."
+        )
+    finally:
+        cleanup_test_csv()
+
+
+def test_configure_axis_reused():
+    """
+    Structural requirement: _configure_axis must be called multiple times (DRY).
+    
+    This test will FAIL for repository_before (no _configure_axis method)
+    and PASS for repository_after (_configure_axis called by _plot_histogram and _plot_bar).
+    """
+    csv_path = create_test_csv()
+    try:
+        analysis = FinancialNewsAnalysis(csv_path)
+        
+        assert hasattr(analysis, '_configure_axis'), (
+            "_configure_axis method does not exist. "
+            "Refactored code must extract axis configuration into reusable helper."
+        )
+        
+        # Check that _configure_axis is called in _plot_histogram
+        if hasattr(analysis, '_plot_histogram'):
+            hist_source = inspect.getsource(analysis._plot_histogram)
+            assert '_configure_axis' in hist_source, (
+                "_plot_histogram must call _configure_axis for DRY compliance."
+            )
+        
+        # Check that _configure_axis is called in _plot_bar
+        if hasattr(analysis, '_plot_bar'):
+            bar_source = inspect.getsource(analysis._plot_bar)
+            assert '_configure_axis' in bar_source, (
+                "_plot_bar must call _configure_axis for DRY compliance."
+            )
+    finally:
+        cleanup_test_csv()
+
+
+def test_show_plot_reused():
+    """
+    Structural requirement: _show_plot must be called by plotting helpers.
+    
+    This test will FAIL for repository_before (no _show_plot method)
+    and PASS for repository_after (_show_plot called by _plot_histogram and _plot_bar).
+    """
+    csv_path = create_test_csv()
+    try:
+        analysis = FinancialNewsAnalysis(csv_path)
+        
+        assert hasattr(analysis, '_show_plot'), (
+            "_show_plot method does not exist. "
+            "Refactored code must extract show logic into reusable helper."
+        )
+        
+        # Check that _show_plot is called in _plot_histogram
+        if hasattr(analysis, '_plot_histogram'):
+            hist_source = inspect.getsource(analysis._plot_histogram)
+            assert '_show_plot' in hist_source, (
+                "_plot_histogram must call _show_plot for DRY compliance."
+            )
+        
+        # Check that _show_plot is called in _plot_bar
+        if hasattr(analysis, '_plot_bar'):
+            bar_source = inspect.getsource(analysis._plot_bar)
+            assert '_show_plot' in bar_source, (
+                "_plot_bar must call _show_plot for DRY compliance."
+            )
+    finally:
+        cleanup_test_csv()
+
+
+# =============================================================================
+# Additional PASS_TO_PASS: More behavioral tests
+# =============================================================================
+
+def test_descriptive_statistics_headline_stats_structure():
+    """Verify headline_stats has expected statistical keys."""
+    csv_path = create_test_csv()
+    try:
+        analysis = FinancialNewsAnalysis(csv_path)
+        headline_stats, _, _ = analysis.descriptive_statistics()
+        
+        # Should have count, mean, std, min, max, etc.
+        assert hasattr(headline_stats, 'count') or 'count' in headline_stats.index, (
+            "headline_stats should contain 'count'"
+        )
+    finally:
+        cleanup_test_csv()
+
+
+def test_descriptive_statistics_publisher_counts():
+    """Verify publisher_counts returns correct counts."""
+    csv_path = create_test_csv()
+    try:
+        analysis = FinancialNewsAnalysis(csv_path)
+        _, publisher_counts, _ = analysis.descriptive_statistics()
+        
+        # Reuters and Bloomberg each have 2 articles, CNBC has 1
+        assert publisher_counts['Reuters'] == 2, f"Expected Reuters=2, got {publisher_counts['Reuters']}"
+        assert publisher_counts['Bloomberg'] == 2, f"Expected Bloomberg=2, got {publisher_counts['Bloomberg']}"
+        assert publisher_counts['CNBC'] == 1, f"Expected CNBC=1, got {publisher_counts['CNBC']}"
+    finally:
+        cleanup_test_csv()
+
+
+def test_descriptive_statistics_date_counts():
+    """Verify date_counts returns counts per date."""
+    csv_path = create_test_csv()
+    try:
+        analysis = FinancialNewsAnalysis(csv_path)
+        _, _, date_counts = analysis.descriptive_statistics()
+        
+        # Each date has 1 article
+        assert len(date_counts) == 5, f"Expected 5 unique dates, got {len(date_counts)}"
+    finally:
+        cleanup_test_csv()
+
+
+def test_class_accepts_file_path():
+    """Verify class constructor accepts file path string."""
+    csv_path = create_test_csv()
+    try:
+        analysis = FinancialNewsAnalysis(csv_path)
+        assert analysis is not None, "Constructor should return instance"
+        assert hasattr(analysis, 'data'), "Instance should have data attribute"
+    finally:
+        cleanup_test_csv()
+
+
 if __name__ == '__main__':
     import subprocess
     result = subprocess.run(
