@@ -1,0 +1,9 @@
+{
+    "instance_id": "7edce8-blog-post-management",
+    "problem_statement": "I want an open-ended RTK Query prompt that teaches the essence of the Redux docs tutorial—createApi, fetchBaseQuery, cache tags, and auto-hooks—without dictating every endpoint, URL, or component name. The agent must infer the minimal CRUD pair (read list + create item) and the correct tag invalidation flow, exposing how well it truly understands the pattern rather than copying the guide verbatim.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/7edce8-blog-post-management",
+    "environment_setup": "Dockerfile"
+  }
+  
