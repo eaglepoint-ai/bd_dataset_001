@@ -1,0 +1,83 @@
+diff -r repository_before/name_validation.sql repository_after/name_validation.sql
+0a1,20
+> CREATE OR REPLACE FUNCTION normalize_student_name(
+>     input_name TEXT,
+>     max_parts INTEGER DEFAULT 2
+> )
+> RETURNS TEXT
+> LANGUAGE sql
+> IMMUTABLE
+> STRICT
+> AS $$
+>     SELECT string_agg(initcap(part), ' ')
+>     FROM (
+>         SELECT part
+>         FROM regexp_split_to_table(
+>             regexp_replace(btrim(input_name), '\s+', ' ', 'g'),
+>             ' '
+>         ) WITH ORDINALITY AS t(part, ord)
+>         WHERE ord <= max_parts
+>     ) s;
+> $$;
+> 
+2c22,24
+< RETURNS TRIGGER AS $$
+---
+> RETURNS TRIGGER
+> LANGUAGE plpgsql
+> AS $$
+4,7c26
+<     input_name TEXT := NEW.name;
+<     trimmed_name TEXT;
+<     words TEXT[];
+<     formatted_name TEXT;
+---
+>     normalized TEXT;
+9,12c28,31
+<     RAISE DEBUG 'Input name before processing: %', input_name;
+< 
+<     IF input_name IS NULL OR TRIM(input_name) = '' THEN
+<         RAISE EXCEPTION 'Name cannot be null or empty';
+---
+>     IF NEW.name IS NULL OR btrim(NEW.name) = '' THEN
+>         RAISE EXCEPTION
+>             'Name cannot be null or empty'
+>             USING ERRCODE = '22004';
+15,18c34,38
+<     trimmed_name := TRIM(input_name);
+< 
+<     IF trimmed_name !~ '^[A-Za-z\s]+$' THEN
+<         RAISE EXCEPTION 'Name can only contain alphabetic characters and spaces';
+---
+>     -- Reject control characters safely
+>     IF NEW.name ~ E'[\\x00-\\x1F\\x7F]' THEN
+>         RAISE EXCEPTION
+>             'Name contains invalid control characters'
+>             USING ERRCODE = '22021';
+21,22c41
+<     words := string_to_array(trimmed_name, ' ');
+<     words := array_filter(words, x -> x != '');
+---
+>     normalized := normalize_student_name(NEW.name);
+24,25c43,44
+<     IF array_length(words, 1) > 2 THEN
+<         words := words[1:2];
+---
+>     IF NEW.name IS DISTINCT FROM normalized THEN
+>         NEW.name := normalized;
+28,34d46
+<     formatted_name :=
+<         string_agg(INITCAP(word), ' ')
+<         FROM unnest(words) AS word;
+< 
+<     RAISE DEBUG 'Formatted name: %', formatted_name;
+< 
+<     NEW.name := formatted_name;
+37c49,51
+< $$ LANGUAGE plpgsql;
+---
+> $$;
+> 
+> DROP TRIGGER IF EXISTS trg_validate_student_name ON students;
+42a57
+> 
