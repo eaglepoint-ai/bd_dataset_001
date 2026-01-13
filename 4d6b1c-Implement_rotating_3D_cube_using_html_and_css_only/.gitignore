@@ -1,5 +1,7 @@
 # Dependencies
 node_modules/
+tests/node_modules/
+.pnpm-store/
 
 
 # Testing
