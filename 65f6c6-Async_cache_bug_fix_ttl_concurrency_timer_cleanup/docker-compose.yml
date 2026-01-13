@@ -1,15 +1,22 @@
-
 services:
-  # Service to run the standard evaluation and produce the JSON report
+  # Service to run the standard evaluation (generates latest.json)
   evaluator:
     build: .
     volumes:
       - ./evaluation/reports:/app/evaluation/reports
     command: node evaluation/evaluation.js
-    environment:
-      - NODE_ENV=production
 
-  # Service to specifically run the correctness tests for quick verification
-  tester:
+  # Command to specifically run the BEFORE (original) code
+  test-before:
     build: .
+    environment:
+      - TARGET_IMPL=repository_before/AsyncCache.js
     command: node tests/test.js
+
+  # Command to specifically run the AFTER (updated) code
+  test-after:
+    build: .
+    environment:
+      - TARGET_IMPL=repository_after/AsyncCache.js
+    command: node tests/test.js
+
