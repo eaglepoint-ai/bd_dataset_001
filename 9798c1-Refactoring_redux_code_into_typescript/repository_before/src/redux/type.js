@@ -1,0 +1,8 @@
+export const ADD_BET_SLIP = 'ADD_BET_SLIP'
+export const ADD_BET_SLIP_2 = 'ADD_BET_SLIP_2'
+export const ADD_BET_SLIP_3= 'ADD_BET_SLIP_3'
+export const DELETE_BET_SLIP = 'DELETE_BET_SLIP'
+export const DELETE_BET_SLIP_2 = 'DELETE_BET_SLIP_2'
+export const DELETE_BET_SLIP_3 = 'DELETE_BET_SLIP_3'
+export const CLEAR_BET_SLIP = 'CLEAR_BET_SLIP'
+export const HANDLE_BET = 'HANDLE_BET'
