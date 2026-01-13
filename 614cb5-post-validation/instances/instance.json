@@ -1,0 +1,8 @@
+{
+  "instance_id": "614cb5-post-validation",
+  "problem_statement": "Extend the minimal RTK Query demo (official Redux Essentials tutorial, Part 8) by replacing manual form state in AddPostForm with react-hook-form and adding client-side validation using Zod (via @hookform/resolvers/zod).",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/614cb5-post-validation",
+  "environment_setup": "Dockerfile"
+}
