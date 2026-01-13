@@ -1,14 +1,5 @@
 FROM python:3.11-slim
-
 WORKDIR /app
-
-# Prevent Python from writing .pyc files and enable unbuffered logging
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-
-COPY requirements.txt .
+COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-CMD ["pytest", "tests/meta_test.py"]
+CMD ["pytest", "-q", "tests"]
