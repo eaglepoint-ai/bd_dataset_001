@@ -5,4 +5,14 @@
   "test_patch": "tests/",
   "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/614cb5-post-validation",
   "environment_setup": "Dockerfile"
+  ,
+  "FAIL_TO_PASS": [
+    "tests/tests_after.test.jsx::should show validation errors for invalid input",
+    "tests/tests_after.test.jsx::should reset form on successful submit"
+  ],
+  "PASS_TO_PASS": [
+    "tests/tests_after.test.jsx::should display posts list",
+    "tests/tests_after.test.jsx::should handle loading and error states",
+    "tests/tests_after.test.jsx::should submit valid post and refresh list"
+  ]
 }

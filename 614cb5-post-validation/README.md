@@ -90,3 +90,50 @@ The developer should add any additional metrics and keys that reflect the runs (
    - Commands to run `evaluation/evaluation.py` and generate reports
    
    > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+
+# Project Test & Evaluation Commands
+
+This project uses a unified test and evaluation setup to compare two codebases (`repository_before` and `repository_after`) using the same external test suite. All commands are run from the project root and leverage Docker for reproducibility.
+
+## Commands
+
+
+### 1. Run Tests on `repository_before`
+`docker compose run --rm test-before`
+
+### 2. Run Tests on `repository_after`
+`docker compose run --rm test-after`
+
+### 3. Run Evaluation and Generate Reports
+`docker compose run --rm evaluate`
+
+## Docker Setup
+
+The `docker-compose.yml` file defines three services:
+
+- `test-before`: Runs tests on the `repository_before` codebase
+- `test-after`: Runs tests on the `repository_after` codebase
+- `evaluate`: Runs the evaluation/report script
+
+All services mount the project root and node_modules for fast builds and reproducible results.
+
+## Notes
+
+- Make sure your test suite and evaluation script use the `TEST_TARGET` environment variable to switch between before/after codebases.
+- You can run all commands either with Docker Compose (recommended for consistency) or directly with npm if your environment is set up.
+
+## Example Workflow
+
+1. Run tests on both codebases:
+  ```sh
+  docker compose run --rm test-before
+  docker compose run --rm test-after
+  ```
+2. Run evaluation and generate reports:
+  ```sh
+  docker compose run --rm evaluate
+  ```
+
+## License
+
+MIT
