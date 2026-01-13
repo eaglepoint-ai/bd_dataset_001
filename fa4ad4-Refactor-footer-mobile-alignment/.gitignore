@@ -2,7 +2,7 @@
 # Evaluation artifacts
 # ======================
 evaluation/reports/**
-
+evaluation/reports/*
 # ======================
 # Node / Frontend
 # ======================
