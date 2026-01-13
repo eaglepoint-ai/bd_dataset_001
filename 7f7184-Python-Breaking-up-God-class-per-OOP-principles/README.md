@@ -1,92 +1,40 @@
-# project template
+# Refactoring a God Class into a Clean OOP Design
 
-Starter scaffold for bd dataset task.
+## 1. Problem Statement
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+The `BaseModel` class is a poorly designed ""god class"" that violates the Single Responsibility Principle by combining multiple unrelated entities (User, Place, State, Review, Amenity). Your task is to refactor this into a proper OOP hierarchy.
 
----
+## 2. Prompt Used
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+You are given a python class to refactor following the proper OOP principles. You write clean and efficient code that is readable. The BaseModel class below is a poorly designed “god class” that combines multiple unrealted entities. Your task is to: 1. Keep BaseModel as a base/parent class containing only the created_at, updated_at attributes and the init, save, to_dict and **str** methods 2. Extract these into separate child classes that inherit from BaseModel 3. Each class should inherit from the base model, define its attributes as class level defaults and have a doc string describing what it represents. 4. Break up the classes into multiple files import models from uuid import uuid4 from datetime import datetime class BaseModel: """Represents all entities in the HBnB project. Use entity_type to specify: 'user', 'place', 'state', 'review', 'amenity' """ # Entity type identifier entity_type = "" # User attributes email = "" password = "" first_name = "" last_name = "" # State/Amenity attributes name = "" # Place attributes city_id = "" user_id = "" description = "" number_rooms = 0 number_bathrooms = 0 max_guest = 0 price_by_night = 0 latitude = 0.0 longitude = 0.0 amenity_ids = [] # Review attributes place_id = "" text = "" def **init**(self, *args, \*\*kwargs): """Initialize a new BaseModel. Args: *args (any): Unused. \*\*kwargs (dict): Key/value pairs of attributes. """ tform = "%Y-%m-%dT%H:%M:%S.%f" self.id = str(uuid4()) self.created_at = datetime.today() self.updated_at = datetime.today() if len(kwargs) != 0: for k, v in kwargs.items(): if k == "created_at" or k == "updated_at": self.**dict**[k] = datetime.strptime(v, tform) else: self.**dict**[k] = v else: models.storage.new(self) def save(self): """Update updated_at with the current datetime.""" self.updated_at = datetime.today() models.storage.save() def to_dict(self): """Return the dictionary of the BaseModel instance. Includes the key/value pair **class** representing the class name of the object. """ rdict = self.**dict**.copy() rdict["created_at"] = self.created_at.isoformat() rdict["updated_at"] = self.updated_at.isoformat() rdict["__class__"] = self.**class**.**name** return rdict def **str**(self): """Return the print/str representation of the BaseModel instance.""" clname = self.**class**.**name** return "[{}] ({}) {}".format(clname, self.id, self.**dict**)
 
-### Setup Steps
+## 3. Requirements Specified
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
+1. Python
+2. OOP
 
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
+## 4. Commands
 
-3. **Update `.gitignore`** to reflect your language and library setup
+### Run tests on `repository_before`
 
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
+Run the tests against the initial state. This is expected to fail or error out due to the monolithic structure and missing classes.
 
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+```bash
+docker-compose run --rm -e PYTHONPATH=repository_before app pytest tests/test.py
 ```
 
-### Report Schema
+### Run tests on `repository_after`
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+Run the tests against the refactored solution. This should pass all checks for inheritance, attribute placement, and functionality.
+
+```bash
+docker-compose run --rm -e PYTHONPATH=repository_after app pytest tests/test.py
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+### Run Evaluation
 
----
+Generate the evaluation report which checks correctness and computes metrics.
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
-
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+```bash
+docker-compose run --rm app python evaluation/evaluation.py
+```
