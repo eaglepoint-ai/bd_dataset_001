@@ -1,1 +1,8 @@
-{}
+{
+    "instance_id": "8235d7",
+    "problem_statement": "You are tasked with creating a comprehensive set of Python test cases for an already implemented LRUCache class. The cache supports get and put operations, maintains a fixed capacity, and evicts the least recently used item when the capacity is exceeded. The tests should verify that the class behaves correctly under normal usage and edge cases.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/8235d7-Test_LRU_cache_test_generation",
+    "environment_setup": "Dockerfile"
+}
