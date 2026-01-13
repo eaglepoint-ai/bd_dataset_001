@@ -1,0 +1,9 @@
+{
+    "instance_id": "9d78d1-High-Performance_Rolling_Median_for_Real-Time_Streams",
+    "problem_statement": "",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/61ee8c-High-Performance_Rolling_Median_for_Real-Time_Streams",
+    "environment_setup": "Dockerfile"
+  }
+  
