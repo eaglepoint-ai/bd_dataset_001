@@ -1,0 +1,8 @@
+{
+  "instance_id": "2dbbf0",
+  "problem_statement": "Build a complete, minimal Personal Snippet Manager web application that allows a single user to create, store, view, search, and manage personal text snippets (such as code snippets, terminal commands, or notes). The application must use React + TypeScript on the frontend and FastAPI with PostgreSQL on the backend, persist data across sessions, and provide a responsive user experience with real-time, client-side search filtering. The system should support snippet creation, listing, and instant search across titles and content, handle loading and error states gracefully, and be implemented with clean, readable, and extensible code—without authentication or unnecessary libraries.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/2dbbf0-Personal_snippet_manager",
+  "environment_setup": "Dockerfile"
+}
