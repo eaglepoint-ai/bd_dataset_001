@@ -158,28 +158,108 @@ Express.js Modular Refactor Evaluation
   - Total modular files: 32
 
 [3/5] Running tests on repository_before (expected to FAIL)...
-  ✗ Success: false (no modular structure)
+
+============================================================
+Running tests on repository_before
+============================================================
+FAIL ./test_structure.test.js
+  Structure Tests
+    Directory Structure
+      ✕ config directory should exist
+      ✕ models directory should exist
+      ✕ controllers directory should exist
+      ✕ routes directory should exist
+      ✕ middleware directory should exist
+    ...
+
+Test Suites: 2 failed, 2 total
+Tests:       22 failed, 5 passed, 27 total
+
+Parsed results: 5 passed, 22 failed, 27 total
+  ✗ Passed: 5
+  ✗ Failed: 22
+  ✗ Total: 27
+  ✗ Success: false
 
 [4/5] Running tests on repository_after (expected to PASS)...
-  ✓ Success: true (has modular structure)
+
+============================================================
+Running tests on repository_after
+============================================================
+PASS ./test_structure.test.js
+  Structure Tests
+    Directory Structure
+      ✓ config directory should exist
+      ✓ models directory should exist
+      ✓ controllers directory should exist
+      ✓ routes directory should exist
+      ✓ middleware directory should exist
+    Config Files
+      ✓ all config files should exist
+    Model Files
+      ✓ all model files should exist (one per feature)
+    Controller Files
+      ✓ all controller files should exist (one per feature)
+    Route Files
+      ✓ all route files should exist (one per feature)
+    ...
+
+PASS ./test_equivalence.test.js
+  Equivalence Tests
+    Route Preservation
+      ✓ all routes from before should exist in after
+      ✓ number of routes should match
+    Model Preservation
+      ✓ all mongoose models should be preserved
+    ...
+
+Test Suites: 2 passed, 2 total
+Tests:       27 passed, 27 total
+
+Parsed results: 27 passed, 0 failed, 27 total
+  ✓ Passed: 27
+  ✓ Failed: 0
+  ✓ Total: 27
+  ✓ Success: true
 
 [5/5] Generating report...
+
+============================================================
+Evaluation Complete
+============================================================
+
+Overall Success: true
+
+Before (Monolithic):
+  - Tests Passed: 5/27
+  - Tests Failed: 22/27
+  - Has Modular Structure: false
+
+After (Modular):
+  - Tests Passed: 27/27
+  - Tests Failed: 0/27
+  - Has Modular Structure: true
 
 Improvements:
   - Index.js reduced by 889 lines (95%)
   - Created 32 modular files
   - Structure improved: true
   - Index is minimal: true
+  - Tests fixed: 22
 
-Report saved to: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
+Report saved to: /app/evaluation/reports/2026-01-14/15-40-22/report.json
+
+Exit Code: 0
 ```
+
+**Note:** The report is saved both inside the container (`/app/evaluation/reports/...`) and on your host machine at `evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json` thanks to the volume mount in docker-compose.yml.
 
 ### Metrics
 
 **Before (Monolithic):**
 - 1 file: 938 lines
 - No modular structure
-- No separation of concerns
+- Tests: 5 passed, 22 failed, 27 total
 
 **After (Modular):**
 - 32 modular files
@@ -189,6 +269,7 @@ Report saved to: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
 - 10 route files
 - 1 middleware file
 - index.js: 49 lines (95% reduction)
+- Tests: 27 passed, 0 failed, 27 total ✅
 
 ### Improvements
 
@@ -203,9 +284,28 @@ Report saved to: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
 
 ## Documentation
 
-- See `trajectory/trajectory.md` for detailed implementation notes
+- See `trajectory/trajectory.md` for detailed implementation notes and full evaluation output
 - See `repository_after/README.md` for API documentation
-- See `patches/diff.patch` for complete diff
+- See `patches/diff.patch` for complete diff (6867 lines)
+- See `patches/PATCH_SUMMARY.md` for human-readable patch summary
+- See `evaluation/reports/` for timestamped evaluation reports (JSON)
+
+## Summary
+
+This project successfully demonstrates the transformation of a monolithic Express.js application into a production-ready modular architecture:
+
+- **Code Reduction**: 95% reduction in main file (938 → 49 lines)
+- **Modularity**: 32 organized files replacing 1 monolithic file
+- **Test Success**: 27/27 tests passing (100% success rate)
+- **Tests Fixed**: 22 tests fixed (from failing to passing)
+- **Architecture**: Clean MVC pattern with separation of concerns
+- **Validation**: Comprehensive test suite verifying structure and equivalence
+- **Docker-Ready**: Fully containerized evaluation and testing
+- **Production-Ready**: Proper error handling, centralized configuration
+
+**Evaluation Results:**
+- repository_before: 5/27 tests passed (no modular structure)
+- repository_after: 27/27 tests passed (complete modular structure) ✅
 
 ## Testing Endpoints in Browser
 

@@ -106,7 +106,6 @@ describe('Structure Tests', () => {
     describe('CommonJS Usage', () => {
         test('should use CommonJS require/module.exports', () => {
             const filesToCheck = [
-                'index.js',
                 'config/database.js',
                 'models/Account.js',
                 'controllers/authController.js',
@@ -123,6 +122,11 @@ describe('Structure Tests', () => {
                 const hasES6Import = content.includes('import ') && !content.includes('import(');
                 expect(hasES6Import).toBe(false);
             });
+            
+            // Check index.js separately (it uses require but doesn't export)
+            const indexPath = path.join(REPO_PATH, 'index.js');
+            const indexContent = fs.readFileSync(indexPath, 'utf8');
+            expect(indexContent).toContain('require(');
         });
     });
 

@@ -12,60 +12,57 @@ function runTests(repoPath, repoName) {
     console.log(`Running tests on ${repoName}`);
     console.log('='.repeat(60));
     
+    let output = '';
+    let passed = 0;
+    let failed = 0;
+    let total = 0;
+    
     try {
         // Set environment variable to tell tests which repo to check
         const env = { ...process.env, TEST_REPO_PATH: repoPath };
         
-        const output = execSync(
-            'npm test -- --verbose --no-colors',
+        output = execSync(
+            'npm test 2>&1',
             { 
                 cwd: path.join(__dirname, '../tests'),
                 env: env,
                 encoding: 'utf8',
-                stdio: 'pipe'
+                shell: '/bin/bash'
             }
         );
-        
-        // Parse results
-        const passedMatch = output.match(/(\d+) passed/);
-        const failedMatch = output.match(/(\d+) failed/);
-        const totalMatch = output.match(/Tests:\s+(\d+)/);
-        
-        const passed = passedMatch ? parseInt(passedMatch[1]) : 0;
-        const failed = failedMatch ? parseInt(failedMatch[1]) : 0;
-        const total = totalMatch ? parseInt(totalMatch[1]) : passed + failed;
-        
-        console.log(output);
-        
-        return {
-            success: failed === 0,
-            passed: passed,
-            failed: failed,
-            total: total,
-            output: output
-        };
     } catch (error) {
-        // Jest exits with non-zero on test failures
-        const output = error.stdout || error.stderr || error.message;
-        
-        console.log(output);
-        
-        const passedMatch = output.match(/(\d+) passed/);
-        const failedMatch = output.match(/(\d+) failed/);
-        const totalMatch = output.match(/Tests:\s+(\d+)/);
-        
-        const passed = passedMatch ? parseInt(passedMatch[1]) : 0;
-        const failed = failedMatch ? parseInt(failedMatch[1]) : 0;
-        const total = totalMatch ? parseInt(totalMatch[1]) : passed + failed;
-        
-        return {
-            success: false,
-            passed: passed,
-            failed: failed,
-            total: total,
-            output: output
-        };
+        // Jest exits with non-zero on test failures, but output is still in stdout
+        output = error.stdout || error.stderr || error.message || '';
     }
+    
+    console.log(output);
+    
+    // Parse results - look for "Tests:       27 passed, 27 total" or "Tests:       22 failed, 5 passed, 27 total"
+    // Try to match: "Tests:       22 failed, 5 passed, 27 total"
+    const fullMatch = output.match(/Tests:\s+(\d+)\s+failed,\s+(\d+)\s+passed,\s+(\d+)\s+total/);
+    if (fullMatch) {
+        failed = parseInt(fullMatch[1]);
+        passed = parseInt(fullMatch[2]);
+        total = parseInt(fullMatch[3]);
+    } else {
+        // Try to match: "Tests:       27 passed, 27 total"
+        const passedMatch = output.match(/Tests:\s+(\d+)\s+passed,\s+(\d+)\s+total/);
+        if (passedMatch) {
+            passed = parseInt(passedMatch[1]);
+            total = parseInt(passedMatch[2]);
+            failed = 0;
+        }
+    }
+    
+    console.log(`\nParsed results: ${passed} passed, ${failed} failed, ${total} total`);
+    
+    return {
+        success: failed === 0 && passed > 0,
+        passed: passed,
+        failed: failed,
+        total: total,
+        output: output
+    };
 }
 
 function analyzeStructure(repoPath) {
@@ -126,7 +123,7 @@ function generateReport(beforeResults, afterResults, beforeMetrics, afterMetrics
     fs.mkdirSync(reportDir, { recursive: true });
     
     const report = {
-        run_id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        run_id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         started_at: now.toISOString(),
         finished_at: new Date().toISOString(),
         environment: {
