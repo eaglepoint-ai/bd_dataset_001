@@ -1,6 +1,18 @@
 services:
-  app:
+  meta-test-before:
     build: .
-    command: pytest -q tests
+    container_name: meta-test-before
+    command: ["repository_before"]
+
+  meta-test-after:
+    build: .
+    container_name: meta_test_after
+    command: ["repository_after"]
+
+  evaluation:
+    build: .
+    container_name: evaluation
+    entrypoint: ["python3", "evaluation/evaluation.py"]
+    command: []
     volumes:
-      - .:/app
+      - ./evaluation/reports:/app/evaluation/reports
