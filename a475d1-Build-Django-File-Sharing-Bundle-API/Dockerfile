@@ -11,6 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY repository_after .
 
 # Run database setup during the build process
+# Explicitly create migrations for the 'api' app since the migrations folder is missing
+RUN python manage.py makemigrations api
 RUN python manage.py migrate
 RUN python init_admin.py
 
