@@ -4,3 +4,6 @@ node_modules*
 build*
 dist*
 .vscode*
+
+evaluation/reports/
+!evaluation/evaluation.js

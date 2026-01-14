@@ -91,14 +91,21 @@ function main() {
   const now = new Date();
   const day = now.toISOString().slice(0, 10); // YYYY-MM-DD
   const time = now.toISOString().slice(11, 19).replace(/:/g, '-'); // HH-MM-SS
-  const folder = path.join(ROOT, 'evaluation', day, time);
+  const baseReports = path.join(ROOT, 'evaluation', 'reports');
+  const folder = path.join(baseReports, day, time);
   if (!fs.existsSync(folder)) {
     fs.mkdirSync(folder, { recursive: true });
   }
+  if (!fs.existsSync(baseReports)) {
+    fs.mkdirSync(baseReports, { recursive: true });
+  }
   const report = run_evaluation();
-  const reportPath = path.join(folder, 'latest.json');
+  const reportPath = path.join(folder, 'report.json');
+  const latestPath = path.join(baseReports, 'latest.json');
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  // fs.writeFileSync(latestPath, JSON.stringify(report, null, 2));
   console.log(`Report written to ${reportPath}`);
+  // console.log(`Report also written to ${latestPath}`);
   return report.success ? 0 : 1;
 }
 
