@@ -2,9 +2,6 @@ import os
 import sys
 import pytest
 from pathlib import Path
-from django.core.files.uploadedfile import SimpleUploadedFile
-from rest_framework.test import APIClient
-from rest_framework import status
 import django
 from django.conf import settings
 
@@ -27,6 +24,28 @@ if not settings.configured:
     except Exception as e:
         # If setup fails (e.g. in empty repository_before), we handle it in tests or let collection fail
         print(f"Django setup failed: {e}")
+        # Fallback configuration to allow imports to succeed even if the project isn't valid
+        if not settings.configured:
+            settings.configure(
+                SECRET_KEY='fallback-secret-key',
+                INSTALLED_APPS=[
+                    'django.contrib.contenttypes',
+                    'django.contrib.auth',
+                    'rest_framework',
+                ],
+                REST_FRAMEWORK = {
+                   'TEST_REQUEST_RENDERER_CLASSES': [
+                       'rest_framework.renderers.MultiPartRenderer',
+                       'rest_framework.renderers.JSONRenderer',
+                       'rest_framework.renderers.TemplateHTMLRenderer'
+                   ]
+                }
+            )
+            django.setup()
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+from rest_framework.test import APIClient
+from rest_framework import status
 
 # Import models safely - they might not exist in repository_before
 try:

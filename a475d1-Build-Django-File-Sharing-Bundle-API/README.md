@@ -1,92 +1,41 @@
-# project template
+# Build Django File Sharing Bundle API
 
-Starter scaffold for bd dataset task.
+## 1. Problem Statement
+The task is to design and implement a full-featured backend for a file sharing platform using Django REST Framework, similar to Google Drive. The system must support user registration and JWT-based authentication, allowing users to securely upload, manage, and organize files into bundles that can be shared privately or publicly via unique share links. Users should only access their own content or bundles shared with them, with automatic author assignment and proper permission enforcement. The backend should provide structured API endpoints for posts, files, bundles, and users, handle file uploads and in-memory ZIP downloads, and be built following best practices with serializers, ViewSets, routers, and environment-based configuration. The project must be fully modular, maintainable, and production-read
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+## 2. Prompt Used
+ Build a Django REST Framework backend from scratch for a file sharing platform similar to Google Drive. Tech Stack Django 5.1+ Django REST Framework SQLite JWT auth via djangorestframework-simplejwt CORS via django-cors-headers File uploads with multipart/form-data Project Setup Project: backend App: api Media storage in media/uploads/ Use env vars for secrets Authentication JWT auth (Access: 30 min, Refresh: 1 day) User registration endpoint (public) Login + token refresh Use Django User model Models Post: title, content, author, created_at, updated_at (users only see their own) File: file, author, created_at Bundle: name, description many-to-many with File author created_at share_id (unique, auto-generated) shared_with (many-to-many User) API Endpoints Auth: POST /api/user/register/ POST /api/token/ POST /api/token/refresh/ Files: POST /api/upload/ GET /api/upload/ Bundles (ViewSet): CRUD /api/bundles/ GET /api/bundles/<id>/download/ (ZIP) POST /api/bundles/<id>/share_with_users/ GET /api/bundles/share/<share_id>/ (public) Posts: CRUD /api/posts/ Users: GET /api/users/ Business Logic Users can see bundles they own or that are shared with them Only author’s files can be added to bundles Bundles download as in-memory ZIP Public access via share_id Authors auto-assigned from request.user Requirements JWT required for all endpoints except registration & public share Proper permissions, status codes, serializers Use ViewSets, routers, and custom actions Provide all necessary files (models, serializers, views, urls, settings)
 
----
+## 3. Requirements Specified
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+1 Tech Stack
+2 Django 5.1+
+3 Django REST Framework
+4 SQLite
+5 JWT auth via djangorestframework-simplejwt
+6 CORS via django-cors-headers
+7 File uploads with multipart/form-data
+8 JWT required for all endpoints except registration & public share
+9 Proper permissions, status codes, serializers
+10 Use ViewSets, routers, and custom actions
+11 Provide all necessary files (models, serializers, views, urls, settings)
 
-### Setup Steps
+## 4. Commands
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
+### Run tests on `repository_before`
 
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
 
-3. **Update `.gitignore`** to reflect your language and library setup
+     ```bash
+     docker-compose run --rm -e PYTHONPATH=repository_before app pytest tests/test_requirements.py
+     ```
 
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
+### Run tests on `repository_after`
 
----
+     ```bash
+     docker-compose run --rm -e PYTHONPATH=repository_after app pytest tests/test_requirements.py
+     ```
 
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
-```
-
-### Report Schema
-
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
-```
-
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
-
----
-
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
-
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+### Run Evaluation
+     ```bash
+     docker-compose run --rm app python evaluation/evaluation.py
+     ```

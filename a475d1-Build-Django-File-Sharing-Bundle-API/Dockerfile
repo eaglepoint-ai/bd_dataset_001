@@ -5,8 +5,11 @@ WORKDIR /app
 # Install system dependencies if any (none needed for sqlite/pure python usually, but maybe gcc for some libs)
 # RUN apt-get update && apt-get install -y gcc
 
-COPY repository_after/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt /tmp/requirements-test.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-test.txt
+
+COPY repository_after/requirements.txt /tmp/requirements-app.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-app.txt
 
 COPY repository_after .
 
