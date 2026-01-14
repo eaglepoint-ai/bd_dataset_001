@@ -1,0 +1,14 @@
+{
+  "name": "deep-clone-function-fix",
+  "version": "1.0.0",
+  "description": "Deep clone function fix task",
+  "main": "repository_before/index.js",
+  "scripts": {
+    "test": "echo 'No tests defined yet'",
+    "start": "node repository_before/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
+
