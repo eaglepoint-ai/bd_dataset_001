@@ -1,0 +1,6 @@
+services:
+  tests:
+    build: .
+    command: python repository_before/dna_sequence_pattern_matcher.py
+    volumes:
+      - .:/app
