@@ -1,1 +1,1 @@
-evaluation/*.json
+evaluation/reports/**/**/*.json
