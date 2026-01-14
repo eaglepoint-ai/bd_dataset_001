@@ -1,0 +1,32 @@
+# Evaluation reports (auto-generated)
+evaluation/reports/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+*.log

@@ -69,7 +69,7 @@ This will:
 - Run tests for both before (buggy) and after (fixed) implementations
 - Collect individual test results with pass/fail status
 - Verify the bug fix resolves all failures
-- Generate a report at `evaluation/YYYY-MM-DD/HH-MM-SS/report.json`
+- Generate a report at `evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json`
 
 ### Run evaluation with custom output file
 ```bash
