@@ -217,8 +217,25 @@ function main(): number {
   // Run evaluation
   const report = runEvaluation();
 
-  // Write report to report.json
-  const reportPath = path.join(REPORTS_DIR, 'report.json');
+  // Derive dated directory structure from the report start time:
+  // evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
+  const startedAt = new Date(report.started_at);
+  const year = startedAt.getFullYear();
+  const month = String(startedAt.getMonth() + 1).padStart(2, '0');
+  const day = String(startedAt.getDate()).padStart(2, '0');
+  const hours = String(startedAt.getHours()).padStart(2, '0');
+  const minutes = String(startedAt.getMinutes()).padStart(2, '0');
+  const seconds = String(startedAt.getSeconds()).padStart(2, '0');
+
+  const dateDir = path.join(REPORTS_DIR, `${year}-${month}-${day}`);
+  const timeDir = path.join(dateDir, `${hours}-${minutes}-${seconds}`);
+
+  if (!fs.existsSync(timeDir)) {
+    fs.mkdirSync(timeDir, { recursive: true });
+  }
+
+  // Write report to the timestamped report.json path
+  const reportPath = path.join(timeDir, 'report.json');
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
   console.log(`Evaluation report written to ${reportPath}`);
