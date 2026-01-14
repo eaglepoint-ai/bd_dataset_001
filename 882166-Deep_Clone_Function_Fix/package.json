@@ -4,11 +4,17 @@
   "description": "Deep clone function fix task",
   "main": "repository_before/index.js",
   "scripts": {
-    "test": "echo 'No tests defined yet'",
+    "test": "jest",
     "start": "node repository_before/index.js"
   },
   "keywords": [],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testMatch": ["**/tests/**/*.js"]
+  }
 }
 
