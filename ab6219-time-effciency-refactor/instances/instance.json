@@ -1,0 +1,9 @@
+{
+    "instance_id": "ab6219",
+    "problem_statement": "Refactor the given Python function to improve time efficiency. The function should find all unique pairs of numbers in a list that sum up to a given target value. The current implementation is O(n^2) in time complexity, but can be optimized to O(n) using a hash table. The refactored function should maintain the same functionality and output, but with improved performance.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/ab6219-time-effcieny-refactor",
+    "environment_setup": "Dockerfile"
+  }
+  
