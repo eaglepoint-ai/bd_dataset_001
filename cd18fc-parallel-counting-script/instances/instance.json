@@ -3,7 +3,7 @@
     "problem_statement": "",
     "base_commit": "repository_before",
     "test_patch": "tests/",
-    "github_url": "",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/cd18fc-parallel-counting-script",
     "environment_setup": "Dockerfile"
   }
   
