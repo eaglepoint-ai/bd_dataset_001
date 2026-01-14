@@ -1,52 +1,179 @@
-# project template
+# Bug Fix: High-Performance Matrix Rotation
 
-Starter scaffold for bd dataset task.
+This dataset task contains a production-style Python function for rotating n×n matrices 90 degrees clockwise with an intentional runtime bug.
+The objective is to **identify and fix the NameError bug** while preserving the **O(n²) time complexity** and **O(1) space complexity** of the in-place rotation algorithm.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+## Problem Statement
 
----
+The `rotate_2d_matrix` function implements a layer-by-layer rotation approach with in-place modifications. The algorithm should:
+1. Divide the matrix into concentric square layers
+2. Process each layer from outermost to innermost
+3. Perform four-way cyclic swaps of corresponding elements
+4. Use offset tracking to handle element positions during rotation
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+**The Bug**: The function currently fails with `NameError: name 'i' is not defined` due to a variable naming issue where the loop variable is declared with a Cyrillic character `і` (U+0456) but referenced as ASCII `i`.
 
-### Setup Steps
+## Folder Layout
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
+- `repository_before/` — original implementation with the NameError bug
+- `repository_after/` — fixed implementation
+- `tests/` — comprehensive test suite including edge cases and benchmarks
+- `evaluation/` — evaluation scripts comparing before/after implementations
+- `instances/` — problem instance metadata (JSON)
+- `patches/` — diff between before/after implementations
+- `trajectory/` — detailed problem-solving methodology (Markdown)
 
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
+## Run with Docker
 
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
+### Build image
+```bash
+docker compose build
 ```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+
+### Run tests (before – expected failures)
+```bash
+docker compose run --rm -e PYTHONPATH=/app/repository_before app pytest -v --tb=short
 ```
+
+**Expected behavior:**
+- Most tests: ❌ FAIL (due to NameError: name 'i' is not defined)
+- Only 1×1 test passes (loop never executes)
+- All other tests show: `NameError: name 'i' is not defined`
+
+**Example failure output:**
+```
+tests/test_matrix_rotation.py::test_rotate_2x2 FAILED
+...
+NameError: name 'i' is not defined
+```
+
+### Run tests (after – expected all pass)
+```bash
+docker compose run --rm -e PYTHONPATH=/app/repository_after app pytest -v
+```
+
+**Expected behavior:**
+- All tests: ✅ PASS
+- Edge cases (1×1, 2×2): ✅ PASS
+- Small matrices (3×3, 5×5): ✅ PASS
+- Medium matrices (100×100, 500×500): ✅ PASS
+- Large matrices (1000×1000, 2000×2000): ✅ PASS
+- Performance benchmarks within acceptable time limits
+
+### Run evaluation (compares both implementations)
+```bash
+docker compose run --rm app python evaluation/evaluation.py
+```
+
+This will:
+- Run tests for both before (buggy) and after (fixed) implementations
+- Collect individual test results with pass/fail status
+- Verify the bug fix resolves all failures
+- Generate a report at `evaluation/YYYY-MM-DD/HH-MM-SS/report.json`
+
+### Run evaluation with custom output file
+```bash
+docker compose run --rm app python evaluation/evaluation.py --output /path/to/custom/report.json
+```
+
+## Run Locally
+
+### Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Run all tests with failure details (before implementation)
+```bash
+# Show test failures with details
+PYTHONPATH=repository_before pytest -v --tb=short tests/
+```
+
+### Run all tests (after implementation)
+```bash
+# Set PYTHONPATH to repository_after and run tests
+PYTHONPATH=repository_after pytest -v
+
+# Or run the comprehensive test suite directly
+PYTHONPATH=repository_after python3 tests/test_matrix_rotation.py
+```
+
+### Run evaluation locally
+```bash
+python3 evaluation/evaluation.py
+```
+
+## Performance Requirements
+
+The fixed implementation must meet these performance criteria:
+
+### Time Complexity
+- **Expected**: O(n²) - optimal since every element must be visited
+- **Verified**: All benchmark tests confirm linear scaling with n²
+
+### Benchmarking Results
+- **1×1 matrix**: Instant
+- **2×2 matrix**: Instant
+- **3×3 matrix**: Instant
+- **100×100 matrix**: ~0.001s
+- **500×500 matrix**: ~0.03s
+- **1000×1000 matrix**: ~0.15s
+- **2000×2000 matrix**: ~0.64s
+
+### Space Complexity
+- **Expected**: O(1) extra space (in-place rotation)
+- **Verified**: Function modifies matrix in-place, returns None
+
+## Test Coverage
+
+The test suite includes:
+
+### Edge Cases
+- 1×1 matrix (trivial case)
+- 2×2 matrix (smallest non-trivial case)
+
+### Small Matrices
+- 3×3 matrix (odd dimension)
+- 4×4 matrix (even dimension)
+- 5×5 matrix (larger odd dimension)
+
+### Medium Matrices
+- 100×100 matrix
+- 500×500 matrix
+
+### Large Matrices
+- 1000×1000 matrix
+- 2000×2000 matrix
+
+### Correctness Tests
+- In-place modification verification
+- Double rotation (180°)
+- Quadruple rotation (360° = identity)
+
+## Regenerate Patch
+
+From repository root:
+
+```bash
+git diff --no-index repository_before/rotation.py repository_after/rotation.py > patches/diff.patch
+```
+
+## Bug Details
+
+**Line 6 in repository_before/rotation.py**:
+```python
+і = _len - 1 - row  # Cyrillic 'і' (U+0456)
+```
+
+**Lines 9-12** reference the variable as:
+```python
+matrix[i - offset][row]  # ASCII 'i'
+matrix[i][i - offset]    # ASCII 'i'
+```
+
+This mismatch causes `NameError: name 'i' is not defined` at runtime.
+
+**Fix**: Change the Cyrillic `і` to ASCII `i` on line 6
 
 ### Report Schema
 
