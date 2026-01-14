@@ -36,46 +36,14 @@ A production-ready collaborative text editor using Conflict-free Replicated Data
 - `snapshots`: Periodic snapshots for fast recovery
 - `client_sessions`: Track client vector clocks for tombstone GC
 
-## Quick Start
-
-### Run Application
-
+### 1. Run Unit Tests
 ```bash
-# Start all services (PostgreSQL, Redis, App)
-docker-compose up -d
-
-# Check service status
-docker-compose ps
-
-# View logs
-docker-compose logs -f app
+docker-compose run --rm evaluation npm test
 ```
 
-### Run Tests
-
+### 2. Run Evaluation
 ```bash
-# Run unit tests (CRDT convergence)
-docker-compose run --rm tests npm test tests/crdt/
-
-# Run integration tests (tombstone GC with memory verification)
-docker-compose run --rm tests node --expose-gc node_modules/.bin/jest tests/integration/
-
-# Run all tests
-docker-compose run --rm tests npm test
-```
-
-### Run Evaluation
-
-```bash
-# Run full evaluation (tests + performance gates)
-docker-compose run --rm tests node evaluation/evaluation.js
-
-# Evaluation enforces performance gates:
-# - Convergence time < 10 seconds
-# - Message size < 1KB
-# - Operation latency < 100ms
-# - Throughput > 1000 ops/s
-# - Tombstone GC memory reduction > 50%
+docker-compose run --rm evaluation
 ```
 
 ### Stop Services
@@ -121,23 +89,6 @@ npm run test:coverage
 npm run build
 ```
 
-### Environment Variables
-
-```env
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/crdt_editor
-
-# Redis
-REDIS_URL=redis://localhost:6379
-
-# Server
-PORT=3000
-NODE_ENV=development
-
-# CRDT Configuration
-SNAPSHOT_INTERVAL=100
-GC_INTERVAL=1000
-```
 
 ## API Endpoints
 
@@ -192,27 +143,7 @@ Messages use custom binary protocol (5-byte header + JSON payload):
 }
 ```
 
-## Testing
 
-### Unit Tests
-
-```bash
-# CRDT convergence tests
-npm test tests/crdt/
-
-# Run specific test
-npm test tests/crdt/convergence.test.ts
-```
-
-### Integration Tests
-
-```bash
-# All integration tests
-docker-compose run --rm tests npm test tests/integration/
-
-# Tombstone GC with memory verification
-docker-compose run --rm tests node --expose-gc node_modules/.bin/jest tests/integration/tombstone-gc.test.ts
-```
 
 ## Performance Characteristics
 
@@ -489,12 +420,7 @@ This is a minimal implementation to prove the bridge works. Not implemented:
 
 These features can be added incrementally in future stages.
 
-### Environment Variables
 
-```env
-# Client configuration (Vite)
-VITE_WS_URL=ws://localhost:3000
-```
 
 ### Troubleshooting Frontend
 
