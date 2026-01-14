@@ -1,8 +1,8 @@
 {
-  "run_id": "8440f8d2-2632-4428-bf57-1d05f60675a4",
-  "started_at": "2026-01-12T14:04:28.549008Z",
-  "finished_at": "2026-01-12T14:04:31.512426Z",
-  "duration_seconds": 2.963418,
+  "run_id": "d8a335a2-69b8-4c79-96ce-73876ae473f4",
+  "started_at": "2026-01-14T11:15:58.456144Z",
+  "finished_at": "2026-01-14T11:16:03.844267Z",
+  "duration_seconds": 5.388123,
   "environment": {
     "python_version": "3.13.2",
     "platform": "macOS-12.7.6-x86_64-i386-64bit-Mach-O"
@@ -19,7 +19,7 @@
     "tests": {
       "passed": true,
       "return_code": 0,
-      "output": "s.s.s.s.s.s.s.s.s.s.s.s.s.                                               [100%]\n13 passed, 13 skipped in 1.46s\n"
+      "output": "s.s.s.s.s.s.s.s.s.s.s.s.s.                                               [100%]\n13 passed, 13 skipped in 0.95s\n"
     },
     "metrics": {}
   },

@@ -13,7 +13,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parent.parent
-REPORTS = ROOT / "evaluation" / "reports"
+REPORTS_BASE = ROOT / "evaluation" / "reports"
 
 
 def environment_info():
@@ -178,14 +178,18 @@ def main():
     Main entry point.
     Creates reports directory, runs evaluation, writes report, and returns exit code.
     """
-    # Create reports directory if it doesn't exist
-    REPORTS.mkdir(parents=True, exist_ok=True)
-
     # Run evaluation
     report = run_evaluation()
 
+    # Create nested directory structure: YYYY-MM-DD/HH-MM-SS/
+    now = datetime.now(timezone.utc)
+    date_dir = now.strftime("%Y-%m-%d")
+    time_dir = now.strftime("%H-%M-%S")
+    report_dir = REPORTS_BASE / date_dir / time_dir
+    report_dir.mkdir(parents=True, exist_ok=True)
+
     # Write report to report.json
-    report_path = REPORTS / "report.json"
+    report_path = report_dir / "report.json"
     report_path.write_text(json.dumps(report, indent=2))
 
     print(f"Evaluation report written to {report_path}")

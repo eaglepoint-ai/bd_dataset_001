@@ -29,3 +29,11 @@ services:
       - .:/app
     environment:
       - PYTHONPATH=/app
+
+  evaluation:
+    build: .
+    command: python3 evaluation/evaluation.py
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app

@@ -1,0 +1,3 @@
+Common subdirectories: repository_before/__pycache__ and repository_after/__pycache__
+Only in repository_after/: app
+Only in repository_after/: main.py

@@ -31,6 +31,88 @@ A FastAPI-based Todo List application with in-memory storage, designed for high 
 └── docker-compose.yml   # Docker Compose configuration
 ```
 
+## Execution Instructions
+
+### Running repository_before
+
+**Using Docker:**
+```bash
+docker-compose --profile before up repository_before
+```
+
+This will:
+- Build the Docker image
+- Start the `repository_before` service on port 8001
+- The service will check if `repository_before/main.py` exists before starting
+
+**Using local Python:**
+```bash
+cd repository_before
+PYTHONPATH=.. uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+```
+
+Note: `repository_before` is intentionally empty for comparison. If `main.py` doesn't exist, the service will exit gracefully.
+
+### Running repository_after
+
+**Using Docker:**
+```bash
+docker-compose up repository_after
+```
+
+This will:
+- Build the Docker image
+- Start the `repository_after` service on port 8000
+- API will be available at http://localhost:8000
+
+**Using local Python:**
+```bash
+cd repository_after
+PYTHONPATH=.. uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**Access the API:**
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+- Health check: http://localhost:8000/health
+
+### Running evaluation
+
+**Using Python:**
+```bash
+python3 evaluation/evaluation.py
+```
+
+This will:
+- Run tests on both `repository_before` and `repository_after`
+- Generate a comparison report
+- Save the report to `evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json`
+- Exit with code 0 (success) or 1 (failure)
+
+**Using Docker:**
+```bash
+docker-compose up evaluation
+```
+
+Or run once and remove container:
+```bash
+docker-compose run --rm evaluation
+```
+
+This will:
+- Build the Docker image
+- Run the evaluation script inside the container
+- Generate reports in `evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json`
+- Exit with code 0 (success) or 1 (failure)
+
+**Report location:**
+Reports are organized by date and time:
+```
+evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
+```
+
+Note: The `tests` service runs pytest during build, while `evaluation` service runs the full evaluation script that generates comparison reports.
+
 ## Docker Usage
 
 ### Build and start all services
@@ -41,20 +123,8 @@ docker-compose up --build
 
 This will start:
 - **repository_after** service on port 8000
-- **repository_before** service on port 8001 (if it has content)
+- **repository_before** service on port 8001 (if it has content, requires `--profile before`)
 - **tests** service (runs pytest)
-
-### Run only repository_after
-
-```bash
-docker-compose up repository_after
-```
-
-### Run only tests
-
-```bash
-docker-compose up tests
-```
 
 ### Run in detached mode
 
@@ -123,14 +193,42 @@ The test suite includes:
 - CRUD operation tests
 - Edge case tests (empty titles, nonexistent todos, pagination, etc.)
 
-Run tests with:
+### Run tests on repository_before
+
+Spin up the app:
+```bash
+docker-compose --profile before up repository_before
+```
+
+Or run tests locally (tests will skip repository_before if no implementation):
+```bash
+pytest tests/ -v
+```
+
+### Run tests on repository_after
+
+Spin up the app:
+```bash
+docker-compose up repository_after
+```
+
+Or run tests locally:
+```bash
+pytest tests/ -v
+```
+
+Note: Tests are parametrized to run against both repositories automatically. Tests for `repository_before` will be skipped if it has no implementation.
+
+### Run all tests
+
+With Docker:
 ```bash
 docker-compose up tests
 ```
 
 Or locally:
 ```bash
-uv run pytest tests/ -v
+pytest tests/ -v
 ```
 
 ## Evaluation
@@ -144,7 +242,7 @@ python3 evaluation/evaluation.py
 This will:
 - Run tests on both repositories
 - Generate a comparison report
-- Write the report to `evaluation/reports/report.json`
+- Write the report to `evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json`
 - Exit with code 0 (success) or 1 (failure)
 
 The evaluation report includes:
