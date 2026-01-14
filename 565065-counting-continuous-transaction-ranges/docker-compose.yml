@@ -21,7 +21,7 @@ services:
       - PYTHONDONTWRITEBYTECODE=1
       - PYTHONUNBUFFERED=1
 
-  evaluate:
+  evaluation:
     build: .
     command: python evaluation/evaluation.py
     volumes:
