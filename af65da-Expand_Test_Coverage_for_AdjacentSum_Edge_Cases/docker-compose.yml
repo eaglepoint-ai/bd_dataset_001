@@ -3,12 +3,10 @@ services:
     build: .
     container_name: meta-test-before
     command: ["repository_before"]
-
   meta-test-after:
     build: .
-    container_name: meta_test_after
+    container_name: meta-test-after
     command: ["repository_after"]
-
   evaluation:
     build: .
     container_name: evaluation

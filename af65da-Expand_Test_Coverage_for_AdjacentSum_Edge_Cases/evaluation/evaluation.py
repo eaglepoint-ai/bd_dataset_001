@@ -36,140 +36,88 @@ def environment_info():
 
 
 def parse_test_file(test_file_path):
-    """Parse the Java test file and extract test method names and their contents."""
+    """
+    Parse the Java test file and extract @Test method names.
+    
+    Uses the same naming convention approach as MetaTest.java for consistency.
+    Only extracts method names (not bodies) since we use naming conventions
+    to determine requirement coverage.
+    """
     with open(test_file_path, 'r') as f:
         content = f.read()
     
-    test_methods = {}
-    pattern = r'@Test\s+public\s+void\s+(\w+)\s*\(\s*\)\s*\{'
-    
-    for match in re.finditer(pattern, content):
-        method_name = match.group(1)
-        start_pos = match.end()
-        
-        brace_count = 1
-        pos = start_pos
-        while brace_count > 0 and pos < len(content):
-            if content[pos] == '{':
-                brace_count += 1
-            elif content[pos] == '}':
-                brace_count -= 1
-            pos += 1
-        
-        method_body = content[start_pos:pos-1]
-        test_methods[method_name] = method_body
+    # Extract all @Test annotated method names
+    pattern = r'@Test\s+public\s+void\s+(\w+)\s*\(\s*\)'
+    test_methods = re.findall(pattern, content)
     
     return test_methods
 
 
-def check_requirement_1(tests):
-    """REQ-1: Empty and single-element arrays."""
-    has_empty_array_test = False
-    has_single_element_test = False
+def check_requirement_1(test_methods):
+    """
+    REQ-1: Empty and single-element arrays.
     
-    for name, body in tests.items():
-        name_lower = name.lower()
-        
-        if 'empty' in name_lower:
-            has_empty_array_test = True
-        elif re.search(r'int\s*\[\s*\]\s*\w+\s*=\s*\{\s*\}', body):
-            has_empty_array_test = True
-        
-        if 'single' in name_lower:
-            has_single_element_test = True
-        elif re.search(r'int\s*\[\s*\]\s*\w+\s*=\s*\{\s*-?\d+\s*\}', body):
-            if not re.search(r'int\s*\[\s*\]\s*\w+\s*=\s*\{\s*-?\d+\s*,', body):
-                has_single_element_test = True
+    Uses naming convention: looks for 'empty' AND 'single' in method names.
+    Matches MetaTest.java approach.
+    """
+    has_empty = any('empty' in name.lower() for name in test_methods)
+    has_single = any('single' in name.lower() for name in test_methods)
     
-    return has_empty_array_test and has_single_element_test
+    return has_empty and has_single
 
 
-def check_requirement_2(tests):
-    """REQ-2: Positive and negative integers (mixed)."""
-    has_mixed_positive_negative_test = False
+def check_requirement_2(test_methods):
+    """
+    REQ-2: Mixed positive and negative integers.
     
-    for name, body in tests.items():
-        name_lower = name.lower()
-        
-        if 'mixed' in name_lower and ('positive' in name_lower or 'negative' in name_lower):
-            has_mixed_positive_negative_test = True
-            break
-        
-        array_matches = re.findall(r'\{([^}]+)\}', body)
-        for arr_content in array_matches:
-            has_negative = bool(re.search(r'-\d+', arr_content))
-            without_negative = re.sub(r'-\d+', '', arr_content)
-            has_positive = bool(re.search(r'\d+', without_negative))
-            
-            if has_negative and has_positive:
-                has_mixed_positive_negative_test = True
-                break
-        
-        if has_mixed_positive_negative_test:
-            break
-    
-    return has_mixed_positive_negative_test
+    Uses naming convention: looks for 'mixed' in method names.
+    Matches MetaTest.java approach.
+    """
+    return any('mixed' in name.lower() for name in test_methods)
 
 
-def check_requirement_3(tests):
-    """REQ-3: Arrays containing zero values."""
-    has_zero_test = False
+def check_requirement_3(test_methods):
+    """
+    REQ-3: Arrays containing zero values.
     
-    for name, body in tests.items():
-        name_lower = name.lower()
-        
-        if 'zero' in name_lower:
-            has_zero_test = True
-            break
-        
-        if re.search(r'\{\s*0\s*,', body) or re.search(r',\s*0\s*,', body) or re.search(r',\s*0\s*\}', body):
-            has_zero_test = True
-            break
-    
-    return has_zero_test
+    Uses naming convention: looks for 'zero' in method names.
+    Matches MetaTest.java approach.
+    """
+    return any('zero' in name.lower() for name in test_methods)
 
 
-def check_requirement_4(tests):
-    """REQ-4: Integer overflow and underflow behavior."""
-    has_overflow_test = False
-    has_underflow_test = False
+def check_requirement_4(test_methods):
+    """
+    REQ-4: Integer overflow and underflow behavior.
     
-    for name, body in tests.items():
-        name_lower = name.lower()
-        
-        if 'overflow' in name_lower:
-            has_overflow_test = True
-        if 'Integer.MAX_VALUE' in body:
-            if re.search(r'Integer\.MAX_VALUE\s*,\s*[1-9]', body) or re.search(r'[1-9]\s*,\s*Integer\.MAX_VALUE', body):
-                has_overflow_test = True
-        
-        if 'underflow' in name_lower:
-            has_underflow_test = True
-        if 'Integer.MIN_VALUE' in body:
-            if re.search(r'Integer\.MIN_VALUE\s*,\s*-[1-9]', body) or re.search(r'-[1-9]\s*,\s*Integer\.MIN_VALUE', body):
-                has_underflow_test = True
+    Uses naming convention: looks for 'overflow' AND 'underflow' in method names.
+    Matches MetaTest.java approach.
+    """
+    has_overflow = any('overflow' in name.lower() for name in test_methods)
+    has_underflow = any('underflow' in name.lower() for name in test_methods)
     
-    return has_overflow_test and has_underflow_test
+    return has_overflow and has_underflow
 
 
-def check_requirement_5(tests):
-    """REQ-5: Boundary and extreme input values."""
-    has_max_value_test = False
-    has_min_value_test = False
+def check_requirement_5(test_methods):
+    """
+    REQ-5: Boundary and extreme input values.
     
-    for name, body in tests.items():
-        if 'Integer.MAX_VALUE' in body:
-            has_max_value_test = True
-        if 'Integer.MIN_VALUE' in body:
-            has_min_value_test = True
+    Uses naming convention: looks for 'max' AND 'min' in method names.
+    Matches MetaTest.java approach.
+    """
+    has_max = any('max' in name.lower() for name in test_methods)
+    has_min = any('min' in name.lower() for name in test_methods)
     
-    return has_max_value_test and has_min_value_test
+    return has_max and has_min
 
 
 def run_tests(repo_name: str):
     """
     Run meta tests on the repository and return results.
-    This analyzes the test file for requirement coverage.
+    
+    Analyzes test method names for requirement coverage using
+    the same naming convention approach as MetaTest.java.
     """
     test_file_path = ROOT / repo_name / 'src' / 'test' / 'AdjacentSumTest.java'
     
@@ -181,22 +129,22 @@ def run_tests(repo_name: str):
         }
     
     try:
-        tests = parse_test_file(test_file_path)
+        test_methods = parse_test_file(test_file_path)
         
         requirements = [
-            ("REQ-1: Empty and single-element arrays", check_requirement_1(tests)),
-            ("REQ-2: Positive and negative integers", check_requirement_2(tests)),
-            ("REQ-3: Arrays containing zero values", check_requirement_3(tests)),
-            ("REQ-4: Integer overflow and underflow", check_requirement_4(tests)),
-            ("REQ-5: Boundary and extreme values", check_requirement_5(tests)),
+            ("REQ-1: Empty and single-element arrays", check_requirement_1(test_methods)),
+            ("REQ-2: Positive and negative integers", check_requirement_2(test_methods)),
+            ("REQ-3: Arrays containing zero values", check_requirement_3(test_methods)),
+            ("REQ-4: Integer overflow and underflow", check_requirement_4(test_methods)),
+            ("REQ-5: Boundary and extreme values", check_requirement_5(test_methods)),
         ]
         
         passed_count = sum(1 for _, passed in requirements if passed)
         all_passed = passed_count == len(requirements)
         
         output_lines = [
-            f"Found {len(tests)} test methods",
-            f"Test methods: {', '.join(tests.keys())}",
+            f"Found {len(test_methods)} test methods",
+            f"Test methods: {', '.join(test_methods)}",
             "",
             "Requirement Coverage:",
         ]
@@ -225,7 +173,8 @@ def run_tests(repo_name: str):
 def run_metrics(repo_name: str):
     """
     Collect metrics for the repository.
-    Returns test coverage metrics.
+    
+    Returns test coverage metrics using naming convention approach.
     """
     test_file_path = ROOT / repo_name / 'src' / 'test' / 'AdjacentSumTest.java'
     
@@ -233,18 +182,18 @@ def run_metrics(repo_name: str):
         return {}
     
     try:
-        tests = parse_test_file(test_file_path)
+        test_methods = parse_test_file(test_file_path)
         
         requirements_passed = sum([
-            1 if check_requirement_1(tests) else 0,
-            1 if check_requirement_2(tests) else 0,
-            1 if check_requirement_3(tests) else 0,
-            1 if check_requirement_4(tests) else 0,
-            1 if check_requirement_5(tests) else 0,
+            1 if check_requirement_1(test_methods) else 0,
+            1 if check_requirement_2(test_methods) else 0,
+            1 if check_requirement_3(test_methods) else 0,
+            1 if check_requirement_4(test_methods) else 0,
+            1 if check_requirement_5(test_methods) else 0,
         ])
         
         return {
-            "test_methods_count": len(tests),
+            "test_methods_count": len(test_methods),
             "requirements_covered": requirements_passed,
             "requirements_total": 5,
             "coverage_percentage": (requirements_passed / 5) * 100
