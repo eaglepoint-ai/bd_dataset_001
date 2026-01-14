@@ -1,9 +1,29 @@
 {
-  "instance_id": "6b741d",
-  "problem_statement": "Optimize the ProductSearch class to handle 100,000+ products with sub-100ms response times. Fix performance issues: pre-compute lowercase strings, single-pass filtering, use heap for top-N selection, and index by category. Must maintain same public API.",
+  "instance_id": "6b741d-Product_Search_Performance_Optimization",
+  "problem_statement": "Optimize the ProductSearch class for an e-commerce platform to handle 100,000+ products and 1,000 queries/second, always returning top 20 matches in under 100ms, while keeping the exact same public API and result correctness. The baseline implementation is correct but slow at scale. The optimized version must precompute lowercase fields, use a single filter pass, a min-heap for top-N, and a Map for category lookup, with bounded memory usage.",
   "base_commit": "repository_before",
   "test_patch": "tests/",
-  "github_url": "",
-  "environment_setup": "Dockerfile"
+  "repo": "https://github.com/eaglepoint-ai/bytedance_dataset/tree/main/bd_dataset_001/6b741d-Product_Search_Performance_Optimization",
+  "environment_setup": "Dockerfile",
+  "FAIL_TO_PASS": [
+    "tests/productSearch.before.test.js::should perform search of 100,000 products in under 100ms (expected to FAIL)"
+  ],
+  "PASS_TO_PASS": [
+    "tests/productSearch.before.test.js::should return correct count and categories",
+    "tests/productSearch.before.test.js::should find product by id",
+    "tests/productSearch.before.test.js::should filter by category and limit",
+    "tests/productSearch.before.test.js::should filter by price range",
+    "tests/productSearch.before.test.js::should filter by query (name/desc, case-insensitive)",
+    "tests/productSearch.before.test.js::should return top rated products",
+    "tests/productSearch.before.test.js::should clear all products",
+    "tests/productSearch.after.test.js::should perform search of 100,000 products in under 100ms (should PASS)",
+    "tests/productSearch.after.test.js::should return correct count and categories",
+    "tests/productSearch.after.test.js::should find product by id",
+    "tests/productSearch.after.test.js::should filter by category and limit",
+    "tests/productSearch.after.test.js::should filter by price range",
+    "tests/productSearch.after.test.js::should filter by query (name/desc, case-insensitive)",
+    "tests/productSearch.after.test.js::should return top rated products",
+    "tests/productSearch.after.test.js::should clear all products"
+  ]
 }
 

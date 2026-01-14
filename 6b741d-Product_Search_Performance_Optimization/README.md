@@ -1,104 +1,83 @@
 # Product Search Performance Optimization
 
-## Problem Statement
+This dataset task contains a production-style JavaScript class for product search. The objective is to optimize for high performance (100,000+ products, sub-100ms search) while preserving **bit-for-bit** runtime behavior and public API.
 
-A product search feature for an e-commerce site is experiencing severe performance degradation. The code works correctly but becomes extremely slow when the product catalog grows beyond 10,000 items. Users report 2-3 second delays when typing in the search box. The ProductSearch class needs to be optimized to handle 100,000+ products with sub-100ms response times while maintaining the exact same public API.
+## Folder layout
 
----
+- `repository_before/` original implementation
+- `repository_after/` optimized implementation
+- `tests/` correctness + performance tests
+- `patches/` diff between before/after
+- `evaluation/` evaluation runner and reports
+- `instances/` task metadata
+- `trajectory/` solution write-up
 
-## Prompt
+## Run with Docker
 
-**Role:** Senior Backend Engineer
-
-**Context:** Your company's e-commerce platform has a product search feature that works correctly for small catalogs but performance degrades badly at scale. Users are complaining about lag when searching. You need to optimize the code while keeping the same public API (search, searchByCategory, getTopRated).
-
-**Scale Assumptions:**
-
-- Product catalog: 100,000+ items
-- Search queries: 1,000/second
-- Results needed: Top 20 matches
-
----
-
-## Core Requirements (Must Fix)
-
-### 1. Eliminate Redundant String Operations
-- `toLowerCase()` called on every item for every search
-- Pre-compute or cache lowercase values
-
-### 2. Single Pass Filtering
-- Multiple `.filter()` calls create multiple array passes
-- Combine into single loop
-
-### 3. Efficient Top-N Selection
-- Full sort then slice is O(n log n)
-- Use min-heap for O(n log k) where k=20
-
-### 4. Indexed Lookups
-- Category filtering is O(n) linear scan
-- Use Map for O(1) lookup by category
-
----
-
-## Constraints
-
-- Do NOT change public API signatures
-- Do NOT use external search libraries
-- Must work with plain JavaScript arrays
-
----
-
-## Acceptance Criteria
-
-1. Search 100,000 products in under 100ms
-2. Same results as original implementation
-3. Memory usage does not grow unbounded
-4. All public methods work correctly
-
----
-
-## Requirements Summary
-
-1. **Pre-compute lowercase** - Cache on add, not on search
-2. **Single filter pass** - Combine all filters in one loop
-3. **Heap select for top-N** - O(n log k) instead of O(n log n)
-4. **Index by category** - Map for O(1) category lookup
-5. **Same public API** - search(), searchByCategory(), getTopRated(), getProductById(), getCategories(), getProductCount(), clear()
-
----
-
-## Public API (Must Maintain)
-
-```javascript
-class ProductSearch {
-  addProduct(product)           // Add single product
-  addProducts(products)         // Add multiple products
-  search(query, options)        // Search with filters
-  searchByCategory(category, limit)  // Filter by category
-  getTopRated(limit)            // Get highest rated
-  getProductById(id)            // Find by ID
-  getCategories()               // List all categories
-  getProductCount()             // Total count
-  clear()                       // Reset
-}
+### Build image
+```bash
+docker compose build
 ```
 
----
-
-## Commands
-
-### Run repository_before
+### Run tests (before – expected to FAIL performance)
 ```bash
-docker-compose run --rm app node -e "const PS = require('./repository_before'); console.log('OK')"
+docker compose run --rm before
+```
+**Expected behavior:**
+- Correctness tests: ✅ PASS
+- Performance test: ❌ FAIL (expected - not optimized)
+
+### Run tests (after – expected to PASS all)
+```bash
+docker compose run --rm after
+```
+**Expected behavior:**
+- Correctness tests: ✅ PASS
+- Performance test: ✅ PASS (optimized)
+
+### Run evaluation (compares both implementations)
+```bash
+docker compose run --rm evaluation
+```
+This will:
+- Run tests for both before and after implementations
+- Compare correctness and performance
+- Generate a report at `evaluation/reports/latest.json`
+
+## Run locally
+
+### Install dependencies
+```bash
+npm install
 ```
 
-### Run tests
+### Run all tests (before)
 ```bash
-docker-compose run --rm app npm test
+NODE_PATH=repository_before npx mocha tests/productSearch.before.test.js
+```
+
+### Run all tests (after)
+```bash
+NODE_PATH=repository_after npx mocha tests/productSearch.after.test.js
 ```
 
 ### Run evaluation
 ```bash
-docker-compose run --rm app node evaluation/evaluation.js
+node evaluation/evaluation.js
 ```
+
+## Regenerate patch
+
+From repo root:
+```bash
+git diff --no-index repository_before repository_after > patches/task.patch
+```
+
+---
+
+## Task Summary
+
+- Optimize ProductSearch to handle 100,000+ products and 1,000 queries/sec with sub-100ms response.
+- Maintain exact public API and result equivalence.
+- See `instances/instance.json` for requirements and test expectations.
 
