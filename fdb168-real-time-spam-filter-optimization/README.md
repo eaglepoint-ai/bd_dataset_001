@@ -33,7 +33,6 @@ The current spam filter violates production constraints due to slow training, hi
 
 ### Technical Constraints
 - Python 3.11
-- CPU-only execution (no GPU)
 - Allowed libraries: scikit-learn, numpy, scipy
 - Deterministic behavior across runs
 - Must handle obfuscated spam patterns (e.g., "Fr33 m0ney")
