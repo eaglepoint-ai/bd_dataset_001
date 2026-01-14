@@ -201,24 +201,34 @@ The test suite includes:
 
 ### Run tests on repository_before
 
-Spin up the app:
+**Spin up the app:**
 ```bash
 docker-compose --profile before up repository_before
 ```
 
-Or run tests locally (tests will skip repository_before if no implementation):
+**Run tests using Docker:**
+```bash
+docker-compose run --rm -e TEST_REPOSITORY=repository_before tests
+```
+
+**Or run tests locally (tests will skip repository_before if no implementation):**
 ```bash
 pytest tests/ -v
 ```
 
 ### Run tests on repository_after
 
-Spin up the app:
+**Spin up the app:**
 ```bash
 docker-compose up repository_after
 ```
 
-Or run tests locally:
+**Run tests using Docker:**
+```bash
+docker-compose run --rm -e TEST_REPOSITORY=repository_after tests
+```
+
+**Or run tests locally:**
 ```bash
 pytest tests/ -v
 ```
@@ -241,6 +251,17 @@ pytest tests/ -v
 
 Run the evaluation script to compare `repository_before` and `repository_after`:
 
+**Using Docker:**
+```bash
+docker-compose up evaluation
+```
+
+Or run once and remove container:
+```bash
+docker-compose run --rm evaluation
+```
+
+**Using Python:**
 ```bash
 python3 evaluation/evaluation.py
 ```

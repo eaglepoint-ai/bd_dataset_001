@@ -1,19 +1,20 @@
 FROM python:3.13-slim
 
 WORKDIR /app
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
-COPY requirements.txt requirements-dev.txt ./
-RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
-
+# Copy application code
 COPY . .
 
-ENV PYTHONPATH=/app
+# Install dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    rm -rf /tmp/* /var/tmp/*
 
-# Test stage
-FROM python:3.13-slim AS tests
-WORKDIR /app
-COPY requirements.txt requirements-dev.txt ./
-RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
-COPY . .
-ENV PYTHONPATH=/app
-RUN pytest -q tests
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python3 -c "import sys; sys.exit(0)" || exit 1
+
+CMD ["python3", "evaluation/evaluation.py"]

@@ -22,9 +22,8 @@ services:
       - PYTHONPATH=/app/repository_after
 
   tests:
-    build:
-      context: .
-      target: tests
+    build: .
+    command: pytest -q tests
     volumes:
       - .:/app
     environment:
