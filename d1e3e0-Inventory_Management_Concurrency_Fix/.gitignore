@@ -4,3 +4,12 @@ dist/
 .DS_Store
 evaluation/reports/
 
+# Environment
+.env
+
+# Tests
+.tmp_*.sqlite
+*.sqlite
+coverage/
+test_output.txt
+

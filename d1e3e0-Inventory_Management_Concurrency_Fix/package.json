@@ -4,13 +4,17 @@
   "description": "Inventory management concurrency fix task",
   "main": "repository_before/index.ts",
   "scripts": {
-    "test": "echo 'No tests defined yet'",
+    "test": "ts-node tests/index.ts",
+    "test:before": "ts-node tests/test_before.ts",
+    "test:after": "ts-node tests/test_after.ts",
+    "evaluate": "ts-node evaluation/evaluation.ts",
     "start": "ts-node repository_before/index.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/typeorm": "^10.0.0",
-    "typeorm": "^0.3.17"
+    "typeorm": "^0.3.17",
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
@@ -21,4 +25,3 @@
   "author": "",
   "license": "MIT"
 }
-
