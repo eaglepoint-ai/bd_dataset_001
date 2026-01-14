@@ -1,0 +1,8 @@
+{
+  "instance_id": "3338bf",
+  "problem_statement": "The original implementation misuses asyncio by performing blocking operations within an asynchronous workflow, resulting in serialized execution and poor scalability. It also relies on global mutable state, lacks clear interface contracts, and allows unbounded memory growth. The task is to refactor the code into a modern Python 3.12+ solution that achieves true non-blocking concurrency, enforces strict type safety, eliminates global state, and ensures controlled memory usage using a circular buffer, while adhering to a functional-style processing approach.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/3338bf-Modernizing_a_blocking_async_pipeline_in_python",
+  "environment_setup": "Dockerfile"
+}
