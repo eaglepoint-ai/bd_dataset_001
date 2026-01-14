@@ -113,18 +113,39 @@ Key considerations:
 
 ## File Structure
 
+
 ```
 repository_before/
-└── calculator.py    # Fix the bugs in this file
+└── calculator.py    # Original buggy implementation
+repository_after/
+└── calculator.py    # Refactored/fixed implementation
+tests/
+	test_before.py   # Tests for before
+	test_after.py    # Tests for after
+evaluation/
+	evaluation.py    # Evaluation script
+```
+## patch file generation
+``` git diff --no-index repository_before repository_after > patches/diff.patch ```
+
+## Commands
+
+Test repository_before:
+```sh
+docker compose run --rm app python -m pytest tests/test_before.py -v
 ```
 
-## Running Tests
-
-```bash
-# With Docker
-docker-compose up --build
-
-# Without Docker
-python -m pytest tests/ -v
+Test repository_after:
+```sh
+docker compose run --rm app python -m pytest tests/test_after.py -v
 ```
+
+Run evaluation:
+```sh
+docker compose run --rm app python evaluation/evaluation.py
+```
+
+
+
+
 

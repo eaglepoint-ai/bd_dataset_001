@@ -10,6 +10,19 @@
     "operator-precedence",
     "error-handling"
   ],
-  "created_at": "2026-01-14"
+  "created_at": "2026-01-14",
+  "environment_setup": "Dockerfile",
+  "FAIL_TO_PASS": [
+    "tests/test_structure.py::test_helper_function_exists",
+    "tests/test_structure.py::test_parsing_duplication_reduced",
+    "tests/test_structure.py::test_line_count_not_excessive"
+  ],
+  "PASS_TO_PASS": [
+    "tests/test_before.py::test_before_matches_reference_vectors",
+    "tests/test_after.py::test_after_matches_reference_vectors",
+    "tests/test_calc_score_equivalence.py::test_public_api_docstring_and_name_match",
+    "tests/test_calc_score_equivalence.py::test_equivalence_on_handpicked_adversarial_inputs",
+    "tests/test_calc_score_equivalence.py::test_equivalence_randomized_fuzz_deterministic"
+  ]
 }
 

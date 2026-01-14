@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY repository_before/ ./repository_before/
+COPY repository_after/ ./repository_after/
 COPY tests/ ./tests/
 
 # Default command runs the calculator tests
