@@ -1,0 +1,26 @@
+diff --git a/repository_after/useIsMobile.ts b/repository_after/useIsMobile.ts
+new file mode 100644
+index 0000000..e69de29
+--- /dev/null
++++ b/repository_after/useIsMobile.ts
+@@
++import { useEffect, useState } from "react";
++
++const MOBILE_BREAKPOINT = 768;
++
++export function useIsMobile(): boolean | undefined {
++  const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined);
++
++  useEffect(() => {
++    const handleResize = () => {
++      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
++    };
++    handleResize();
++    window.addEventListener("resize", handleResize);
++    return () => {
++      window.removeEventListener("resize", handleResize);
++    };
++  }, []);
++
++  return isMobile;
++}
