@@ -167,8 +167,8 @@ function runEvaluation(): Report {
 
     const report: Report = {
       run_id: runId,
-      started_at: start.toISOString().replace(/\.\d{3}/, '').replace('Z', '.000Z'),
-      finished_at: end.toISOString().replace(/\.\d{3}/, '').replace('Z', '.000Z'),
+      started_at: start.toISOString(),
+      finished_at: end.toISOString(),
       duration_seconds: duration,
       environment: environmentInfo(),
       before,
@@ -186,8 +186,8 @@ function runEvaluation(): Report {
 
     return {
       run_id: runId,
-      started_at: start.toISOString().replace(/\.\d{3}/, '').replace('Z', '.000Z'),
-      finished_at: end.toISOString().replace(/\.\d{3}/, '').replace('Z', '.000Z'),
+      started_at: start.toISOString(),
+      finished_at: end.toISOString(),
       duration_seconds: duration,
       environment: environmentInfo(),
       before: {
