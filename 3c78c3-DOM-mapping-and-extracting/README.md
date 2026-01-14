@@ -1,92 +1,107 @@
-# project template
+# DOM Mapping and Extracting
 
-Starter scaffold for bd dataset task.
+This dataset task involves creating a system that takes any webpage URL and outputs a complete JSON representation of the page's DOM structure.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+## Folder Layout
 
----
+- `repository_before/` - Empty baseline (only `__init__.py`)
+- `repository_after/` - Complete DOM extraction implementation
+- `tests/` - Test suite validating all requirements
+- `patches/` - Diff between before/after
+- `evaluation/` - Evaluation runner with report generation
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+## Problem Statement
 
-### Setup Steps
+Accept a webpage URL as input. Fully load the page, including JavaScript-rendered content. Traverse the entire DOM tree. For each element, extract tag name, text content, attributes, visibility, and DOM depth. Generate a unique absolute XPath for every element. Preserve parent-child hierarchy in the output. Output valid JSON only. Single .json file named with a unique id containing a single JSON object. No explanations or formatting outside JSON.
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
+## Prompt Used
 
 ```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+You are an advanced web developer specializing in web scraping and DOM analysis.
+Create a system that takes any webpage URL and outputs a complete JSON representation 
+of the page's DOM. The system must capture every HTML element, the data it contains, 
+and a unique XPath for each element. The output should be machine-readable and suitable 
+for automation, scraping, and AI agents.
 ```
 
-### Report Schema
+## Functional Requirements
+
+1. Accept a webpage URL as input
+2. Fully load the page, including JavaScript-rendered content
+3. Traverse the entire DOM tree
+4. For each element, extract:
+   - Tag name
+   - Text content
+   - Attributes
+   - Visibility
+   - DOM depth
+5. Generate a unique absolute XPath for every element
+6. Preserve parent-child hierarchy in the output
+7. Output valid JSON only
+8. Single .json file named with a unique id containing a single JSON object
+9. No explanations or formatting outside JSON
+
+## Expected JSON Structure
 
 ```json
 {
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
+  "url": "https://example.com",
+  "dom": {
+    "tag": "html",
+    "xpath": "/html",
+    "depth": 0,
+    "attributes": {},
+    "text": "",
+    "visible": true,
+    "children": [
+      {
+        "tag": "a",
+        "xpath": "/html/body/a[1]",
+        "depth": 2,
+        "attributes": {
+          "href": "/login"
+        },
+        "text": "Login",
+        "visible": true,
+        "children": []
+      }
+    ]
+  }
 }
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+## Run with Docker
 
----
+### Build image
+```bash
+docker compose build
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+### Run tests (before – expected N/A since no implementation)
+```bash
+# repository_before has no implementation, so no tests to run
+```
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+### Run tests (after – expected pass)
+```bash
+docker compose run --rm app-after
+```
+*Expected: All requirement-based tests PASS.*
+
+### Run evaluation
+```bash
+docker compose run --rm evaluation
+```
+
+## Run Locally
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run tests on repository_after
+pytest tests/ -v
+
+# Run evaluation
+python evaluation/evaluation.py
+```

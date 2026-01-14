@@ -1,9 +1,20 @@
 {
     "instance_id": "3c78c3",
-    "problem_statement": "",
+    "problem_statement": "Create a system that accepts a webpage URL as input, fully loads the page including JavaScript-rendered content, traverses the entire DOM tree, and outputs a complete JSON representation. For each element, extract tag name, text content, attributes, visibility, and DOM depth. Generate a unique absolute XPath for every element and preserve parent-child hierarchy. Output valid JSON only in a single .json file named with a unique id containing a single JSON object with no explanations or formatting outside JSON.",
     "base_commit": "repository_before",
     "test_patch": "tests/",
     "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/3c78c3-DOM-mapping-and-extracting",
-    "environment_setup": "Dockerfile"
-  }
+    "environment_setup": "Dockerfile",
+    "FAIL_TO_PASS": [
+        "tests/test_dom_extractor.py::test_url_input_acceptance",
+        "tests/test_dom_extractor.py::test_javascript_rendering",
+        "tests/test_dom_extractor.py::test_dom_tree_traversal",
+        "tests/test_dom_extractor.py::test_element_extraction",
+        "tests/test_dom_extractor.py::test_xpath_generation",
+        "tests/test_dom_extractor.py::test_hierarchy_preservation",
+        "tests/test_dom_extractor.py::test_json_output_valid",
+        "tests/test_dom_extractor.py::test_json_file_output"
+    ],
+    "PASS_TO_PASS": []
+}
   

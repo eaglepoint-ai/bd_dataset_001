@@ -1,6 +1,30 @@
 services:
   app:
     build: .
-    command: pytest -q tests
+    command: pytest tests/ -v
     volumes:
       - .:/app
+    environment:
+      - PYTHONPATH=/app/repository_after
+
+  app-before:
+    build: .
+    command: echo "No implementation in repository_before - skipping tests"
+    volumes:
+      - .:/app
+
+  app-after:
+    build: .
+    command: pytest tests/ -v
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app/repository_after
+
+  evaluation:
+    build: .
+    command: python evaluation/evaluation.py
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app/repository_after
