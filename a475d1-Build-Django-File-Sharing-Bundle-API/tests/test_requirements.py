@@ -9,7 +9,13 @@ import django
 from django.conf import settings
 
 # Determine which repository to test based on env var from evaluation.py
-TARGET_REPO = os.environ.get("TARGET_REPO", "repository_after")
+TARGET_REPO = os.environ.get("TARGET_REPO")
+if not TARGET_REPO:
+    if "repository_before" in os.environ.get("PYTHONPATH", ""):
+        TARGET_REPO = "repository_before"
+    else:
+        TARGET_REPO = "repository_after"
+
 REPO_PATH = Path(__file__).resolve().parent.parent / TARGET_REPO
 sys.path.append(str(REPO_PATH))
 
