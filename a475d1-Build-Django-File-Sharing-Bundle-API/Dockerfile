@@ -10,6 +10,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY repository_after .
 
-# Run migrations (attempt) and server
-# A wrapper script would be better, but CMD is fine for simple setup
-CMD ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+# Run database setup during the build process
+RUN python manage.py migrate
+RUN python init_admin.py
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
