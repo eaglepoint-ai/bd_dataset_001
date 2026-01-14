@@ -1,0 +1,108 @@
+{
+  "instances": [
+    {
+      "instance_id": "777aa5-001",
+      "task_type": "0-1_feature_generation",
+      "difficulty": "hard",
+      "description": "Replace Operational Transforms with CRDT for real-time collaborative text editing",
+      "requirements": {
+        "functional": [
+          "Implement Sequence CRDT with unique identifiers",
+          "Support concurrent insert and delete operations",
+          "Guarantee convergence across all replicas",
+          "Handle network partitions and offline editing",
+          "Implement tombstone garbage collection"
+        ],
+        "non_functional": [
+          "Convergence time < 10 seconds for 100 concurrent users",
+          "WebSocket messages ≤ 1KB per update",
+          "Operation latency < 100ms",
+          "Throughput > 1000 operations/second",
+          "Memory efficient with tombstone GC"
+        ],
+        "technical": [
+          "React 18 + TypeScript + Tiptap (frontend)",
+          "Node.js 20.x + Express + WebSocket (backend)",
+          "PostgreSQL for persistence (JSONB for CRDT state)",
+          "Redis for pub/sub (horizontal scaling)",
+          "Custom binary protocol (no external CRDT libraries)",
+          "Docker + docker-compose for deployment"
+        ]
+      },
+      "test_scenarios": [
+        {
+          "scenario_id": "convergence_basic",
+          "description": "Two clients make concurrent edits and converge",
+          "expected_outcome": "Both clients show identical final text"
+        },
+        {
+          "scenario_id": "convergence_complex",
+          "description": "Multiple clients with interleaved operations",
+          "expected_outcome": "All clients converge to same state regardless of operation order"
+        },
+        {
+          "scenario_id": "offline_sync",
+          "description": "Client goes offline, makes edits, reconnects",
+          "expected_outcome": "Offline edits are merged correctly using vector clocks"
+        },
+        {
+          "scenario_id": "concurrent_inserts",
+          "description": "Multiple clients insert at same position simultaneously",
+          "expected_outcome": "Deterministic ordering based on site IDs"
+        },
+        {
+          "scenario_id": "tombstone_gc",
+          "description": "Delete 10k characters and run garbage collection",
+          "expected_outcome": "Memory reduced by >50% after GC"
+        },
+        {
+          "scenario_id": "message_size",
+          "description": "Measure WebSocket message sizes",
+          "expected_outcome": "All messages < 1KB using custom binary protocol"
+        },
+        {
+          "scenario_id": "performance_100_users",
+          "description": "100 concurrent users making edits",
+          "expected_outcome": "Convergence < 10s, latency < 100ms, throughput > 1000 ops/s"
+        }
+      ],
+      "evaluation_criteria": {
+        "correctness": {
+          "weight": 0.4,
+          "checks": [
+            "All convergence tests pass",
+            "Idempotence verified",
+            "Causal consistency maintained",
+            "Offline sync works correctly"
+          ]
+        },
+        "performance": {
+          "weight": 0.3,
+          "checks": [
+            "Convergence time < 10s",
+            "Message size < 1KB",
+            "Latency < 100ms",
+            "Throughput > 1000 ops/s"
+          ]
+        },
+        "implementation_quality": {
+          "weight": 0.2,
+          "checks": [
+            "No external CRDT libraries used",
+            "Custom binary protocol implemented",
+            "Tombstone GC implemented correctly",
+            "Three-command Docker setup works"
+          ]
+        },
+        "documentation": {
+          "weight": 0.1,
+          "checks": [
+            "Trajectory documents reasoning process",
+            "README explains setup and usage",
+            "Code comments explain CRDT logic"
+          ]
+        }
+      }
+    }
+  ]
+}
