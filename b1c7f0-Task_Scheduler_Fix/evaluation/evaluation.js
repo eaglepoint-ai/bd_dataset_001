@@ -77,13 +77,18 @@ function runTests(mode, testsPath, cwd, timeoutMs = 20000) {
 function main() {
   const root = path.join(__dirname, '..');
   const testsPath = path.join(root, 'tests', 'test.js');
-  const reportsDir = path.join(__dirname, 'reports');
-  const reportPath = path.join(reportsDir, 'latest.json');
+  const reportsRoot = path.join(__dirname, 'reports');
 
-  fs.mkdirSync(reportsDir, { recursive: true });
+  const now = new Date();
+  const ymd = now.toISOString().slice(0, 10); // YYYY-MM-DD
+  const hms = now.toISOString().slice(11, 19).replace(/:/g, '-'); // HH-MM-SS
+  const reportDir = path.join(reportsRoot, ymd, hms);
+  const reportPath = path.join(reportDir, 'report.json');
+
+  fs.mkdirSync(reportDir, { recursive: true });
 
   const runId = randomUUID();
-  const start = new Date();
+  const start = now;
   let before = null;
   let after = null;
 
