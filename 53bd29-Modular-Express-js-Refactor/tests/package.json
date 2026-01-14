@@ -1,0 +1,17 @@
+{
+  "name": "express-refactor-tests",
+  "version": "1.0.0",
+  "description": "Tests for Express.js modular refactor",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "roots": ["."],
+    "testMatch": ["**/test_*.test.js"],
+    "verbose": true
+  }
+}

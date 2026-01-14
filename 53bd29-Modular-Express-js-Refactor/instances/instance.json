@@ -1,9 +1,34 @@
 {
     "instance_id": "53bd29",
-    "problem_statement": "",
+    "problem_statement": "Refactor a large, monolithic Express application consisting of over 1000 lines in a single index.js file into a clean, modular, and production-ready backend architecture. The refactor must reorganize the codebase into a scalable MVC-style structure by separating configuration, models, controllers, routes, and middleware, with one model/controller/route per feature while preserving all existing routes, behaviors, responses, and business logic exactly as they are. Controllers should encapsulate application logic, routes should only map endpoints, and database, environment, and file upload configurations must be centralized. The final result should include robust async error handling, a minimal server entry point, and a maintainable Express + MongoDB codebase that starts correctly and functions identically to the original implementation.",
     "base_commit": "repository_before",
     "test_patch": "tests/",
     "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/53bd29-Modular-Express-js-Refactor",
-    "environment_setup": "Dockerfile"
+    "environment_setup": "Dockerfile",
+    "requirements": [
+        "Separate config, models, controllers, routes, and middleware",
+        "One model/controller/route per feature",
+        "Controllers handle logic, routes only map endpoints",
+        "Centralized DB, env, and upload config",
+        "Use CommonJS imports",
+        "Preserve all routes, paths, responses, and logic",
+        "Add proper async error handling",
+        "Keep entry index.js minimal (server start + DB connect)",
+        "App must start and all existing endpoints must work identically"
+    ],
+    "FAIL_TO_PASS": [
+        "tests/test_structure.py::TestStructure::test_config_directory_exists",
+        "tests/test_structure.py::TestStructure::test_models_directory_exists",
+        "tests/test_structure.py::TestStructure::test_controllers_directory_exists",
+        "tests/test_structure.py::TestStructure::test_routes_directory_exists",
+        "tests/test_structure.py::TestStructure::test_middleware_directory_exists",
+        "tests/test_structure.py::TestStructure::test_index_file_is_minimal"
+    ],
+    "PASS_TO_PASS": [
+        "tests/test_equivalence.py::TestEquivalence::test_all_routes_preserved",
+        "tests/test_equivalence.py::TestEquivalence::test_all_models_preserved",
+        "tests/test_equivalence.py::TestEquivalence::test_middleware_preserved",
+        "tests/test_equivalence.py::TestEquivalence::test_database_connection_preserved"
+    ]
   }
   
