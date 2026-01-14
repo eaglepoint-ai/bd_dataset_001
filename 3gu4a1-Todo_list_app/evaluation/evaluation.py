@@ -7,6 +7,7 @@ import os
 import sys
 import json
 import uuid
+import re
 import platform
 import subprocess
 from pathlib import Path
@@ -26,16 +27,29 @@ def environment_info():
 
 def run_tests(repo_name: str):
     """Run pytest tests for a specific repository. Returns test results dictionary."""
-    if not (ROOT / repo_name / "main.py").exists():
+    # Check for implementation - repository_after has app/main.py, repository_before may have main.py
+    repo_path = ROOT / repo_name
+    has_implementation = False
+    
+    if repo_name == "repository_after":
+        # repository_after has app/main.py
+        has_implementation = (repo_path / "app" / "main.py").exists()
+    else:
+        # repository_before may have main.py at root or app/main.py
+        has_implementation = (repo_path / "main.py").exists() or (repo_path / "app" / "main.py").exists()
+    
+    if not has_implementation:
         return {
             "passed": False,
             "return_code": -1,
-            "output": f"Repository {repo_name} has no implementation (main.py not found)",
+            "output": f"Repository {repo_name} has no implementation (main.py or app/main.py not found)",
         }
 
     try:
         env = os.environ.copy()
         env["PYTHONPATH"] = f"{ROOT}:{env.get('PYTHONPATH', '')}".rstrip(":")
+        # Set environment variable to filter which repository to test
+        env["TEST_REPOSITORY"] = repo_name
 
         proc = subprocess.run(
             ["pytest", "tests", "-q", "--tb=short"],
@@ -47,7 +61,23 @@ def run_tests(repo_name: str):
         )
 
         output = (proc.stdout + proc.stderr)[:8000]
+        # Check for passed tests - must have at least one passed test
         has_passed = "passed" in output.lower() and "0 passed" not in output.lower()
+        # For repository_after, ensure no tests were skipped due to import errors
+        # Check that we have actual test results, not just skips
+        if repo_name == "repository_after":
+            # Count passed tests - should have significant number of passed tests
+            passed_match = re.search(r"(\d+)\s+passed", output)
+            skipped_match = re.search(r"(\d+)\s+skipped", output)
+            passed_count = int(passed_match.group(1)) if passed_match else 0
+            skipped_count = int(skipped_match.group(1)) if skipped_match else 0
+            # For repository_after, we expect many passed tests and minimal skips (only for repository_before)
+            # If all tests are skipped, that's a failure
+            if passed_count == 0 and skipped_count > 0:
+                has_passed = False
+            # Also check for import errors that would cause skips
+            if "Skipping repository_after" in output or "module not found" in output.lower():
+                has_passed = False
 
         return {
             "passed": proc.returncode == 0 and has_passed,

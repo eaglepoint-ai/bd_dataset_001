@@ -23,7 +23,7 @@ async def list_todos(
         0, ge=0, description="Number of items to skip (newest first)"
     ),
     limit: int = Query(
-        settings.default_limit, ge=1, le=settings.max_limit, description="Maximum number of items to return"
+        settings.default_limit, ge=0, le=settings.max_limit, description="Maximum number of items to return"
     ),
 ) -> List[TodoOut]:
     """List todos with pagination (newest first)."""

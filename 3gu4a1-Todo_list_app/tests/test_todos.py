@@ -4,7 +4,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 
-@pytest.fixture(params=["repository_before", "repository_after"])
+# Filter repositories based on TEST_REPOSITORY environment variable
+_test_repos = ["repository_before", "repository_after"]
+if os.environ.get("TEST_REPOSITORY"):
+    _test_repos = [os.environ.get("TEST_REPOSITORY")]
+
+
+@pytest.fixture(params=_test_repos)
 def client(request):
     """Fixture that provides a TestClient for both repositories."""
     repo_name = request.param
