@@ -1,6 +1,6 @@
-# Evaluation reports - keep only latest.json
+# Evaluation reports - ignore all reports (date/time structured reports)
 evaluation/reports/*
-!evaluation/reports/latest.json
+!evaluation/reports/.gitkeep
 
 # Python cache
 evaluation/__pycache__/

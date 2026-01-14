@@ -125,7 +125,12 @@ docker-compose -f docker-compose.test.yml run --rm test_evaluation
 
 ## Evaluation Report
 
-The evaluation script generates a standardized report at `evaluation/reports/latest.json`. Only `latest.json` is tracked in the repository (other report files are gitignored).
+The evaluation script generates standardized reports in the following structure:
+```
+evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
+```
+
+All report files are gitignored (not tracked in the repository). The reports folder structure is preserved via `.gitkeep`.
 
 ```json
 {

@@ -234,14 +234,18 @@ def run_evaluation():
 
 def main():
     """Main entry point for evaluation."""
-    # Create reports directory
-    REPORTS.mkdir(parents=True, exist_ok=True)
+    # Create reports directory with date/time structure
+    now = datetime.now(timezone.utc)
+    date_dir = now.strftime("%Y-%m-%d")
+    time_dir = now.strftime("%H-%M-%S")
+    report_dir = REPORTS / date_dir / time_dir
+    report_dir.mkdir(parents=True, exist_ok=True)
     
     # Run evaluation
     report = run_evaluation()
     
-    # Write report
-    report_path = REPORTS / "latest.json"
+    # Write report to date/time structure
+    report_path = report_dir / "report.json"
     report_path.write_text(json.dumps(report, indent=2))
     
     print(f"Report written to {report_path}")
