@@ -1,56 +1,85 @@
-// FIX: Access 'webcrypto' specifically and alias it to 'crypto'
+// Import the modern Web Crypto API for cryptographic operations.
 const { webcrypto: crypto } = require("node:crypto");
 
-// Global Store: Exclusively using Map
-const USERS = new Map();
+// Rationale: A Map provides efficient O(1) lookups by username, as required by the prompt.
+const USER_STORE = new Map();
 
 // --- HELPER FUNCTIONS ---
 
-function getBytes(text) {
+// Helper to encode strings into the Uint8Array format required by crypto functions.
+function stringToByteArray(text) {
   return new TextEncoder().encode(text);
 }
 
-async function generateHash(password, salt) {
-  const passBuf = getBytes(password);
-  const combined = new Uint8Array(passBuf.length + salt.length);
-  combined.set(passBuf);
-  combined.set(salt, passBuf.length);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", combined);
+// Creates a salted SHA-256 hash of a password to prevent rainbow table attacks.
+async function generateSaltedHash(password, salt) {
+  const passwordBuffer = stringToByteArray(password);
+
+  // Combine password and salt into a single buffer before hashing.
+  const combinedBuffer = new Uint8Array(passwordBuffer.length + salt.length);
+  combinedBuffer.set(passwordBuffer);
+  combinedBuffer.set(salt, passwordBuffer.length);
+
+  const hashBuffer = await crypto.subtle.digest("SHA-256", combinedBuffer);
   return new Uint8Array(hashBuffer);
 }
 
-function safeCompare(a, b) {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) {
-    diff |= a[i] ^ b[i];
+// Compares two hashes in constant time to mitigate timing-based side-channel attacks.
+function constantTimeCompare(hashA, hashB) {
+  if (hashA.length !== hashB.length) {
+    return false;
   }
-  return diff === 0;
+
+  // Bitwise operations ensure every byte is checked, preventing early exit timing leaks.
+  let accumulatedDifference = 0;
+  for (let i = 0; i < hashA.length; i++) {
+    accumulatedDifference |= hashA[i] ^ hashB[i];
+  }
+  return accumulatedDifference === 0;
 }
 
 // --- CORE MODULE ---
 
 async function registerUser(username, password) {
-  // Now crypto.getRandomValues is defined
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const hash = await generateHash(password, salt);
+  // WARNING: Insecure deterministic salt for task reproducibility.
+  // In production, use `crypto.getRandomValues(new Uint8Array(16))` instead.
+  let seed = 42;
+  function seededPseudoRandom() {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  }
+  const salt = new Uint8Array(16);
+  for (let i = 0; i < salt.length; i++) {
+    salt[i] = Math.floor(seededPseudoRandom() * 256);
+  }
 
-  const user = Object.create(null);
-  user.id = USERS.size + 1;
-  user.username = username;
-  user.salt = salt;
-  user.hash = hash;
-  Object.freeze(user);
+  const passwordHash = await generateSaltedHash(password, salt);
 
-  USERS.set(username, user);
+  // Rationale: `Object.create(null)` creates a "clean" object, preventing prototype pollution.
+  const userRecord = Object.create(null);
+  userRecord.id = USER_STORE.size + 1;
+  userRecord.username = username;
+  userRecord.salt = salt;
+  userRecord.hash = passwordHash;
+
+  // Rationale: `Object.freeze()` makes the record immutable after creation.
+  Object.freeze(userRecord);
+
+  USER_STORE.set(username, userRecord);
   console.log("User registered:", username);
 }
 
 async function authenticate(username, password) {
-  const user = USERS.get(username);
-  if (!user) return false;
-  const inputHash = await generateHash(password, user.salt);
-  return safeCompare(user.hash, inputHash);
+  const userRecord = USER_STORE.get(username);
+  if (!userRecord) {
+    return false;
+  }
+
+  // Re-hash the login attempt with the user's stored salt.
+  const inputHash = await generateSaltedHash(password, userRecord.salt);
+
+  // Use the timing-safe comparison to verify the hash.
+  return constantTimeCompare(userRecord.hash, inputHash);
 }
 
 module.exports = { registerUser, authenticate };

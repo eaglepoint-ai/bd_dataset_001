@@ -4,7 +4,8 @@
  */
 function runUniversalTests(authModule) {
   describe("Authentication Public API", () => {
-    const TEST_USER = `user_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    // Replaced random generation with constant value for deterministic behavior
+    const TEST_USER = `user_${Date.now()}_42`;
     const TEST_PASS = "SecurePass123!";
 
     // --- 1. FUNCTIONAL TESTS (Should Work on Both) ---
