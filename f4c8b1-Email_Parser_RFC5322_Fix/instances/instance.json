@@ -1,0 +1,10 @@
+{
+  "instance_id": "f4c8b1",
+  "problem_statement": "Fix the buggy EmailParser class to correctly handle RFC 5322 compliant emails including multipart boundaries, RFC 2047 header encoding, quoted-printable/base64 body encoding, attachment extraction, and proper error handling. Must use state machine for boundary parsing (no regex), handle edge cases gracefully, and maintain the same public API.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "",
+  "environment_setup": "Dockerfile"
+}
+
+
