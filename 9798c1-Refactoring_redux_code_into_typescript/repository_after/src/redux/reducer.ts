@@ -16,6 +16,9 @@ const initialState: BetState = {
 };
 
 // Reducer with explicit types for state, action, and return value
+// Action type is BetAction for type safety, but foreign actions from other reducers
+// (when using combineReducers) will pass through to the default case at runtime.
+// TypeScript allows this because the default case doesn't access action properties.
 const betReducer = (
   state: BetState = initialState,
   action: BetAction

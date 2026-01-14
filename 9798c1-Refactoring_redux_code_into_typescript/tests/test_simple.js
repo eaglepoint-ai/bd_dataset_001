@@ -64,14 +64,36 @@ test('Dependencies installed', () => {
 
 // Test 3: Verify source files exist
 test('Source files exist', () => {
-  const reducerPath = path.join(REPO_PATH, 'src', 'redux', 'reducer.js');
-  const actionPath = path.join(REPO_PATH, 'src', 'redux', 'action.js');
-  
-  if (!fs.existsSync(reducerPath)) {
-    throw new Error('reducer.js not found');
-  }
-  if (!fs.existsSync(actionPath)) {
-    throw new Error('action.js not found');
+  if (TARGET === 'after') {
+    // After version uses TypeScript
+    const reducerPath = path.join(REPO_PATH, 'src', 'redux', 'reducer.ts');
+    const actionsPath = path.join(REPO_PATH, 'src', 'redux', 'actions.ts');
+    const typesPath = path.join(REPO_PATH, 'src', 'redux', 'types.ts');
+    const storePath = path.join(REPO_PATH, 'src', 'store.ts');
+    
+    if (!fs.existsSync(reducerPath)) {
+      throw new Error('reducer.ts not found');
+    }
+    if (!fs.existsSync(actionsPath)) {
+      throw new Error('actions.ts not found');
+    }
+    if (!fs.existsSync(typesPath)) {
+      throw new Error('types.ts not found');
+    }
+    if (!fs.existsSync(storePath)) {
+      throw new Error('store.ts not found');
+    }
+  } else {
+    // Before version uses JavaScript
+    const reducerPath = path.join(REPO_PATH, 'src', 'redux', 'reducer.js');
+    const actionPath = path.join(REPO_PATH, 'src', 'redux', 'action.js');
+    
+    if (!fs.existsSync(reducerPath)) {
+      throw new Error('reducer.js not found');
+    }
+    if (!fs.existsSync(actionPath)) {
+      throw new Error('action.js not found');
+    }
   }
 });
 
