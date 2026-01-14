@@ -1,13 +1,13 @@
+"""Pydantic v2 models for Todo API."""
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class TodoCreate(BaseModel):
+    """Request model for creating a new todo."""
     title: str = Field(..., description="Title of the todo item")
 
-    # Trim and validate title (non-empty after trimming)
     @field_validator("title", mode="before")
     @classmethod
     def trim_and_validate_title(cls, v: str) -> str:
@@ -22,6 +22,7 @@ class TodoCreate(BaseModel):
 
 
 class TodoUpdate(BaseModel):
+    """Request model for full todo update (PUT)."""
     title: str = Field(..., description="New title of the todo item")
     completed: bool = Field(..., description="Completion status")
 
@@ -39,12 +40,13 @@ class TodoUpdate(BaseModel):
 
 
 class TodoPatch(BaseModel):
-    title: Optional[str] = Field(None, description="New title of the todo item")
-    completed: Optional[bool] = Field(None, description="Completion status")
+    """Request model for partial todo update (PATCH)."""
+    title: str | None = Field(None, description="New title of the todo item")
+    completed: bool | None = Field(None, description="Completion status")
 
     @field_validator("title", mode="before")
     @classmethod
-    def trim_and_validate_title_optional(cls, v: Optional[str]) -> Optional[str]:
+    def trim_and_validate_title_optional(cls, v: str | None) -> str | None:
         if v is None:
             return None
         if not isinstance(v, str):
@@ -56,11 +58,10 @@ class TodoPatch(BaseModel):
 
 
 class TodoOut(BaseModel):
-    # Using UUID4 string ID
-    id: str
-    title: str
-    completed: bool = False
-    created_at: datetime
+    """Response model for todo output."""
+    id: str = Field(..., description="UUID4 string identifier")
+    title: str = Field(..., description="Todo title")
+    completed: bool = Field(default=False, description="Completion status")
+    created_at: datetime = Field(..., description="Creation timestamp in UTC")
 
-    # Allow validating directly from dataclasses via attribute access
     model_config = ConfigDict(from_attributes=True)
