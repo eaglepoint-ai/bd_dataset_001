@@ -1,0 +1,9 @@
+{
+    "instance_id": "61c554",
+    "problem_statement": "Create a simple Java Swing hotel management system with MySQL that allows navigation between login, room management, and booking views, though login functionality is not required. The system must enable adding rooms, viewing all rooms with availability status, managing bookings, and checking out rooms through a basic graphical interface. A MySQL database with a single rooms table must store all room information, and the application should demonstrate CRUD operations via JDBC.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/61c554-java-hotel-management",
+    "environment_setup": "Dockerfile"
+  }
+  
