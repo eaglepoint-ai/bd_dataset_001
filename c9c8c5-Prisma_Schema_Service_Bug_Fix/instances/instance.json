@@ -1,0 +1,12 @@
+{
+  "instance_id": "c9c8c5-Prisma_Schema_Service_Bug_Fix",
+  "task_type": "bug_fix",
+  "language": "typescript",
+  "framework": "prisma",
+  "difficulty": "medium",
+  "files_to_modify": [
+    "prisma/schema.prisma",
+    "chatService.ts"
+  ]
+}
+
