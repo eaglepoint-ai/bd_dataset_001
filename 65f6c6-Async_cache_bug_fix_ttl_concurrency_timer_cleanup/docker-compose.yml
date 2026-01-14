@@ -1,15 +1,6 @@
-
 services:
-  # Service to run the standard evaluation and produce the JSON report
-  evaluator:
+  app:
     build: .
+    command: pytest -q tests
     volumes:
-      - ./evaluation/reports:/app/evaluation/reports
-    command: node evaluation/evaluation.js
-    environment:
-      - NODE_ENV=production
-
-  # Service to specifically run the correctness tests for quick verification
-  tester:
-    build: .
-    command: node tests/test.js
+      - .:/app
