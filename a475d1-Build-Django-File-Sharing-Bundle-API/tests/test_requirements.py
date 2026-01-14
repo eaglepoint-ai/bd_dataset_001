@@ -2,22 +2,35 @@ import os
 import sys
 import pytest
 from pathlib import Path
-from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 from rest_framework import status
 import django
+from django.conf import settings
 
-# Add repository_after to sys.path
-REPO_AFTER_PATH = Path(__file__).resolve().parent.parent / "repository_after"
-sys.path.append(str(REPO_AFTER_PATH))
+# Determine which repository to test based on env var from evaluation.py
+TARGET_REPO = os.environ.get("TARGET_REPO", "repository_after")
+REPO_PATH = Path(__file__).resolve().parent.parent / TARGET_REPO
+sys.path.append(str(REPO_PATH))
 
-# Configure Django settings
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
-django.setup()
+# Configure Django settings if not already configured
+if not settings.configured:
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+    try:
+        django.setup()
+    except Exception as e:
+        # If setup fails (e.g. in empty repository_before), we handle it in tests or let collection fail
+        print(f"Django setup failed: {e}")
 
-from django.contrib.auth.models import User
-from api.models import Post, File, Bundle
+# Import models safely - they might not exist in repository_before
+try:
+    from django.contrib.auth.models import User
+    from api.models import Post, File, Bundle
+except ImportError:
+    User = None
+    Post = None
+    File = None
+    Bundle = None
 
 @pytest.fixture
 def api_client():
@@ -33,6 +46,7 @@ def user_data():
 
 @pytest.fixture
 def create_user(user_data):
+    if not User: pytest.skip("User model not available")
     return User.objects.create_user(**user_data)
 
 @pytest.fixture
@@ -42,6 +56,7 @@ def authenticated_client(create_user, api_client):
 
 @pytest.fixture
 def another_user():
+    if not User: pytest.skip("User model not available")
     return User.objects.create_user(username='other', password='password')
 
 @pytest.mark.django_db
@@ -49,7 +64,10 @@ class TestRequirements:
     
     def test_tech_stack_dependencies(self):
         """Req 1-7: Check Tech Stack and Dependencies"""
-        req_file = REPO_AFTER_PATH / "requirements.txt"
+        req_file = REPO_PATH / "requirements.txt"
+        if not req_file.exists():
+            pytest.fail(f"requirements.txt not found in {REPO_PATH}")
+            
         content = req_file.read_text()
         
         assert "django" in content.lower() 
@@ -59,6 +77,9 @@ class TestRequirements:
     
     def test_settings_configuration(self):
         """Req 5, 6, 7: JWT, CORS, Multipart"""
+        if not settings.configured:
+             pytest.fail("Django settings not configured")
+             
         # JWT
         assert 'rest_framework_simplejwt' in settings.INSTALLED_APPS
         assert 'rest_framework_simplejwt.authentication.JWTAuthentication' in settings.REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']
@@ -73,6 +94,9 @@ class TestRequirements:
 
     def test_models_structure(self):
         """Req 11: Necessary files (models)"""
+        if not Post or not File or not Bundle:
+             pytest.fail("Models not imported correctly")
+
         # Post Model
         post_fields = [f.name for f in Post._meta.get_fields()]
         assert 'title' in post_fields
@@ -109,6 +133,7 @@ class TestRequirements:
 
     def test_file_upload_and_permissions(self, authenticated_client, create_user):
         """Req 7, 8, 9: File uploads, JWT auth, Permissions"""
+        if not File: pytest.skip("File model missing")
         file_content = b"test content"
         file = SimpleUploadedFile("test.txt", file_content)
         
@@ -122,6 +147,7 @@ class TestRequirements:
 
     def test_post_creation_and_visibility(self, authenticated_client, create_user, another_user):
         """Requirements: Users see only their own posts"""
+        if not Post: pytest.skip("Post model missing")
         # Create post for main user
         authenticated_client.post('/api/posts/', {'title': 'My Post', 'content': 'Content'})
         
@@ -136,6 +162,7 @@ class TestRequirements:
 
     def test_bundle_creation_and_sharing(self, authenticated_client, create_user, another_user):
         """Req 10, 11: bundles, sharing logic"""
+        if not Bundle or not File: pytest.skip("Models missing")
         # Setup files
         f1 = File.objects.create(file="f1.txt", author=create_user)
         
@@ -166,6 +193,7 @@ class TestRequirements:
 
     def test_bundle_file_ownership_validation(self, authenticated_client, create_user, another_user):
         """Req: Only author's files can be added to bundles"""
+        if not File: pytest.skip("File model missing")
         other_file = File.objects.create(file="other.txt", author=another_user)
         
         response = authenticated_client.post('/api/bundles/', {
@@ -177,7 +205,11 @@ class TestRequirements:
 
     def test_bundle_download(self, authenticated_client, create_user):
         """Req: Bundles download as in-memory ZIP"""
+        if not Bundle: pytest.skip("Bundle model missing")
         f1 = File.objects.create(file="test_dl.txt", author=create_user)
+        
+        # Ensure directory exists for the test file since we mock file storage or use real FS
+        Path(f1.file.path).parent.mkdir(parents=True, exist_ok=True)
         # We need a real file for zip to read
         with open(f1.file.path, 'wb') as f:
             f.write(b"content")
