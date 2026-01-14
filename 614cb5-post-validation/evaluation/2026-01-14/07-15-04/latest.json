@@ -1,0 +1,32 @@
+{
+  "run_id": "88396564-2c54-406c-b405-f8d45ec7e6a8",
+  "started_at": "2026-01-14T07:15:04.150Z",
+  "finished_at": "2026-01-14T07:15:14.637Z",
+  "duration_seconds": 10.487,
+  "environment": {
+    "node_version": "v20.19.6",
+    "platform": "linux-x64"
+  },
+  "before": {
+    "tests": {
+      "passed": false,
+      "return_code": 0,
+      "output": "No tests to run for repository_before"
+    },
+    "metrics": {}
+  },
+  "after": {
+    "tests": {
+      "passed": true,
+      "return_code": 0,
+      "output": "\n> rtkq-react-hook-form-zod-demo@0.0.0 test:after\n> cross-env TEST_TARGET=after vitest run tests/tests_after.test.js\n\n\n RUN  v1.6.1 /app\n\n ✓ tests/tests_after.test.jsx  (11 tests) 1081ms\n\n Test Files  1 passed (1)\n      Tests  11 passed (11)\n   Start at  07:15:06\n   Duration  7.79s (transform 1.07s, setup 423ms, collect 3.44s, tests 1.08s, environment 1.92s, prepare 261ms)\n\n"
+    },
+    "metrics": {}
+  },
+  "comparison": {
+    "passed_gate": true,
+    "improvement_summary": "After implementation passed correctness checks."
+  },
+  "success": true,
+  "error": null
+}

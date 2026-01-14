@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "server": "json-server --watch db.json --port 5173 --routes routes.json",
     "preview": "vite preview",
-    "evaluate": "node tests/evaluation.js",
+    "evaluate": "node evaluation/evaluation.js",
     "test:before": "cross-env TEST_TARGET=before vitest run tests/tests_after.test.js",
     "test:after": "cross-env TEST_TARGET=after vitest run tests/tests_after.test.js",
     "test:ui": "vitest --ui"

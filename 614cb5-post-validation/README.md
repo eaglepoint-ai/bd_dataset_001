@@ -6,7 +6,7 @@ Starter scaffold for bd dataset task.
 - repository_before/: baseline code (`__init__.py`)
 - repository_after/: optimized code (`__init__.py`)
 - tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
+- evaluation/: evaluation scripts (`evaluation.js`)
 - instances/: sample/problem instances (JSON)
 - patches/: patches for diffing
 - trajectory/: notes or write-up (Markdown)
@@ -45,7 +45,7 @@ evaluation/
 └── reports/
     └── YYYY-MM-DD/
         └── HH-MM-SS/
-            └── report.json
+            └── latest.json
 ```
 
 ### Report Schema
@@ -87,7 +87,7 @@ The developer should add any additional metrics and keys that reflect the runs (
 4. **Commands:**
    - Commands to spin up the app and run tests on `repository_before`
    - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
+   - Commands to run `evaluation/evaluation.js` and generate reports
    
    > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
 
