@@ -68,7 +68,7 @@ This will:
 **Using local Python:**
 ```bash
 cd repository_after
-PYTHONPATH=.. uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 **Access the API:**
@@ -168,7 +168,13 @@ uv sync
 2. Run the application:
 ```bash
 cd repository_after
-uv run uvicorn main:app --reload
+uvicorn app.main:app --reload
+```
+
+Or with `uv`:
+```bash
+cd repository_after
+uv run uvicorn app.main:app --reload
 ```
 
 3. Run tests:

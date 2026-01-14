@@ -46,8 +46,8 @@ htmlcov/
 .tox/
 .hypothesis/
 
-# Evaluation reports (optional - uncomment if you don't want to track reports)
-# evaluation/reports/*.json
+# Evaluation reports
+evaluation/reports/
 
 # Environment variables
 .env

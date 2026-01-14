@@ -16,9 +16,14 @@ def client(request):
 
     try:
         if repo_name == "repository_before":
-            from repository_before.main import app
+            # repository_before may have main.py at root or app/main.py
+            try:
+                from repository_before.main import app
+            except ImportError:
+                from app.main import app
         else:
-            from repository_after.main import app
+            # repository_after has app/main.py
+            from app.main import app
         return TestClient(app)
     except (ImportError, ModuleNotFoundError) as e:
         pytest.skip(f"Skipping {repo_name} - module not found or not implemented: {e}")
