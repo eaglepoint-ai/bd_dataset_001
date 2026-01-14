@@ -310,12 +310,25 @@ def main():
     date_dir = now.strftime("%Y-%m-%d")
     time_dir = now.strftime("%H-%M-%S")
     report_dir = REPORTS / date_dir / time_dir
-    report_dir.mkdir(parents=True, exist_ok=True)
     
-    # Write report
-    report_path = report_dir / "report.json"
-    report_path.write_text(json.dumps(report, indent=2))
-    print(f"\nReport written to {report_path}")
+    try:
+        # Ensure the base reports directory exists first
+        REPORTS.mkdir(parents=True, exist_ok=True)
+        report_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Write report
+        report_path = report_dir / "report.json"
+        report_path.write_text(json.dumps(report, indent=2))
+        print(f"\nReport written to {report_path}")
+    except PermissionError:
+        # If we can't write to the mounted volume, print the report to stdout instead
+        print("\nWARNING: Could not write report to file (permission denied)")
+        print("Report JSON output:")
+        print(json.dumps(report, indent=2))
+    except Exception as e:
+        print(f"\nWARNING: Could not write report to file: {e}")
+        print("Report JSON output:")
+        print(json.dumps(report, indent=2))
     
     return 0 if report["success"] else 1
 

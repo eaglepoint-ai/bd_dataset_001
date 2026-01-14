@@ -10,7 +10,7 @@ services:
   evaluation:
     build: .
     container_name: evaluation
-    entrypoint: ["python3", "evaluation/evaluation.py"]
+    entrypoint: ["/bin/bash", "-c", "mkdir -p /app/evaluation/reports && python3 evaluation/evaluation.py"]
     command: []
     volumes:
-      - ./evaluation/reports:/app/evaluation/reports
+      - ./evaluation:/app/evaluation

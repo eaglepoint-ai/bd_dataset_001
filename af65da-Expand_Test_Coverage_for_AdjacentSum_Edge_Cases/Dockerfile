@@ -43,6 +43,9 @@ COPY --from=builder /app/repository_before ./repository_before
 COPY --from=builder /app/repository_after ./repository_after
 COPY --from=builder /app/evaluation ./evaluation
 
+# Create reports directory with open permissions for volume mounts
+RUN mkdir -p /app/evaluation/reports && chmod 777 /app/evaluation/reports
+
 # Install Python for evaluation script (evaluation.py still needs it)
 RUN apt-get update && apt-get install -y python3 && \
     rm -rf /var/lib/apt/lists/*
@@ -62,9 +65,6 @@ fi\n\
 CLASSPATH=$BUILD_DIR:/app/tests/build:/app/lib/junit-4.13.2.jar:/app/lib/hamcrest-core-1.3.jar\n\
 java -cp $CLASSPATH MetaTest\n\
 ' > /app/run-meta-test.sh && chmod +x /app/run-meta-test.sh
-
-# Recommended: Run as a non-root user for security
-USER 1000
 
 # Default entrypoint runs the meta-test script
 ENTRYPOINT ["/app/run-meta-test.sh"]
