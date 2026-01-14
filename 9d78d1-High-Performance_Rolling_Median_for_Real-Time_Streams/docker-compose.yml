@@ -1,6 +1,44 @@
+version: "3.9"
+
 services:
-  app:
-    build: .
-    command: pytest -q tests
+  test-before:
+    image: python:3.11-slim
+    command: >
+      sh -c "pip install pytest -q &&
+             cd /app &&
+             python -m pytest tests/test_rolling_median.py -v"
+    environment:
+      TARGET_REPO: repository_before
     volumes:
-      - .:/app
+      - ./repository_before:/app/repository_before
+      - ./tests:/app/tests
+    working_dir: /app
+
+  test-after:
+    image: python:3.11-slim
+    command: >
+      sh -c "pip install pytest -q &&
+             cd /app &&
+             python -m pytest tests/test_rolling_median.py -v"
+    environment:
+      TARGET_REPO: repository_after
+    volumes:
+      - ./repository_after:/app/repository_after
+      - ./tests:/app/tests
+    working_dir: /app
+
+  evaluation:
+    image: python:3.11-slim
+    command: >
+      sh -c "pip install pytest -q &&
+             cd /app &&
+             python evaluation/evaluation.py"
+    depends_on:
+      - test-before
+      - test-after
+    volumes:
+      - ./repository_before:/app/repository_before
+      - ./repository_after:/app/repository_after
+      - ./tests:/app/tests
+      - ./evaluation:/app/evaluation
+    working_dir: /app
