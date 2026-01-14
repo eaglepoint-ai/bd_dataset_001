@@ -1,0 +1,8 @@
+{
+  "instance_id": "c52175",
+  "problem_statement": "Determine the time-to-impact for an object released from rest at $y=150$ m within a dual-zone gravitational field. The environment enforces repulsive gravity ($a = +9.8$ m/s²) for all altitudes above a $100$ m threshold and attractive gravity ($a = -9.8$ m/s²) for altitudes at or below that threshold. The model must strictly adhere to these vectors, acknowledging that the repulsive zone may prevent the object from ever entering the attractive region.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/c52175-Piecewise_potential_barrier_kinematics",
+  "environment_setup": "Dockerfile"
+}
