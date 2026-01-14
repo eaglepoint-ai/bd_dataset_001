@@ -85,6 +85,23 @@ python3 evaluation/evaluation.py
 
 ### Docker Testing
 
+#### Using docker-compose (Recommended)
+
+```bash
+# 1. Test repository_before
+docker-compose run --rm -e PYTHONPATH=/app/repository_before -e TARGET=before app node tests/test_compliance.js
+
+# 2. Test repository_after
+docker-compose run --rm -e PYTHONPATH=/app/repository_after -e TARGET=after app node tests/test_compliance.js
+
+# 3. Run evaluation
+docker-compose run --rm app python3 evaluation/evaluation.py
+```
+
+**Note:** Use `docker-compose` (with hyphen) for Docker Compose V1, or `docker compose` (with space) for Docker Compose V2.
+
+#### Alternative: Using Dockerfile.test
+
 ```bash
 # Build Docker image
 docker build -f Dockerfile.test -t redux-typescript .
@@ -97,7 +114,7 @@ docker run --rm -e TARGET=after redux-typescript node tests/test_compliance.js
 docker run --rm redux-typescript python3 evaluation/evaluation.py
 ```
 
-### Docker Compose
+#### Using docker-compose.test.yml
 
 ```bash
 # Build test image
