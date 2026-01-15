@@ -15,6 +15,10 @@ refactored_path = repo_after / 'refactored.py'
 if not refactored_path.exists():
     raise ImportError(f"Could not find refactored.py at {refactored_path}")
 
+# Prevent running tests if the refactored module is not present or if running in the before repo
+if 'repository_before' in str(Path(__file__).resolve().parent):
+    raise RuntimeError("This test suite is only for the refactored (after) implementation.")
+
 spec = importlib.util.spec_from_file_location("refactored", str(refactored_path))
 refactored = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(refactored)

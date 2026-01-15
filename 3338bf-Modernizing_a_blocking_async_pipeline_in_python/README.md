@@ -25,6 +25,8 @@ docker run --rm async-pipeline python evaluation/evaluation.py --trials 3 --item
 docker run --rm async-pipeline python repository_before/async_processing_pipeline.py
 ```
 
+> **Note:** The before (legacy) implementation uses threads to simulate concurrency, so the output may look similar to the refactored version. However, it is not truly async, is not type-safe, and uses global state. Only the refactored version meets all modern requirements and should be used for evaluation and testing.
+
 ### Running Repository After (Refactored) in Docker
 
 ```bash
