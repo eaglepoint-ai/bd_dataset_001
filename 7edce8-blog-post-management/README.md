@@ -90,3 +90,14 @@ The developer should add any additional metrics and keys that reflect the runs (
    - Commands to run `evaluation/evaluation.py` and generate reports
    
    > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+
+
+
+## Commands usage
+Run tests on repository_after codebase:
+
+  `docker compose run --rm test-after`
+  
+Run evaluation and generate reports:
+
+  `docker compose run --rm evaluate`

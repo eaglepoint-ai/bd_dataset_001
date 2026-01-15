@@ -1,0 +1,40 @@
+{
+  "name": "rtk-blog-management",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "cd repository_after/rtk-blog-management && vite build",
+    "server": "cd repository_after/rtk-blog-management && json-server --watch db.json --port 5173 --routes routes.json",
+    "evaluate": "node evaluation/evaluation.js",
+    "test:after": "cross-env TEST_TARGET=after vitest run tests/tests_after.test.js"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@reduxjs/toolkit": "^2.11.2",
+    "@testing-library/user-event": "^14.6.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.71.0",
+    "react-redux": "^9.2.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "jsdom": "^27.4.0",
+    "json-server": "^1.0.0-beta.3",
+    "vite": "^7.2.4",
+    "vitest": "^1.0.0"
+  }
+}
