@@ -1,6 +1,31 @@
 services:
   app:
     build: .
-    command: pytest -q tests
     volumes:
       - .:/app
+    command: python
+    tty: true
+
+  test:
+    build: .
+    volumes:
+      - .:/app
+    command: python -m pytest tests/
+    depends_on:
+      - app
+
+  demo:
+    build: .
+    volumes:
+      - .:/app
+    command: python repository_after/main.py
+    depends_on:
+      - app
+
+  evaluate:
+    build: .
+    volumes:
+      - .:/app
+    command: python evaluation/evaluation.py
+    depends_on:
+      - app

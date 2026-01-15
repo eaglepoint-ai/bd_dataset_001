@@ -1,92 +1,91 @@
-# project template
+# Python Input Validation & Error Handling Library
 
-Starter scaffold for bd dataset task.
-
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+A production-ready, modular library designed to standardize error handling and input validation in Python applications. Features structured error categories, centralized handling, safety decorators, and automated retries.
 
 ---
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+## 🐳 Quick Start (Docker)
 
-### Setup Steps
+If you prefer to run commands manually, use the following steps:
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
+### 1. Build and Run
 
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
+```bash
+# Build and run using Docker Compose
+docker compose up --build
+```
 
-3. **Update `.gitignore`** to reflect your language and library setup
+## 🚀 Automation Scripts
 
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
+To simplify your workflow, three bash scripts are provided to handle everything from installation to demo execution:
+
+- **`./build.sh`** Automatically builds the Docker image.
+- **`./runner.sh`** Runs the full lifecycle: Starts the container, executes **30 unit tests**, runs the **evaluation script**, and saves a timestamped `report.json`.
+- **`./run_main.sh`** A quick-start script to see the library in action. It runs the demo script showcasing validation, error handling, and retries.
 
 ---
 
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
+# Run the main demo (example)
 
-When the evaluation command is run, it should generate reports in the following structure:
+### We use the -m flag to ensuring correct path resolution
 
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+## Standard Demo Output:
+
+```bash
+docker exec input-validation python repository_after/main.py
 ```
 
-### Report Schema
+# Run tests with coverage
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+```bash
+docker exec input-validation pytest --cov=repository_after tests/
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+# Build + run tests (quick validation)
 
----
+```bash
+docker compose up --build
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+# Run evaluation script
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+```bash
+docker exec input-validation python evaluation/evaluation.py
+```
+
+# Test Suite Overview
+
+## The 30 failing/passing tests validate the following key areas:
+
+```bash
+Test Group,Count,Key Validations
+Enums,2,"ErrorCategory and ErrorSeverity integrity."
+Error Models,5,"CategorizedError serialization and default attributes."
+Validators,12,"Email regex, range checks, length constraints, and type enforcement."
+Handlers,5,"Log filtering, stats tracking, history buffer, and graceful shutdown."
+Decorators,5,"Safe execution logic, retry backoff, and category filtering."
+Integration,1,"End-to-end flow from validation failure to handler logging."
+```
+
+# folder structure
+
+```
+.
+├── repository_after/
+│   ├── error_handling_lib/    # Core Library
+│   │   ├── enums/             # Error types & severity
+│   │   ├── errors/            # Categorized exception classes
+│   │   ├── validators/        # Input validation logic
+│   │   ├── handlers/          # Central error processing
+│   │   └── decorators/        # @safe_execute & @retry_on_error
+│   └── main.py                # Demo script
+├── tests/                     # Pytest suite
+├── evaluation/
+│   └── evaluation.py          # Safety evaluation script
+├── Dockerfile
+├── runner.sh
+├── build.sh
+├── run_main.sh
+├── requirements.txt
+└── README.md
+```
