@@ -12,19 +12,19 @@ This repository demonstrates a DNA sequence pattern matching implementation usin
 ### 1. Run Tests for `repository_before`
 
 ```bash
-docker compose run --rm tests python repository_before/dna_sequence_pattern_matcher.py
+docker compose run --rm test-before
 ```
 
 ### 2. Run Tests for `repository_after`
 
 ```bash
-# No command specified
+docker compose run --rm test-after
 ```
 
 ### 3. Run Evaluations
 
 ```bash
-# No command specified
+docker compose run --rm evaluation
 ```
 
 ## Projects
