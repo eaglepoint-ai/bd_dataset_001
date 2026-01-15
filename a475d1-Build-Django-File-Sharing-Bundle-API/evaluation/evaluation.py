@@ -6,6 +6,7 @@ import uuid
 import platform
 import os
 import subprocess
+import re
 from pathlib import Path
 from datetime import datetime
 
@@ -106,6 +107,55 @@ def run_evaluation():
         "error": None
     }
 
+def parse_test_results(output):
+    passed = 0
+    failed = 0
+    try:
+        lines = output.strip().splitlines()
+        # Find the line that looks like a summary
+        for line in reversed(lines):
+            if "passed" in line or "failed" in line:
+                # Regex for "X passed, Y failed" or "X passed" or "Y failed"
+                p = re.search(r'(\d+) passed', line)
+                f = re.search(r'(\d+) failed', line)
+                
+                if p: passed = int(p.group(1))
+                if f: failed = int(f.group(1))
+                
+                if p or f:
+                    return passed, failed
+    except Exception:
+        pass
+    return passed, failed
+
+def print_summary(report, report_path):
+    print("=" * 60)
+    print("EVALUATION RESULTS")
+    print("=" * 60)
+    print()
+    print(f"Run ID: {report['run_id']}")
+    print(f"Duration: {report['duration_seconds']:.2f} seconds")
+    print()
+    
+    for stage, label in [("before", "BEFORE (repository_before)"), ("after", "AFTER (repository_after)")]:
+        tests = report[stage]["tests"]
+        passed_count, failed_count = parse_test_results(tests["output"])
+        
+        print(f"{label}:")
+        print(f"  Tests passed: {tests['passed']}")
+        print(f"  Passed: {passed_count} | Failed: {failed_count}")
+        print()
+
+    print("COMPARISON:")
+    print(f"  Passed gate: {report['comparison']['passed_gate']}")
+    print(f"  Summary: {report['comparison']['improvement_summary']}")
+    print()
+    print("=" * 60)
+    print(f"SUCCESS: {report['success']}")
+    print("=" * 60)
+    print()
+    print(f"Report written to {report_path}")
+
 def main():
     report = run_evaluation()
     
@@ -119,7 +169,8 @@ def main():
     
     path = report_dir / "report.json"
     path.write_text(json.dumps(report, indent=2))
-    print(f"Report written to {path}")
+    
+    print_summary(report, path)
     return 0 if report["success"] else 1
 
 if __name__ == "__main__":
