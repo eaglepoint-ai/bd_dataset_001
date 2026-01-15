@@ -4,6 +4,8 @@ evaluation/reports/*
 
 # Mandatory evaluation artifact (generated during CI)
 report.json
+report_content
+log_summary
 
 # Python cache
 evaluation/__pycache__/
