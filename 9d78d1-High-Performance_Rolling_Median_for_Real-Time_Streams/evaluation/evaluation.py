@@ -21,7 +21,6 @@ def environment_info():
 
 def run_tests(repo_name: str):
     """Run pytest on a repository and return structured results."""
-    repo_path = ROOT / repo_name
     try:
         proc = subprocess.run(
             ["pytest", "tests", "-q"],
@@ -29,12 +28,12 @@ def run_tests(repo_name: str):
             capture_output=True,
             text=True,
             timeout=120,
-            env={**dict(**os.environ), "TARGET_REPO": repo_name}
+            env={**os.environ, "TARGET_REPO": repo_name}
         )
         return {
             "passed": proc.returncode == 0,
             "return_code": proc.returncode,
-            "output": (proc.stdout + proc.stderr)[:8000]  # truncate
+            "output": (proc.stdout + proc.stderr)[:8000]
         }
     except subprocess.TimeoutExpired:
         return {
@@ -51,7 +50,6 @@ def run_tests(repo_name: str):
 
 def run_metrics(repo_path: Path):
     """Optional placeholder for metrics collection."""
-    # Example: we could measure performance, ops/sec, memory, etc.
     return {}
 
 def evaluate(repo_name: str):
@@ -71,16 +69,21 @@ def run_evaluation():
     try:
         before = evaluate("repository_before")
         after = evaluate("repository_after")
+
+        # ✅ REQUIRED CONDITION
+        success = (not before["tests"]["passed"]) and after["tests"]["passed"]
+
         comparison = {
-            "passed_gate": after["tests"]["passed"],
+            "passed_gate": success,
             "improvement_summary": (
-                "After implementation passed correctness tests"
-                if after["tests"]["passed"] else
-                "After implementation failed correctness tests"
+                "Before failed and after passed all tests"
+                if success else
+                "Evaluation conditions not satisfied"
             )
         }
-        success = comparison["passed_gate"]
+
         error = None
+
     except Exception as e:
         before = after = {}
         comparison = {}
@@ -88,6 +91,7 @@ def run_evaluation():
         error = str(e)
 
     end = datetime.utcnow()
+
     return {
         "run_id": run_id,
         "started_at": start.isoformat() + "Z",
@@ -104,8 +108,16 @@ def run_evaluation():
 def main():
     REPORTS.mkdir(parents=True, exist_ok=True)
     report = run_evaluation()
+
     path = REPORTS / "latest.json"
     path.write_text(json.dumps(report, indent=2))
+
+    # ✅ TERMINAL OUTPUT
+    if report["success"]:
+        print("\n✅ EVALUATION SUCCEEDED")
+    else:
+        print("\n❌ EVALUATION FAILED")
+
     print(f"Report written to {path}")
     return 0 if report["success"] else 1
 
