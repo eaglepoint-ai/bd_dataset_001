@@ -158,6 +158,90 @@ def generate_report(
     
     return report
 
+def _truncate(s: str, limit: int) -> str:
+    if len(s) <= limit:
+        return s
+    return s[:limit] + f"\n... (truncated, {len(s) - limit} chars omitted)\n"
+
+def write_artifacts(
+    artifacts_dir: Path,
+    report: Dict[str, Any],
+    before_results: Dict[str, Any],
+    after_results: Dict[str, Any],
+) -> None:
+    """
+    Write artifacts expected by the evaluation harness.
+
+    Many runners expect these files to exist directly under `evaluation/reports/`:
+    - `report.json`
+    - `log_summary` (short text)
+    - `report_content` (human-readable markdown)
+    """
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1) Canonical JSON report at a stable path.
+    (artifacts_dir / "report.json").write_text(json.dumps(report, indent=2))
+
+    # 2) Short log summary (plain text).
+    before_summary = before_results.get("summary", {})
+    after_summary = after_results.get("summary", {})
+    summary_lines = [
+        "MARKDOWN BLOG SPA EVALUATION",
+        "",
+        f"success: {report.get('success', False)}",
+        "",
+        "before:",
+        f"  success: {before_results.get('success', False)}",
+        f"  return_code: {before_results.get('return_code', -1)}",
+        f"  passed/total: {before_summary.get('passed', 0)}/{before_summary.get('total', 0)}",
+        f"  failed: {before_summary.get('failed', 0)}",
+        f"  skipped: {before_summary.get('skipped', 0)}",
+        "",
+        "after:",
+        f"  success: {after_results.get('success', False)}",
+        f"  return_code: {after_results.get('return_code', -1)}",
+        f"  passed/total: {after_summary.get('passed', 0)}/{after_summary.get('total', 0)}",
+        f"  failed: {after_summary.get('failed', 0)}",
+        f"  skipped: {after_summary.get('skipped', 0)}",
+        "",
+    ]
+    (artifacts_dir / "log_summary").write_text("\n".join(summary_lines))
+
+    # 3) Human-readable report content (markdown), with bounded pytest output.
+    before_output = _truncate(str(before_results.get("output", "")), 12000)
+    after_output = _truncate(str(after_results.get("output", "")), 12000)
+
+    report_md = "\n".join(
+        [
+            "## Summary",
+            f"- **success**: `{report.get('success', False)}`",
+            "",
+            "## Before (`repository_before`)",
+            f"- **success**: `{before_results.get('success', False)}`",
+            f"- **return_code**: `{before_results.get('return_code', -1)}`",
+            f"- **tests**: passed `{before_summary.get('passed', 0)}` / total `{before_summary.get('total', 0)}` "
+            f"(failed `{before_summary.get('failed', 0)}`, skipped `{before_summary.get('skipped', 0)}`)",
+            "",
+            "### Pytest output (truncated)",
+            "```",
+            before_output,
+            "```",
+            "",
+            "## After (`repository_after`)",
+            f"- **success**: `{after_results.get('success', False)}`",
+            f"- **return_code**: `{after_results.get('return_code', -1)}`",
+            f"- **tests**: passed `{after_summary.get('passed', 0)}` / total `{after_summary.get('total', 0)}` "
+            f"(failed `{after_summary.get('failed', 0)}`, skipped `{after_summary.get('skipped', 0)}`)",
+            "",
+            "### Pytest output (truncated)",
+            "```",
+            after_output,
+            "```",
+            "",
+        ]
+    )
+    (artifacts_dir / "report_content").write_text(report_md)
+
 def main():
     """Main evaluation function."""
     import os
@@ -174,33 +258,73 @@ def main():
     project_root = Path(__file__).parent.parent
     repo_before = project_root / "repository_before"
     repo_after = project_root / "repository_after"
-    
-    # Determine output path
+
+    reports_root = project_root / "evaluation" / "reports"
+
+    # Determine output path(s)
+    # - Always write a stable `evaluation/reports/report.json` for harnesses that expect it.
+    # - Also write a timestamped copy for local history (and for README consistency).
     if args.output:
         output_path = Path(args.output)
+        timestamped_output_path = output_path
     else:
         now = datetime.now()
         date_dir = now.strftime("%Y-%m-%d")
         time_dir = now.strftime("%H-%M-%S")
-        output_path = project_root / "evaluation" / "reports" / date_dir / time_dir / "report.json"
+        timestamped_output_path = reports_root / date_dir / time_dir / "report.json"
+        output_path = reports_root / "report.json"
     
     print(f"\n{'=' * 60}")
     print("MARKDOWN BLOG SPA EVALUATION")
     print(f"{'=' * 60}")
     print(f"Project root: {project_root}")
     print(f"Report will be saved to: {output_path}")
+    if timestamped_output_path != output_path:
+        print(f"Timestamped report copy: {timestamped_output_path}")
     
     # Collect environment info
     environment = get_environment_info()
-    
-    # Run tests on repository_before
-    before_results = run_pytest(repo_before, "repository_before")
-    
-    # Run tests on repository_after
-    after_results = run_pytest(repo_after, "repository_after")
-    
-    # Generate report
-    report = generate_report(before_results, after_results, environment, output_path)
+
+    before_results: Dict[str, Any] = {}
+    after_results: Dict[str, Any] = {}
+    report: Dict[str, Any] = {}
+    try:
+        # Run tests on repository_before
+        before_results = run_pytest(repo_before, "repository_before")
+
+        # Run tests on repository_after
+        after_results = run_pytest(repo_after, "repository_after")
+
+        # Generate report (stable path)
+        report = generate_report(before_results, after_results, environment, output_path)
+
+        # Also write timestamped copy (if different).
+        if timestamped_output_path != output_path:
+            generate_report(before_results, after_results, environment, timestamped_output_path)
+    except Exception as e:
+        # Ensure we still emit artifacts even if evaluation crashes.
+        report = {
+            "run_id": datetime.now().strftime("%Y%m%d-%H%M%S"),
+            "started_at": datetime.now().isoformat(),
+            "finished_at": datetime.now().isoformat(),
+            "duration_seconds": 0.0,
+            "environment": environment,
+            "before": {"tests": {}, "success": False, "return_code": -1},
+            "after": {"tests": {}, "success": False, "return_code": -1},
+            "comparison": {},
+            "success": False,
+            "error": f"{type(e).__name__}: {e}",
+        }
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(json.dumps(report, indent=2))
+        if timestamped_output_path != output_path:
+            timestamped_output_path.parent.mkdir(parents=True, exist_ok=True)
+            timestamped_output_path.write_text(json.dumps(report, indent=2))
+        before_results = before_results or {"success": False, "return_code": -1, "summary": {}, "output": ""}
+        after_results = after_results or {"success": False, "return_code": -1, "summary": {}, "output": ""}
+    finally:
+        # Harness artifacts at `evaluation/reports/`.
+        write_artifacts(reports_root, report, before_results, after_results)
     
     # Print summary
     print(f"\n{'=' * 60}")
