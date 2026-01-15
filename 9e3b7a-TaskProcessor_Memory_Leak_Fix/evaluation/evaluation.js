@@ -84,12 +84,18 @@ function runTests(repoPath, label) {
       }
     );
   } catch (error) {
+    console.error(`ERROR running tests for ${repoName}:`, error.message);
     output = error.stdout ? error.stdout.toString() : '';
     if (!output && error.stderr) {
       output = error.stderr.toString();
     }
     if (!output && error.output) {
       output = error.output.join('');
+    }
+    // Log failures to console so they appear in logs
+    if (output) {
+      console.log(`--- Captured Output for ${repoName} ---`);
+      console.log(output.substring(0, 1000) + (output.length > 1000 ? '...' : ''));
     }
     exitCode = error.status || 1;
   }
@@ -155,8 +161,7 @@ function main() {
   console.log(`  Overall: ${afterResults.success ? '✅ PASSED' : '❌ FAILED'}`);
   console.log(`  Tests: ${afterResults.passed}/${afterResults.total} passed`);
 
-  // Overall success depends on after passing and before showing expected failures
-  const overallSuccess = afterResults.success && !beforeResults.success;
+  const success = afterResults.success && !beforeResults.success;
 
   const report = {
     run_id: runId,
@@ -164,8 +169,8 @@ function main() {
     task_name: TASK_NAME,
     started_at: startedAt.toISOString(),
     finished_at: new Date().toISOString(),
-    success: overallSuccess,
-    error: overallSuccess ? null : "Verification failed: repository_after must pass and repository_before should fail",
+    success,
+    error: success ? null : "Verification failed: repository_after must pass and repository_before should fail",
     environment: getEnvironmentInfo(),
     results: {
       before: beforeResults,
@@ -174,23 +179,28 @@ function main() {
     }
   };
 
+  const outputFile = process.argv[2] && process.argv[2].startsWith('--output=') 
+    ? path.resolve(process.argv[2].split('=')[1])
+    : path.join(projectRoot, 'report.json');
+
   const now = new Date();
   const dateStr = now.toISOString().split('T')[0];
   const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
   const timestampDir = path.join(projectRoot, 'evaluation', dateStr, timeStr);
   
-  // Create timestamp directory
   if (!fs.existsSync(timestampDir)) {
     fs.mkdirSync(timestampDir, { recursive: true });
   }
 
-  // Save to timestamped directory (Aquila looks here)
-  const reportFile = path.join(timestampDir, 'report.json');
-  fs.writeFileSync(reportFile, JSON.stringify(report, null, 2));
+  // Save to the specified output file (usually root report.json)
+  fs.writeFileSync(outputFile, JSON.stringify(report, null, 2));
+  
+  // Also save to timestamped directory for history
+  fs.writeFileSync(path.join(timestampDir, 'report.json'), JSON.stringify(report, null, 2));
 
-  console.log(`\n✅ Report saved to: ${reportFile}`);
+  console.log(`\n✅ Report saved to: ${outputFile}`);
 
-  process.exit(overallSuccess ? 0 : 1);
+  process.exit(success ? 0 : 1);
 }
 
 main();
