@@ -1,0 +1,8 @@
+{
+    "instance_id": "0c1112",
+    "problem_statement": "The async_generator module provides an asynchronous generator that depends on time delays and random number generation, making its behavior non-deterministic and difficult to verify through manual testing. Without automated tests, there is no reliable way to ensure that the function yields the correct number of values, respects the expected timing behavior, or produces outputs within the required range. Testing the function manually would be slow due to real time delays and would produce inconsistent results because of randomness. A structured suite of unit tests is therefore necessary to validate the correctness of the generator logic, confirm proper asynchronous behavior, and ensure future code changes do not introduce regressions.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/0c1112-Async_Generator",
+    "environment_setup": "Dockerfile"
+}  
