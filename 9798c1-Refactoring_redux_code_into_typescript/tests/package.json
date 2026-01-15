@@ -1,0 +1,10 @@
+{
+  "name": "redux-typescript-refactor-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Test runner wrapper for before/after repositories",
+  "scripts": {
+    "test": "node test_compliance.js && node test_simple.js"
+  }
+}
+

@@ -1,14 +1,22 @@
-version: '3.9'
+version: '3.8'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    working_dir: /app
+  evaluation:
+    build: .
     volumes:
-      - .:/app
+      - ./evaluation/reports:/app/evaluation/reports
+    command: node evaluation/evaluation.js
+
+  test-before:
+    build: .
     environment:
+      - TEST_REPO_PATH=/app/repository_before
+      - TARGET=before
+    command: sh -c "cd tests && npm test"
+
+  test-after:
+    build: .
+    environment:
+      - TEST_REPO_PATH=/app/repository_after
       - TARGET=after
-    stdin_open: true
-    tty: true
+    command: sh -c "cd tests && npm test"

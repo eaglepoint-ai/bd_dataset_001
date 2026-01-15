@@ -12,8 +12,13 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const TARGET = process.env.TARGET || 'after';
-const REPO_PATH = path.join(__dirname, '..', `repository_${TARGET}`);
+const REPO_PATH = process.env.TEST_REPO_PATH
+  ? path.resolve(process.env.TEST_REPO_PATH)
+  : path.join(__dirname, '..', `repository_${process.env.TARGET || 'after'}`);
+
+const TARGET =
+  process.env.TARGET ||
+  (REPO_PATH.includes('repository_before') ? 'before' : REPO_PATH.includes('repository_after') ? 'after' : 'after');
 
 let testsPassed = 0;
 let testsFailed = 0;

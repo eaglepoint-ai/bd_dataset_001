@@ -1,0 +1,11 @@
+{
+  "name": "redux-typescript-refactor-evaluation",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Evaluation runner (writes reports)",
+  "scripts": {
+    "test": "node evaluation.js",
+    "start": "node evaluation.js"
+  }
+}
+

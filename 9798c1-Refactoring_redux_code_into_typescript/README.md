@@ -88,14 +88,14 @@ python3 evaluation/evaluation.py
 #### Using docker-compose (Recommended)
 
 ```bash
-# 1. Test repository_before
-docker-compose run --rm -e PYTHONPATH=/app/repository_before -e TARGET=before app node tests/test_compliance.js
+# 1. Run tests against repository_before
+docker-compose run --rm test-before
 
-# 2. Test repository_after
-docker-compose run --rm -e PYTHONPATH=/app/repository_after -e TARGET=after app node tests/test_compliance.js
+# 2. Run tests against repository_after
+docker-compose run --rm test-after
 
-# 3. Run evaluation
-docker-compose run --rm app python3 evaluation/evaluation.py
+# 3. Run evaluation (writes report to evaluation/reports/...)
+docker-compose run --rm evaluation
 ```
 
 **Note:** Use `docker-compose` (with hyphen) for Docker Compose V1, or `docker compose` (with space) for Docker Compose V2.

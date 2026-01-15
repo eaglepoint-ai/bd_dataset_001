@@ -16,8 +16,13 @@ console.log('3. Basic runtime checks pass');
 const fs = require('fs');
 const path = require('path');
 
-const TARGET = process.env.TARGET || 'after';
-const REPO_PATH = path.join(__dirname, '..', `repository_${TARGET}`);
+const REPO_PATH = process.env.TEST_REPO_PATH
+  ? path.resolve(process.env.TEST_REPO_PATH)
+  : path.join(__dirname, '..', `repository_${process.env.TARGET || 'after'}`);
+
+const TARGET =
+  process.env.TARGET ||
+  (REPO_PATH.includes('repository_before') ? 'before' : REPO_PATH.includes('repository_after') ? 'after' : 'after');
 
 let passed = 0;
 let failed = 0;
