@@ -1,0 +1,9 @@
+{
+    "instance_id": "4da5aa",
+    "problem_statement": "A TypeScript system must be designed to emulate the App Router by dynamically constructing a route map from a file tree, where directories become path segments and specially named files like `page.tsx` become renderable endpoints. This architecture requires a module to parse the file system, matching incoming URL requests to the correct file path by interpreting dynamic parameters (e.g., `[slug]`) and supporting nested layouts through files like `layout.tsx`. The implementation must prioritize type safety for route parameters and the composition of parallel and nested layouts, delivering the correct React component for a matched request.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/4da5aa-page-routing-typescript",
+    "environment_setup": "Dockerfile"
+  }
+  
