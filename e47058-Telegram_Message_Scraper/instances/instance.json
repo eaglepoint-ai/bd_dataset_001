@@ -1,0 +1,8 @@
+{
+    "instance_id": "e47058",
+    "problem_statement": "The Telegram Message Scraper script depends on external systems such as the Telegram API, the local file system, and asynchronous network operations, which makes it difficult to validate reliably through manual testing. Without automated tests, changes to the script could introduce regressions, incorrect data extraction, formatting errors, or unhandled failure scenarios that may go unnoticed until production use. Testing the script manually would require real Telegram credentials, live network connectivity, and actual file creation, making it slow, risky, and hard to reproduce edge cases. A comprehensive suite of unit tests is therefore necessary to verify correct behavior, simulate error conditions, ensure proper CSV output, and allow future modifications to be made confidently without breaking existing functionality.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/e47058-Telegram_Message_Scraper",
+    "environment_setup": "Dockerfile"
+}  
