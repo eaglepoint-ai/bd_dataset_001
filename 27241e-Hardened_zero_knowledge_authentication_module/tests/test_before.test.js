@@ -1,26 +1,15 @@
-const fs = require("fs");
 const path = require("path");
-const vm = require("vm");
 const { runUniversalTests } = require("./test_shared");
 
-function loadLegacyModule() {
-  const filePath = path.join(__dirname, "../repository_before/index.js");
-  const code = fs.readFileSync(filePath, "utf8");
+const modulePath = path.join(__dirname, "../repository_before/index.js");
 
-  const sandbox = {
-    console: { log: () => {} }, // Silence logs
-  };
-  vm.createContext(sandbox);
-  vm.runInContext(code, sandbox);
+// Load normally (CommonJS). Jest isolates test files; we also reset modules below for safety.
+beforeEach(() => {
+  jest.resetModules();
+});
 
-  return {
-    registerUser: sandbox.registerUser,
-    authenticate: sandbox.authenticate,
-  };
-}
+const authModule = require("../repository_before/index.js");
 
-const authModule = loadLegacyModule();
-
-// Run Shared Tests
-// Expected: Tests 1-4 PASS. Test 5 FAILS (because it is Sync).
-runUniversalTests(authModule);
+// Run requirements-driven tests.
+// Expected: legacy implementation FAILS multiple security requirements.
+runUniversalTests({ authModule, modulePath });
