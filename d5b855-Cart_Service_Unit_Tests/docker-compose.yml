@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  run_before:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
