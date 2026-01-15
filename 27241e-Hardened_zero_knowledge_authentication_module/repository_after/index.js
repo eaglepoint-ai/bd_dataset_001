@@ -1,5 +1,5 @@
 // Import the modern Web Crypto API for cryptographic operations.
-const { webcrypto: crypto } = require("node:crypto");
+const { webcrypto: crypto, timingSafeEqual } = require("node:crypto");
 
 // Rationale: A Map provides efficient O(1) lookups by username, as required by the prompt.
 const USER_STORE = new Map();
@@ -22,20 +22,6 @@ async function generateSaltedHash(password, salt) {
 
   const hashBuffer = await crypto.subtle.digest("SHA-256", combinedBuffer);
   return new Uint8Array(hashBuffer);
-}
-
-// Compares two hashes in constant time to mitigate timing-based side-channel attacks.
-function constantTimeCompare(hashA, hashB) {
-  if (hashA.length !== hashB.length) {
-    return false;
-  }
-
-  // Bitwise operations ensure every byte is checked, preventing early exit timing leaks.
-  let accumulatedDifference = 0;
-  for (let i = 0; i < hashA.length; i++) {
-    accumulatedDifference |= hashA[i] ^ hashB[i];
-  }
-  return accumulatedDifference === 0;
 }
 
 // --- CORE MODULE ---
@@ -79,7 +65,7 @@ async function authenticate(username, password) {
   const inputHash = await generateSaltedHash(password, userRecord.salt);
 
   // Use the timing-safe comparison to verify the hash.
-  return constantTimeCompare(userRecord.hash, inputHash);
+  return timingSafeEqual(userRecord.hash, inputHash);
 }
 
 module.exports = { registerUser, authenticate };
