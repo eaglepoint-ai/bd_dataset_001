@@ -174,7 +174,8 @@ def run_pytest_with_pythonpath(pythonpath, tests_dir, test_file, label):
         stderr = result.stderr
 
         # Try to parse pytest-style results; if none found and we ran the
-        # script directly, infer success from the script's summary.
+        # script directly, produce a minimal fallback summary but keep the
+        # full raw output so callers can verify details.
         tests = parse_pytest_verbose_output(stdout)
         performance_metrics = extract_performance_metrics(stdout)
 
@@ -185,29 +186,53 @@ def run_pytest_with_pythonpath(pythonpath, tests_dir, test_file, label):
             skipped = sum(1 for t in tests if t.get("outcome") == "skipped")
             total = len(tests)
         else:
-            # Heuristic for standalone runner: look for an "ALL TESTS PASSED"
-            # or similar marker in stdout.
-            all_passed = "ALL TESTS PASSED" in stdout or "✓ ALL TESTS PASSED" in stdout
-            if all_passed:
+            # Heuristic for standalone runner: try to glean results from the
+            # script's printed summary (e.g. "Results: 1 passed, 0 failed...")
+            passed = failed = errors = skipped = 0
+            total = 0
+
+            # Look for a Results: X passed, Y failed, Z errors pattern
+            import re
+            m = re.search(r"Results:\s*(\d+)\s*passed,\s*(\d+)\s*failed,\s*(\d+)\s*errors,?\s*(\d*)\s*skipped?", stdout)
+            if m:
+                try:
+                    passed = int(m.group(1))
+                    failed = int(m.group(2))
+                    errors = int(m.group(3))
+                    skipped = int(m.group(4)) if m.group(4) else 0
+                    total = passed + failed + errors + skipped
+                except Exception:
+                    passed = failed = errors = skipped = 0
+                    total = 0
+
+            # Fallback: detect ALL TESTS PASSED marker
+            if total == 0 and ("ALL TESTS PASSED" in stdout or "✓ ALL TESTS PASSED" in stdout):
                 passed = 1
                 failed = 0
                 errors = 0
                 skipped = 0
                 total = 1
-            else:
-                # No pytest output and no explicit success marker; conservatively
-                # treat the run as failed when the exit code is non-zero.
-                passed = 0
-                failed = 1 if result.returncode != 0 else 0
-                errors = 0
-                skipped = 0
-                total = passed + failed
+
+            # If still no data, but the process exited with 0, treat as success
+            if total == 0 and result.returncode == 0:
+                passed = 1
+                failed = 0
+                total = 1
+
+            # Build a minimal synthetic test entry so callers have at least one
+            # record to inspect. This helps downstream tooling expecting an
+            # array of tests.
+            tests = [{
+                "nodeid": f"{test_file}::script_runner",
+                "name": "script_runner",
+                "outcome": "passed" if failed == 0 and result.returncode == 0 else ("failed" if failed > 0 else "error"),
+            }]
 
         print(f"\nResults: {passed} passed, {failed} failed, {errors} errors, {skipped} skipped (total: {total})")
 
         # When pytest provided test details, print them; otherwise, print a
         # short summary from the script output.
-        if tests:
+        if tests and len(tests) > 0 and "script_runner" not in tests[0].get("nodeid", ""):
             for test in tests:
                 status_icon = {
                     "passed": "✅",
@@ -220,7 +245,7 @@ def run_pytest_with_pythonpath(pythonpath, tests_dir, test_file, label):
             # Print a short runner summary if present
             if "ALL TESTS PASSED" in stdout:
                 print("  ✓ ALL TESTS PASSED (script summary)")
-            elif "SOME TESTS FAILED" in stdout or result.returncode != 0:
+            elif "SOME TESTS FAILED" in stdout or result.returncode != 0 or failed > 0:
                 print("  ✗ Some tests failed (script summary)")
 
         # Print performance summary if available
@@ -229,6 +254,9 @@ def run_pytest_with_pythonpath(pythonpath, tests_dir, test_file, label):
             for key, value in performance_metrics.items():
                 print(f"  {key}: {value}")
 
+        # Compose return payload. Keep truncated `stdout`/`stderr` for quick
+        # display but include the full raw output in the `summary.raw_output`
+        # field so reports contain complete evidence.
         return {
             "success": (passed > 0 and failed == 0) if total > 0 else (result.returncode == 0),
             "exit_code": result.returncode,
@@ -239,6 +267,7 @@ def run_pytest_with_pythonpath(pythonpath, tests_dir, test_file, label):
                 "failed": failed,
                 "errors": errors,
                 "skipped": skipped,
+                "raw_output": stdout,
             },
             "performance_metrics": performance_metrics,
             "stdout": stdout[-5000:] if len(stdout) > 5000 else stdout,

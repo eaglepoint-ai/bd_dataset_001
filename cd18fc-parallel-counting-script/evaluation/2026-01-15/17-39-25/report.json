@@ -1,0 +1,58 @@
+{
+  "run_id": "6beb6b00",
+  "started_at": "2026-01-15T17:39:25.618780",
+  "finished_at": "2026-01-15T17:39:25.938429",
+  "duration_seconds": 0.319649,
+  "success": true,
+  "error": null,
+  "environment": {
+    "python_version": "3.11.14",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "os": "Linux",
+    "os_release": "6.6.87.2-microsoft-standard-WSL2",
+    "architecture": "x86_64",
+    "hostname": "91be3343ebf4",
+    "cpu_cores": 8,
+    "cpu_processor": "",
+    "cpu_model": "11th Gen Intel(R) Core(TM) i5-11300H @ 3.10GHz",
+    "git_commit": "unknown",
+    "git_branch": "unknown"
+  },
+  "results": {
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "test_after.py::script_runner",
+          "name": "script_runner",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "raw_output": "======================================================================\nPRIME COUNTER TEST SUITE\n======================================================================\nConfiguration:\n  Limit: 10,000,000\n  Chunk size: 10,000\n  CPU cores: 8\n\n======================================================================\nREQUIREMENT 1: CORRECTNESS\n======================================================================\n\u2713 \u03c0(10)\n\u2713 \u03c0(100)\n\u2713 \u03c0(1,000)\n\u2713 \u03c0(10,000)\n\u2713 \u03c0(100,000)\n\u2713 \u03c0(10,000,000)\n\n  Testing \u03c0(10^7) - this may take a moment...\n\u2713 \u03c0(10,000,000) - CRITICAL\n  Time: 0.033s\n  Primes Found: 664579\n\n======================================================================\nTests: 7/7 passed\n\n======================================================================\nREQUIREMENT 2: MEMORY EFFICIENCY\n======================================================================\n\u2713 Chunk size constraint\n\u2713 Chunk continuity\n\u2713 Chunk count\n\n======================================================================\nTests: 3/3 passed\n\n======================================================================\nREQUIREMENT 3: EDGE CASES\n======================================================================\n\u2713 Range [0,5) excludes 0 and 1\n\u2713 Empty range [10,10)\n\u2713 Single element [2,3)\n\u2713 Single element [4,5)\n\u2713 Base primes count\n\n======================================================================\nTests: 5/5 passed\n\n======================================================================\nREQUIREMENT 4: DETERMINISM\n======================================================================\n\u2713 Deterministic results\n\n======================================================================\nTests: 1/1 passed\n\n======================================================================\nREQUIREMENT 5: PERFORMANCE\n======================================================================\n\u2713 Slice optimization\nTime: 0.043\nPrimes Found: 664579\n  \u2713 Excellent: 0.043s < 0.09s (high-end target)\n\n======================================================================\nTests: 2/2 passed\n\n======================================================================\nREQUIREMENT 6: MULTIPROCESSING\n======================================================================\n\u2713 CPU core detection\n\u2713 Parallel execution correctness\n\n======================================================================\nTests: 2/2 passed\n\n======================================================================\n\u2713 ALL TESTS PASSED\n======================================================================\n"
+      },
+      "performance_metrics": {
+        "execution_time_seconds": 0.043,
+        "primes_found": 664579
+      },
+      "stdout": "======================================================================\nPRIME COUNTER TEST SUITE\n======================================================================\nConfiguration:\n  Limit: 10,000,000\n  Chunk size: 10,000\n  CPU cores: 8\n\n======================================================================\nREQUIREMENT 1: CORRECTNESS\n======================================================================\n\u2713 \u03c0(10)\n\u2713 \u03c0(100)\n\u2713 \u03c0(1,000)\n\u2713 \u03c0(10,000)\n\u2713 \u03c0(100,000)\n\u2713 \u03c0(10,000,000)\n\n  Testing \u03c0(10^7) - this may take a moment...\n\u2713 \u03c0(10,000,000) - CRITICAL\n  Time: 0.033s\n  Primes Found: 664579\n\n======================================================================\nTests: 7/7 passed\n\n======================================================================\nREQUIREMENT 2: MEMORY EFFICIENCY\n======================================================================\n\u2713 Chunk size constraint\n\u2713 Chunk continuity\n\u2713 Chunk count\n\n======================================================================\nTests: 3/3 passed\n\n======================================================================\nREQUIREMENT 3: EDGE CASES\n======================================================================\n\u2713 Range [0,5) excludes 0 and 1\n\u2713 Empty range [10,10)\n\u2713 Single element [2,3)\n\u2713 Single element [4,5)\n\u2713 Base primes count\n\n======================================================================\nTests: 5/5 passed\n\n======================================================================\nREQUIREMENT 4: DETERMINISM\n======================================================================\n\u2713 Deterministic results\n\n======================================================================\nTests: 1/1 passed\n\n======================================================================\nREQUIREMENT 5: PERFORMANCE\n======================================================================\n\u2713 Slice optimization\nTime: 0.043\nPrimes Found: 664579\n  \u2713 Excellent: 0.043s < 0.09s (high-end target)\n\n======================================================================\nTests: 2/2 passed\n\n======================================================================\nREQUIREMENT 6: MULTIPROCESSING\n======================================================================\n\u2713 CPU core detection\n\u2713 Parallel execution correctness\n\n======================================================================\nTests: 2/2 passed\n\n======================================================================\n\u2713 ALL TESTS PASSED\n======================================================================\n",
+      "stderr": ""
+    },
+    "comparison": {
+      "after_tests_passed": true,
+      "after_total": 1,
+      "after_passed": 1,
+      "after_failed": 0,
+      "performance": {
+        "execution_time_seconds": 0.043,
+        "primes_found": 664579
+      }
+    }
+  }
+}
