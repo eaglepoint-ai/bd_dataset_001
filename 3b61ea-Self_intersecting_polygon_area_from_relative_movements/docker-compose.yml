@@ -7,7 +7,7 @@ services:
       - .:/app
 
   # Run full evaluation: docker-compose run evaluate
-  evaluatation:
+  evaluation:
     build: .
     command: python evaluation/evaluation.py
     volumes:
