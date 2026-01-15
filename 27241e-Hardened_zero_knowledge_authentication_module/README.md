@@ -1,5 +1,35 @@
 # Hardened Zero-Knowledge Authentication Module
 
+
+
+## 🐳 Quick Start (Docker)
+
+If you prefer to run commands manually, use the following steps:
+
+### 1. Build and Run
+
+```bash
+# Start the container (optional, for persistent background use)
+docker compose build
+
+
+```
+
+# run tests (quick validation)
+
+```bash
+docker compose run --rm app npm run test:before
+docker compose run --rm app npm run test:after
+
+```
+
+# Run evaluation script
+
+```bash
+docker compose run --rm app npm run evaluate
+```
+
+
 This project demonstrates the refactoring of a legacy, insecure authentication system into a **Hardened Zero-Knowledge Authentication Module**. 
 
 The goal is to transition from a vulnerable implementation (plain-text passwords, mutable arrays) to a secure architecture using the **Web Crypto API**, **Immutability**, and **Constant-Time comparisons**, while adhering to strict coding constraints.
