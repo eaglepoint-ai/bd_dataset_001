@@ -6,9 +6,6 @@ from circular_data_processor import DataProcessor
 def test_memory_bounded_storage():
 
     async def run_test():
-        """
-        Requirement: Ensure memory-bounded storage using a circular buffer (collections.deque).
-        """
         p = DataProcessor("Worker-Mem")
         
         # Inspect storage type
