@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """
-Markdown Blog SPA evaluator.
+Markdown Blog SPA evaluator (standardized report schema).
 
 The platform runs:
   python3 /app/evaluation/evaluation.py
 
-This script must:
-- run the pytest suite against repository_before and repository_after
-- write mandatory artifacts under evaluation/reports/:
+This script:
+- runs the pytest suite against repository_before and repository_after
+- writes mandatory artifacts under evaluation/reports/:
   - report.json
   - report_content
   - log_summary
+- also writes evaluation/reports/latest.json (alias)
+- and a timestamped copy under evaluation/reports/YYYY-MM-DD/HH-MM-SS/
 
-It also writes a timestamped copy under:
-  evaluation/reports/YYYY-MM-DD/HH-MM-SS/
+Report schema mirrors the standardized evaluator contract used by the JS sample.
 """
 
 from __future__ import annotations
@@ -21,110 +22,125 @@ from __future__ import annotations
 import json
 import os
 import platform
-import re
 import subprocess
 import sys
-from dataclasses import dataclass
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-
-@dataclass(frozen=True)
-class PytestRun:
-    success: bool
-    return_code: int
-    total: int
-    passed: int
-    failed: int
-    skipped: int
-    stdout: str
-    stderr: str
+ROOT = Path(__file__).resolve().parents[1]
+REPORTS_DIR = Path(__file__).resolve().parent / "reports"
 
 
 def _truncate(s: str, *, limit: int) -> str:
     if len(s) <= limit:
         return s
-    return s[-limit:]
+    return s[:limit]
 
 
-def _parse_pytest_summary(output: str) -> tuple[int, int, int, int]:
-    """
-    Best-effort parse of pytest's final summary line.
-
-    Pytest may print the counts in different orders, e.g.:
-      - "8 passed in 1.23s"
-      - "5 failed, 2 passed, 1 skipped in 18.58s"
-    Returns (total, passed, failed, skipped). Unknown counts default to 0.
-    """
-    lines = [ln.strip() for ln in output.splitlines() if ln.strip()]
-    summary_line = ""
-
-    # Prefer the last line that looks like pytest's final summary.
-    for ln in reversed(lines[-200:]):
-        if " in " in ln and any(k in ln for k in (" passed", " failed", " skipped", " error")):
-            summary_line = ln
-            break
-    if not summary_line:
-        # Fallback: parse the whole output.
-        summary_line = output
-
-    def _count(keyword: str) -> int:
-        m = re.search(rf"(\d+)\s+{re.escape(keyword)}", summary_line)
-        return int(m.group(1)) if m else 0
-
-    passed = _count("passed")
-    failed = _count("failed")
-    skipped = _count("skipped")
-    errors = _count("error") + _count("errors")
-
-    # This task's report schema has no separate "errors" field; include them in failed.
-    failed += errors
-
-    total = passed + failed + skipped
-    return total, passed, failed, skipped
+def _iso_z(dt: datetime) -> str:
+    # Emit a UTC-ish ISO string with trailing Z (like the JS evaluator).
+    return dt.replace(microsecond=0).isoformat() + "Z"
 
 
-def run_pytest_for_repo(project_root: Path, repo_path: Path, *, timeout_seconds: int = 240) -> PytestRun:
-    cmd = [sys.executable, "-m", "pytest", "-v", "tests"]
-    env = os.environ.copy()
-    env["TEST_REPO"] = str(repo_path)
-
-    proc = subprocess.run(
-        cmd,
-        cwd=str(project_root),
-        env=env,
-        capture_output=True,
-        text=True,
-        timeout=timeout_seconds,
-    )
-    stdout = proc.stdout or ""
-    stderr = proc.stderr or ""
-
-    total, passed, failed, skipped = _parse_pytest_summary(stdout + "\n" + stderr)
-    # If parsing failed (e.g., collection error), infer totals crudely.
-    if total == 0 and proc.returncode == 0:
-        # A clean run should have produced a summary; keep zeros but mark as success.
+def _get_git_info() -> dict[str, str]:
+    info = {"git_commit": "unknown", "git_branch": "unknown"}
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            cwd=str(ROOT),
+        )
+        if result.returncode == 0:
+            info["git_commit"] = result.stdout.strip()[:8]
+    except Exception:
         pass
 
-    return PytestRun(
-        success=proc.returncode == 0,
-        return_code=proc.returncode,
-        total=total,
-        passed=passed,
-        failed=failed,
-        skipped=skipped,
-        stdout=stdout,
-        stderr=stderr,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            cwd=str(ROOT),
+        )
+        if result.returncode == 0:
+            info["git_branch"] = result.stdout.strip()
+    except Exception:
+        pass
+
+    return info
 
 
-def _environment_info() -> dict[str, str]:
+def get_environment_info() -> dict[str, str]:
+    git = _get_git_info()
     return {
-        "python_version": sys.version.replace("\n", " "),
-        "platform": platform.platform(),
-        "architecture": platform.machine(),
+        "python_version": platform.python_version(),
+        "platform": f"{platform.system()}-{platform.machine()}",
+        "git_commit": git["git_commit"],
+        "git_branch": git["git_branch"],
     }
+
+
+def run_tests(repo_name: str) -> dict[str, Any]:
+    env = os.environ.copy()
+    env["TEST_REPO"] = str(ROOT / repo_name)
+
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-m", "pytest", "-q", "tests"],
+            cwd=str(ROOT),
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+        out = (proc.stdout or "") + (proc.stderr or "")
+        return {
+            "passed": proc.returncode == 0,
+            "return_code": proc.returncode,
+            "output": _truncate(out, limit=8000),
+        }
+    except subprocess.TimeoutExpired as e:
+        out = ""
+        if getattr(e, "stdout", None):
+            out += e.stdout  # type: ignore[operator]
+        if getattr(e, "stderr", None):
+            out += e.stderr  # type: ignore[operator]
+        return {
+            "passed": False,
+            "return_code": 124,
+            "output": _truncate(out or "Test execution timed out", limit=8000),
+        }
+
+
+def run_metrics(repo_name: str) -> dict[str, Any]:
+    """
+    Optional task metrics (numbers/booleans only).
+    """
+    repo = ROOT / repo_name
+    src_dir = repo / "src"
+    content_dir = repo / "content"
+    dist_bundle = repo / "dist" / "app.js"
+
+    ts_files = list(src_dir.rglob("*.ts")) if src_dir.exists() else []
+    post_files = list((content_dir / "blogs").glob("*.md")) if (content_dir / "blogs").exists() else []
+
+    return {
+        "ts_file_count": len(ts_files),
+        "blog_post_count": len(post_files),
+        "has_author_md": (content_dir / "author.md").exists(),
+        "has_dist_bundle": dist_bundle.exists(),
+        "dist_bundle_bytes": dist_bundle.stat().st_size if dist_bundle.exists() else 0,
+    }
+
+
+def _write_json(path: Path, data: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
 def _write_text(path: Path, content: str) -> None:
@@ -132,162 +148,121 @@ def _write_text(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def _write_json(path: Path, data: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, sort_keys=False) + "\n", encoding="utf-8")
-
-
-def _build_report_content(before: PytestRun, after: PytestRun) -> str:
-    def section(label: str, run: PytestRun) -> str:
-        output = _truncate(run.stdout, limit=8000)
-        return (
-            f"## {label}\n"
-            f"- **success**: `{run.success}`\n"
-            f"- **return_code**: `{run.return_code}`\n"
-            f"- **tests**: passed `{run.passed}` / total `{run.total}` (failed `{run.failed}`, skipped `{run.skipped}`)\n\n"
-            "### Pytest output (truncated)\n"
-            "```\n"
-            f"{output}\n"
-            "```\n"
-        )
-
-    success = after.success
-    return (
-        "## Summary\n"
-        f"- **success**: `{success}`\n\n"
-        + section("Before (`repository_before`)", before)
-        + "\n"
-        + section("After (`repository_after`)", after)
-    )
-
-
-def _build_log_summary(before: PytestRun, after: PytestRun) -> str:
-    success = after.success
-    return (
-        "MARKDOWN BLOG SPA EVALUATION\n\n"
-        f"success: {success}\n\n"
-        "before:\n"
-        f"  success: {before.success}\n"
-        f"  return_code: {before.return_code}\n"
-        f"  passed/total: {before.passed}/{before.total}\n"
-        f"  failed: {before.failed}\n"
-        f"  skipped: {before.skipped}\n\n"
-        "after:\n"
-        f"  success: {after.success}\n"
-        f"  return_code: {after.return_code}\n"
-        f"  passed/total: {after.passed}/{after.total}\n"
-        f"  failed: {after.failed}\n"
-        f"  skipped: {after.skipped}\n"
-    )
-
-
 def run_evaluation() -> dict[str, Any]:
-    project_root = Path(__file__).resolve().parents[1]
-    before_repo = project_root / "repository_before"
-    after_repo = project_root / "repository_after"
+    run_id = str(uuid.uuid4())
+    started_at = datetime.utcnow()
+    start_mono = datetime.utcnow()
 
-    before = run_pytest_for_repo(project_root, before_repo)
-    after = run_pytest_for_repo(project_root, after_repo)
+    before = {
+        "tests": run_tests("repository_before"),
+        "metrics": run_metrics("repository_before"),
+    }
+
+    after = {
+        "tests": run_tests("repository_after"),
+        "metrics": run_metrics("repository_after"),
+    }
+
+    finished_at = datetime.utcnow()
+    duration_seconds = (finished_at - start_mono).total_seconds()
+
+    passed_gate = after["tests"]["passed"] is True
 
     return {
+        "run_id": run_id,
+        "started_at": _iso_z(started_at),
+        "finished_at": _iso_z(finished_at),
+        "duration_seconds": duration_seconds,
+        "environment": get_environment_info(),
         "before": before,
         "after": after,
         "comparison": {
-            "before_tests_passed": before.success,
-            "after_tests_passed": after.success,
-            "before_total": before.total,
-            "before_passed": before.passed,
-            "before_failed": before.failed,
-            "after_total": after.total,
-            "after_passed": after.passed,
-            "after_failed": after.failed,
+            "passed_gate": passed_gate,
+            "improvement_summary": (
+                "After implementation passed correctness checks."
+                if passed_gate
+                else "Implementation failed correctness."
+            ),
         },
+        "success": passed_gate,
+        "error": None,
     }
+
+
+def _build_report_content(report: dict[str, Any]) -> str:
+    before = report.get("before", {}) or {}
+    after = report.get("after", {}) or {}
+    comparison = report.get("comparison", {}) or {}
+    return (
+        "## Summary\n"
+        f"- **success**: `{report.get('success')}`\n"
+        f"- **passed_gate**: `{comparison.get('passed_gate')}`\n"
+        f"- **improvement_summary**: {comparison.get('improvement_summary')}\n\n"
+        "## Before (`repository_before`)\n"
+        f"- **passed**: `{before.get('tests', {}).get('passed')}`\n"
+        f"- **return_code**: `{before.get('tests', {}).get('return_code')}`\n"
+        "### Output (truncated)\n"
+        "```\n"
+        f"{before.get('tests', {}).get('output', '')}\n"
+        "```\n\n"
+        "## After (`repository_after`)\n"
+        f"- **passed**: `{after.get('tests', {}).get('passed')}`\n"
+        f"- **return_code**: `{after.get('tests', {}).get('return_code')}`\n"
+        "### Output (truncated)\n"
+        "```\n"
+        f"{after.get('tests', {}).get('output', '')}\n"
+        "```\n"
+    )
+
+
+def _build_log_summary(report: dict[str, Any]) -> str:
+    comparison = report.get("comparison", {}) or {}
+    before = report.get("before", {}) or {}
+    after = report.get("after", {}) or {}
+    return (
+        "MARKDOWN BLOG SPA EVALUATION\n\n"
+        f"success: {report.get('success')}\n"
+        f"passed_gate: {comparison.get('passed_gate')}\n"
+        f"before.passed: {before.get('tests', {}).get('passed')}\n"
+        f"after.passed: {after.get('tests', {}).get('passed')}\n"
+    )
 
 
 def main() -> int:
-    started_at = datetime.now()
-    run_id = started_at.strftime("%Y%m%d-%H%M%S")
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    project_root = Path(__file__).resolve().parents[1]
-    reports_root = project_root / "evaluation" / "reports"
-    ts_dir = reports_root / started_at.strftime("%Y-%m-%d") / started_at.strftime("%H-%M-%S")
+    now = datetime.utcnow()
+    ts_dir = REPORTS_DIR / now.strftime("%Y-%m-%d") / now.strftime("%H-%M-%S")
 
     try:
-        results = run_evaluation()
-        before: PytestRun = results["before"]
-        after: PytestRun = results["after"]
-        success = after.success
-        error: str | None = None if success else "After implementation tests failed"
-    except Exception as e:  # noqa: BLE001 - evaluator must not crash silently
-        results = None
-        before = after = None  # type: ignore[assignment]
-        success = False
-        error = f"{type(e).__name__}: {e}"
+        report = run_evaluation()
+    except Exception as e:  # noqa: BLE001
+        report = {
+            "run_id": str(uuid.uuid4()),
+            "started_at": _iso_z(datetime.utcnow()),
+            "finished_at": _iso_z(datetime.utcnow()),
+            "duration_seconds": 0.0,
+            "environment": get_environment_info(),
+            "before": None,
+            "after": None,
+            "comparison": {"passed_gate": False, "improvement_summary": "Evaluator crashed."},
+            "success": False,
+            "error": f"{type(e).__name__}: {e}",
+        }
 
-    finished_at = datetime.now()
-    duration_seconds = (finished_at - started_at).total_seconds()
+    # Mandatory artifacts (non-timestamped)
+    _write_json(REPORTS_DIR / "report.json", report)
+    _write_json(REPORTS_DIR / "latest.json", report)
+    _write_text(REPORTS_DIR / "report_content", _build_report_content(report))
+    _write_text(REPORTS_DIR / "log_summary", _build_log_summary(report))
 
-    report: dict[str, Any] = {
-        "run_id": run_id,
-        "started_at": started_at.isoformat(),
-        "finished_at": finished_at.isoformat(),
-        "duration_seconds": round(duration_seconds, 6),
-        "environment": _environment_info(),
-        "before": (
-            {
-                "tests": {
-                    "total": before.total,
-                    "passed": before.passed,
-                    "failed": before.failed,
-                    "skipped": before.skipped,
-                },
-                "success": before.success,
-                "return_code": before.return_code,
-            }
-            if before is not None
-            else None
-        ),
-        "after": (
-            {
-                "tests": {
-                    "total": after.total,
-                    "passed": after.passed,
-                    "failed": after.failed,
-                    "skipped": after.skipped,
-                },
-                "success": after.success,
-                "return_code": after.return_code,
-            }
-            if after is not None
-            else None
-        ),
-        "comparison": results["comparison"] if isinstance(results, dict) and "comparison" in results else None,
-        "success": success,
-        "error": error,
-    }
-
-    # Always write mandatory artifacts to evaluation/reports/ (non-timestamped).
-    report_path = reports_root / "report.json"
-    report_content_path = reports_root / "report_content"
-    log_summary_path = reports_root / "log_summary"
-
-    _write_json(report_path, report)
-    if before is not None and after is not None:
-        _write_text(report_content_path, _build_report_content(before, after))
-        _write_text(log_summary_path, _build_log_summary(before, after))
-    else:
-        _write_text(report_content_path, f"## Summary\n- **success**: `{success}`\n\n- **error**: `{error}`\n")
-        _write_text(log_summary_path, f"MARKDOWN BLOG SPA EVALUATION\n\nsuccess: {success}\nerror: {error}\n")
-
-    # Also write a timestamped copy (handy for local history).
+    # Timestamped copy
     _write_json(ts_dir / "report.json", report)
-    if before is not None and after is not None:
-        _write_text(ts_dir / "report_content", _build_report_content(before, after))
-        _write_text(ts_dir / "log_summary", _build_log_summary(before, after))
+    _write_text(ts_dir / "report_content", _build_report_content(report))
+    _write_text(ts_dir / "log_summary", _build_log_summary(report))
 
-    print(f"Wrote report: {report_path}")
-    return 0 if success else 1
+    print(f"Report written to {REPORTS_DIR / 'latest.json'}")
+    return 0 if report.get("success") else 1
 
 
 if __name__ == "__main__":

@@ -138,7 +138,7 @@ docker-compose run --rm evaluation
 ```
 
 ### Notes about Docker workflow
-- Compose intentionally does **not** mount the host workspace by default (keeps evaluation deterministic).
+- Compose mounts this task folder into `/app` (same pattern as the Rate Limiter sample), so evaluation artifacts and edits are reflected on your host.
 - If you change TypeScript source, re-build the browser bundle into `repository_after/dist/app.js` before running Docker tests/evaluation.
 
 ## Trajectory template (Audit → Contract → Design → Execute → Verify)

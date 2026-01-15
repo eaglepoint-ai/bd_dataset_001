@@ -125,6 +125,11 @@ def get_driver():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
+    # Make Chrome filesystem usage explicit so it works both as root and non-root
+    # in containerized environments.
+    options.add_argument("--user-data-dir=/tmp/chrome-user-data")
+    options.add_argument("--data-path=/tmp/chrome-data")
+    options.add_argument("--disk-cache-dir=/tmp/chrome-cache")
 
     # Prefer system chromedriver/chromium inside Docker (deterministic, no downloads).
     chromedriver_path = which("chromedriver")

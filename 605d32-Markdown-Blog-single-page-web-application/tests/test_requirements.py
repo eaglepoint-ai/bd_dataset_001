@@ -119,10 +119,18 @@ def start_server(repo_path: Path, port: int = 8000) -> subprocess.Popen:
 def get_driver():
     """Get Selenium WebDriver"""
     options = Options()
-    options.add_argument("--headless")
+    # Chrome 109+ prefers the "new" headless implementation.
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
+    options.add_argument("--disable-setuid-sandbox")
+    options.add_argument("--no-zygote")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
+    # Make Chrome filesystem usage explicit so it works both as root and non-root
+    # in containerized environments.
+    options.add_argument("--user-data-dir=/tmp/chrome-user-data")
+    options.add_argument("--data-path=/tmp/chrome-data")
+    options.add_argument("--disk-cache-dir=/tmp/chrome-cache")
 
     # Prefer system chromedriver/chromium inside Docker (deterministic, no downloads).
     chromedriver_path = which("chromedriver")
