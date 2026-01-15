@@ -14,11 +14,6 @@ def test_encapsulation():
         p2 = DataProcessor("P2")
         
         # Process data in P1
-        # Verify that DataProcessor instances do not share state (encapsulation).
-        # Legacy implementation used a global 'DATA_STORE' list, which must be removed.
-        
-        # For legacy, we know it uses DATA_STORE.
-        # We can try to inspect the module for DATA_STORE
         import circular_data_processor
         if hasattr(circular_data_processor, 'DATA_STORE'):
             # Legacy case: Check if both append to same global list
