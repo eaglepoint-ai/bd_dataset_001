@@ -38,14 +38,14 @@ import multiprocessing as mp
 # TEST UTILITIES
 # ============================================================================
 
-class TestRunner:
+class Runner:
     """Minimal test runner for requirement validation."""
-    
+
     def __init__(self):
         self.passed = 0
         self.failed = 0
         self.failures = []
-    
+
     def assert_equal(self, actual, expected, test_name: str):
         """Assert equality and record result."""
         if actual == expected:
@@ -57,7 +57,7 @@ class TestRunner:
             self.failures.append((test_name, f"Expected {expected}, got {actual}"))
             print(f"✗ {test_name}: Expected {expected}, got {actual}")
             return False
-    
+
     def assert_true(self, condition: bool, test_name: str, message: str = ""):
         """Assert condition is true."""
         if condition:
@@ -70,18 +70,18 @@ class TestRunner:
             self.failures.append((test_name, msg))
             print(f"✗ {test_name}: {msg}")
             return False
-    
+
     def summary(self) -> bool:
         """Print summary and return success status."""
         total = self.passed + self.failed
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print(f"Tests: {self.passed}/{total} passed")
-        
+
         if self.failures:
             print("\nFailures:")
             for name, reason in self.failures:
                 print(f"  • {name}: {reason}")
-        
+
         return self.failed == 0
 
 
@@ -101,7 +101,7 @@ def test_known_prime_counts():
     - π(100,000) = 9,592
     - π(10,000,000) = 664,579
     """
-    runner = TestRunner()
+    runner = Runner()
     
     print("\n" + "="*70)
     print("REQUIREMENT 1: CORRECTNESS")
@@ -127,7 +127,7 @@ def test_known_prime_counts():
     print(f"  Time: {exec_time:.3f}s")
     print(f"  Primes Found: {count}")
     
-    return runner.summary()
+    assert runner.summary()
 
 
 # ============================================================================
@@ -142,7 +142,7 @@ def test_memory_efficiency():
     - Chunks never exceed CHUNK_SIZE (10,000)
     - Segmented processing (not full array)
     """
-    runner = TestRunner()
+    runner = Runner()
     
     print("\n" + "="*70)
     print("REQUIREMENT 2: MEMORY EFFICIENCY")
@@ -168,7 +168,7 @@ def test_memory_efficiency():
     expected_chunks = (LIMIT - 2 + CHUNK_SIZE - 1) // CHUNK_SIZE
     runner.assert_equal(len(chunks), expected_chunks, "Chunk count")
     
-    return runner.summary()
+    assert runner.summary()
 
 
 # ============================================================================
@@ -184,7 +184,7 @@ def test_edge_cases():
     - Empty ranges return 0
     - Single-element ranges work correctly
     """
-    runner = TestRunner()
+    runner = Runner()
     
     print("\n" + "="*70)
     print("REQUIREMENT 3: EDGE CASES")
@@ -212,7 +212,7 @@ def test_edge_cases():
     base_primes_large = generate_base_primes(3163)
     runner.assert_equal(len(base_primes_large), 447, "Base primes count")
     
-    return runner.summary()
+    assert runner.summary()
 
 
 # ============================================================================
@@ -227,7 +227,7 @@ def test_determinism():
     - Multiple runs produce identical results
     - No randomness or platform-specific behavior
     """
-    runner = TestRunner()
+    runner = Runner()
     
     print("\n" + "="*70)
     print("REQUIREMENT 4: DETERMINISM")
@@ -249,7 +249,7 @@ def test_determinism():
         f"3 runs produced: {results}"
     )
     
-    return runner.summary()
+    assert runner.summary()
 
 
 # ============================================================================
@@ -268,7 +268,7 @@ def test_performance():
     Note: Performance depends on CPU speed, Python version, and system load.
     The 0.09s target is for modern high-end 8-core CPUs.
     """
-    runner = TestRunner()
+    runner = Runner()
     
     print("\n" + "="*70)
     print("REQUIREMENT 5: PERFORMANCE")
@@ -317,7 +317,7 @@ def test_performance():
             f"Projected {estimated_8_core:.3f}s < 0.15s"
         )
     
-    return runner.summary()
+    assert runner.summary()
 
 
 # ============================================================================
@@ -333,7 +333,7 @@ def test_multiprocessing():
     - Parallel pool executes without errors
     - Cross-platform compatibility (Windows, macOS, Linux)
     """
-    runner = TestRunner()
+    runner = Runner()
     
     print("\n" + "="*70)
     print("REQUIREMENT 6: MULTIPROCESSING")
@@ -354,7 +354,7 @@ def test_multiprocessing():
     except Exception as e:
         runner.assert_true(False, "Parallel execution", f"Exception: {e}")
     
-    return runner.summary()
+    assert runner.summary()
 
 
 # ============================================================================
@@ -372,13 +372,25 @@ def run_all_tests():
     print(f"  CPU cores: {mp.cpu_count()}")
     
     all_passed = True
-    
-    all_passed &= test_known_prime_counts()
-    all_passed &= test_memory_efficiency()
-    all_passed &= test_edge_cases()
-    all_passed &= test_determinism()
-    all_passed &= test_performance()
-    all_passed &= test_multiprocessing()
+
+    tests = [
+        test_known_prime_counts,
+        test_memory_efficiency,
+        test_edge_cases,
+        test_determinism,
+        test_performance,
+        test_multiprocessing,
+    ]
+
+    for fn in tests:
+        try:
+            fn()
+        except AssertionError as e:
+            print(f"{fn.__name__} failed: {e}")
+            all_passed = False
+        except Exception as e:
+            print(f"{fn.__name__} error: {e}")
+            all_passed = False
     
     print("\n" + "="*70)
     if all_passed:
