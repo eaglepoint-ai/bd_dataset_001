@@ -23,41 +23,47 @@ function runTests(repoPath) {
     return results;
   }
 
+  const repoName = path.basename(repoPath);
+  const outputFile = path.join(__dirname, `${repoName}-results.json`);
+
   try {
-    // Set REPO environment variable and run jest
-    const repoName = path.basename(repoPath);
-    const output = execSync(
-      `REPO=${repoName} npm test -- --json`,
+    // Run jest with output to file
+    execSync(
+      `npm test -- --json --outputFile=${outputFile} --forceExit`,
       {
         encoding: 'utf-8',
-        stdio: 'pipe',
         timeout: 30000,
-        env: { ...process.env, REPO: repoName }
+        env: { ...process.env, REPO: repoName },
+        shell: true
       }
     );
 
-    const jsonOutput = JSON.parse(output);
-    
-    results.total = jsonOutput.numTotalTests || 0;
-    results.passed = jsonOutput.numPassedTests || 0;
-    results.failed = jsonOutput.numFailedTests || 0;
+    // Read results from file
+    if (fs.existsSync(outputFile)) {
+      const jsonOutput = JSON.parse(fs.readFileSync(outputFile, 'utf-8'));
+      
+      results.total = jsonOutput.numTotalTests || 0;
+      results.passed = jsonOutput.numPassedTests || 0;
+      results.failed = jsonOutput.numFailedTests || 0;
 
-    // Parse individual test results
-    if (jsonOutput.testResults) {
-      jsonOutput.testResults.forEach(fileResult => {
-        fileResult.assertionResults?.forEach(test => {
-          results.tests[test.fullName || test.title] = test.status === 'passed' ? 'PASSED' : 'FAILED';
+      // Parse individual test results
+      if (jsonOutput.testResults) {
+        jsonOutput.testResults.forEach(fileResult => {
+          fileResult.assertionResults?.forEach(test => {
+            results.tests[test.fullName || test.title] = test.status === 'passed' ? 'PASSED' : 'FAILED';
+          });
         });
-      });
+      }
+
+      // Clean up
+      fs.unlinkSync(outputFile);
     }
 
   } catch (error) {
-    // Tests may fail but we still want to capture results
+    // Tests may fail but we still want to capture results from file
     try {
-      const errorOutput = error.stdout || error.stderr || '';
-      const jsonMatch = errorOutput.match(/\{[\s\S]*"testResults"[\s\S]*\}/);
-      if (jsonMatch) {
-        const jsonOutput = JSON.parse(jsonMatch[0]);
+      if (fs.existsSync(outputFile)) {
+        const jsonOutput = JSON.parse(fs.readFileSync(outputFile, 'utf-8'));
         results.total = jsonOutput.numTotalTests || 0;
         results.passed = jsonOutput.numPassedTests || 0;
         results.failed = jsonOutput.numFailedTests || 0;
@@ -69,6 +75,11 @@ function runTests(repoPath) {
             });
           });
         }
+
+        // Clean up
+        fs.unlinkSync(outputFile);
+      } else {
+        results.error = 'Test output file not created';
       }
     } catch (parseError) {
       results.error = error.message;
