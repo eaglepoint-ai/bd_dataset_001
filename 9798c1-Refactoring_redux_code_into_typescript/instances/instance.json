@@ -1,1 +1,7 @@
-{}
+{
+    "instance_id": "9798c1",
+    "problem_statement": "The TypeScript conversion, while demonstrating strong fundamentals in type definitions and Redux patterns, contains several issues that would prevent it from functioning correctly in production: the catch block attempts to access properties on an unknown type which TypeScript"
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/9798c1-Refactoring_redux_code_into_typescript",
+    "environment_setup": "Dockerfile"
+  }
+  
