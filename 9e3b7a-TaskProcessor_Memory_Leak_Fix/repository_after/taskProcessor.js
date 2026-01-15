@@ -139,7 +139,6 @@ class TaskProcessor extends EventEmitter {
 
     this.pending.clear();
     this.processing.clear();
-    this.results.clear();
     this.callbacks.clear();
     this.removeAllListeners();
   }
