@@ -179,19 +179,20 @@ async function runSuite(Scheduler, name, strict) {
 (async () => {
   if (mode === 'before') {
     await runSuite(TaskSchedulerBefore, 'repository_before', false);
-    return;
+    process.exit(0);
   }
 
   if (mode === 'both') {
     await runSuite(TaskSchedulerBefore, 'repository_before', false);
     await runSuite(TaskSchedulerAfter, 'repository_after', true);
     console.log('✅ Done (both)');
-    return;
+    process.exit(0);
   }
 
   // default: after
   await runSuite(TaskSchedulerAfter, 'repository_after', true);
   console.log('✅ Done (after)');
+  process.exit(0);
 })().catch(err => {
   console.error('❌ Tests failed:', err);
   process.exit(1);
