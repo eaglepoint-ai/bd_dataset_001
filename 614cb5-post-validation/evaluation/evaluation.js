@@ -19,12 +19,81 @@ function environmentInfo() {
   };
 }
 
+function parseTestOutput(output) {
+  // Try to parse Vitest output summary
+  const lines = output.split('\n');
+  let total = 0, passed = 0, failed = 0, errors = 0, skipped = 0;
+  const tests = [];
+
+  // Parse summary line: "Tests  11 passed (11)"
+  for (const line of lines) {
+    const vitestSummary = line.match(/Tests\s+(\d+)\s+passed.*\((\d+)\)/);
+    if (vitestSummary) {
+      total = parseInt(vitestSummary[2], 10);
+      passed = parseInt(vitestSummary[1], 10);
+      break;
+    }
+  }
+
+  // Parse per-file test results: "✓ tests/tests_after.test.jsx  (11 tests) 3011ms"
+  for (const line of lines) {
+    const fileMatch = line.match(/[✓✗] ([^ ]+)\s+\((\d+) tests?\)/);
+    if (fileMatch) {
+      const [, file, count] = fileMatch;
+      // Add a pseudo-test entry for the file (since Vitest output doesn't list individual test names by default)
+      tests.push({
+        nodeid: file,
+        name: file,
+        outcome: line.trim().startsWith('✓') ? 'passed' : 'failed',
+        test_count: parseInt(count, 10),
+      });
+    }
+  }
+
+  // If no per-file lines, but we have a total, add a single summary test
+  if (tests.length === 0 && total > 0) {
+    tests.push({
+      nodeid: 'all',
+      name: 'all tests',
+      outcome: passed === total ? 'passed' : 'failed',
+      test_count: total,
+    });
+  }
+
+  // Try to parse failed/skipped if present
+  for (const line of lines) {
+    const failMatch = line.match(/Tests\s+\d+ passed.*(\d+) failed/);
+    if (failMatch) {
+      failed = parseInt(failMatch[1], 10);
+    }
+    const skipMatch = line.match(/Tests\s+\d+ passed.*(\d+) skipped/);
+    if (skipMatch) {
+      skipped = parseInt(skipMatch[1], 10);
+    }
+  }
+
+  return {
+    tests,
+    summary: {
+      total,
+      passed,
+      failed,
+      errors,
+      skipped,
+    },
+  };
+}
+
 function runTests(target) {
   if (target === 'before') {
+    // Simulate no tests for before, as in your current logic
     return {
-      passed: false,
-      return_code: 0,
-      output: 'No tests to run for repository_before',
+      success: false,
+      exit_code: 0,
+      tests: [],
+      summary: { total: 0, passed: 0, failed: 0, errors: 0, skipped: 0 },
+      stdout: 'No tests to run for repository_before',
+      stderr: '',
     };
   }
   try {
@@ -34,16 +103,25 @@ function runTests(target) {
       stdio: 'pipe',
       timeout: 120000,
     });
+    const parsed = parseTestOutput(output);
     return {
-      passed: true,
-      return_code: 0,
-      output: output.slice(0, 8000),
+      success: parsed.summary.failed === 0,
+      exit_code: 0,
+      tests: parsed.tests,
+      summary: parsed.summary,
+      stdout: output.slice(0, 8000),
+      stderr: '',
     };
   } catch (err) {
+    const output = (err.stdout ? err.stdout.toString() : '') + (err.stderr ? err.stderr.toString() : '');
+    const parsed = parseTestOutput(output);
     return {
-      passed: false,
-      return_code: err.status || 1,
-      output: (err.stdout ? err.stdout.toString() : '') + (err.stderr ? err.stderr.toString() : ''),
+      success: false,
+      exit_code: err.status || 1,
+      tests: parsed.tests,
+      summary: parsed.summary,
+      stdout: output.slice(0, 8000),
+      stderr: err.stderr ? err.stderr.toString() : '',
     };
   }
 }
@@ -56,7 +134,7 @@ function runMetrics(repoPath) {
 function evaluate(repoName) {
   const tests = runTests(repoName === 'repository_before' ? 'before' : 'after');
   const metrics = runMetrics(path.join(ROOT, repoName));
-  return { tests, metrics };
+  return { ...tests, metrics };
 }
 
 function run_evaluation() {
@@ -65,10 +143,14 @@ function run_evaluation() {
   const before = evaluate('repository_before');
   const after = evaluate('repository_after');
   const comparison = {
-    passed_gate: after.tests.passed,
-    improvement_summary: after.tests.passed
-      ? 'After implementation passed correctness checks.'
-      : 'After implementation did not pass correctness checks.',
+    before_tests_passed: before.success,
+    after_tests_passed: after.success,
+    before_total: before.summary.total,
+    before_passed: before.summary.passed,
+    before_failed: before.summary.failed,
+    after_total: after.summary.total,
+    after_passed: after.summary.passed,
+    after_failed: after.summary.failed,
   };
   const end = new Date();
   return {
@@ -76,12 +158,14 @@ function run_evaluation() {
     started_at: start.toISOString(),
     finished_at: end.toISOString(),
     duration_seconds: (end - start) / 1000,
-    environment: environmentInfo(),
-    before,
-    after,
-    comparison,
-    success: comparison.passed_gate,
+    success: after.success,
     error: null,
+    environment: environmentInfo(),
+    results: {
+      before: before,
+      after: after,
+      comparison: comparison,
+    },
   };
 }
 
@@ -101,11 +185,8 @@ function main() {
   }
   const report = run_evaluation();
   const reportPath = path.join(folder, 'report.json');
-  const latestPath = path.join(baseReports, 'latest.json');
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-  // fs.writeFileSync(latestPath, JSON.stringify(report, null, 2));
   console.log(`Report written to ${reportPath}`);
-  // console.log(`Report also written to ${latestPath}`);
   return report.success ? 0 : 1;
 }
 

@@ -45,7 +45,7 @@ evaluation/
 └── reports/
     └── YYYY-MM-DD/
         └── HH-MM-SS/
-            └── latest.json
+            └── report.json
 ```
 
 ### Report Schema
