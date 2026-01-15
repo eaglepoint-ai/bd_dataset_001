@@ -1,92 +1,130 @@
-# project template
+# Database-Level Error Handling Refactor
 
-Starter scaffold for bd dataset task.
+This dataset task contains a PostgreSQL trigger function that performs critical side-effect updates. The objective is to add robust, standards-compliant error handling while preserving all existing business logic and no-op semantics.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
-
----
-
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
-
-### Setup Steps
-
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
+## Folder layout
 
 ```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+repository_before/    # Original SQL implementation (silent failures)
+repository_after/     # Refactored SQL implementation (explicit error handling)
+tests/                # Behavior validation + error handling tests
+patches/              # Diff between before/after
+evaluation/           # Evaluation runner and generated reports
+instances/            # Task metadata
+trajectory/           # AI reasoning documentation
 ```
 
-### Report Schema
+## Run with Docker
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+### Build image
+
+```bash
+docker compose build
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+### Run tests (before – expected failures)
 
----
+```bash
+docker compose run --rm app pytest tests/test_before.py -v
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+**Expected behavior:**
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+- ❌ `test_orphan_user_integrity_before`: FAIL (old code doesn't catch orphan users)
+- ❌ `test_invalid_trigger_event_before`: FAIL (old code allows invalid trigger usage)
+
+### Run tests (after – expected all pass)
+
+```bash
+docker compose run --rm app pytest tests/test_after.py -v
+```
+
+**Expected behavior:**
+
+- ✅ `test_standard_sqlstates`: PASS (proper SQLSTATE error codes)
+- ✅ `test_preserve_logic_and_behavior`: PASS (business logic preserved)
+- ✅ `test_applied_to_function_and_trigger`: PASS (function and trigger exist)
+
+### Run all tests
+
+```bash
+docker compose run --rm app pytest tests/ -v
+```
+
+### Run evaluation (compares both implementations)
+
+```bash
+docker compose run --rm app python evaluation/evaluation.py
+```
+
+This will:
+
+1. Run `test_before.py` (expected to FAIL - proves vulnerabilities exist)
+2. Run `test_after.py` (expected to PASS - proves fixes work)
+3. Generate a report at `evaluation/YYYY-MM-DD/HH-MM-SS/report.json`
+
+### Run evaluation with custom output file
+
+```bash
+docker compose run --rm app python evaluation/evaluation.py --output /app/evaluation/custom_report.json
+```
+
+## Run locally
+
+### Prerequisites
+
+- PostgreSQL 15+ running on `localhost:5432`
+- Database `testdb` with user `postgres` / password `password`
+
+### Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Run tests
+
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Run only before tests
+pytest tests/test_before.py -v
+
+# Run only after tests
+pytest tests/test_after.py -v
+```
+
+## Regenerate patch
+
+From repo root:
+
+```bash
+diff -u repository_before/db-level-error-handling.sql repository_after/db-level-error-handling.sql > patches/patch.diff
+```
+
+## What changed (Before → After)
+
+| Aspect             | Before                | After                                  |
+| ------------------ | --------------------- | -------------------------------------- |
+| Trigger validation | None                  | Checks `TG_OP = 'UPDATE'`              |
+| Input validation   | None                  | Checks `NEW.id IS NOT NULL`            |
+| Integrity check    | Silent (empty UPDATE) | Explicit error on orphan user          |
+| Error codes        | None                  | Standard PostgreSQL SQLSTATEs          |
+| Security           | Basic                 | `SET search_path` to prevent hijacking |
+| Exception handling | None                  | `EXCEPTION WHEN OTHERS` block          |
+
+## SQLSTATEs Used
+
+| Code    | Name                           | When Raised                             |
+| ------- | ------------------------------ | --------------------------------------- |
+| `09000` | triggered_action_exception     | Function called from non-UPDATE trigger |
+| `23502` | not_null_violation             | User ID is NULL                         |
+| `23000` | integrity_constraint_violation | No parent record for user               |
+
+## Success Criteria
+
+- ✅ `test_before.py` fails (proves vulnerabilities in old code)
+- ✅ `test_after.py` passes (proves new error handling works)
+- ✅ Business logic preserved (task cancellation still works)
+- ✅ No-op semantics preserved (NULL→NULL, Value→Value don't trigger)
