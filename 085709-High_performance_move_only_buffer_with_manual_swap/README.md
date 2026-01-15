@@ -1,92 +1,140 @@
-# project template
+# FastBuffer — High-Performance Move-Only Buffer
 
-Starter scaffold for bd dataset task.
-
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+A C++20 class that manages a heap-allocated integer buffer with maximum performance and minimal abstraction overhead. The implementation relies exclusively on raw pointers and manual resource management while supporting safe, constant-time move semantics.
 
 ---
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+## Problem Statement
 
-### Setup Steps
+A low-level utility component is required for performance-critical systems where standard library abstractions introduce unacceptable overhead. The component must manage dynamic memory explicitly, support efficient ownership transfer, and remain safe under move operations — including self move-assignment — without relying on modern helper utilities.
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
+The challenge is to implement this correctly under strict constraints that prohibit conditional branching, standard ownership helpers, and high-level abstractions.
 
 ---
 
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
+## Prompt
 
-When the evaluation command is run, it should generate reports in the following structure:
+**Role:** Senior C++ Systems Engineer
 
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
-```
+**Context:**  
+You are tasked with designing a minimal-overhead buffer type for use in performance-sensitive, containerized environments. The buffer must manage heap memory explicitly, transfer ownership efficiently via move semantics, and guarantee correct destruction under all valid usage scenarios.
 
-### Report Schema
+**Scale Assumptions:**
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
-```
-
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+- Used in low-latency or systems-level code
+- Ownership transfers occur frequently
+- Copying underlying buffers is unacceptable
+- Code is evaluated in automated, containerized pipelines
 
 ---
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+## Core Requirements (Must Fix)
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+### 1. Ownership Model
+- `FastBuffer` owns **exactly one** dynamically allocated `int` array at any time, or owns no memory at all.
+
+### 2. Move Semantics
+- Ownership transfer must occur via move construction and move assignment.
+- The underlying buffer must **not** be copied.
+
+### 3. Constant-Time Moves
+- Move construction and move assignment must complete in constant time.
+- Only raw pointer manipulation is permitted.
+
+### 4. Moved-From Object Validity
+- After any move operation, the source object must remain valid and safely destructible.
+
+### 5. Memory Safety
+- No memory leaks during:
+  - Construction
+  - Move construction
+  - Move assignment
+  - Destruction
+
+### 6. Self Move-Assignment Safety
+- Self move-assignment must not corrupt the object or leak memory.
+- Preservation of contents is not required; validity and safety are.
+
+### 7. Forbidden Dependencies
+- The implementation must not depend on:
+  - `<utility>`
+  - `<memory>`
+  - `<algorithm>`
+
+### 8. No Standard Move or Swap Utilities
+- No use of `std::move`, `std::swap`, or related helpers.
+
+### 9. Raw Pointer Ownership Only
+- Ownership transfer must be achieved exclusively through raw pointer reassignment.
+
+### 10. No Conditional Branching
+- The implementation must contain **no use of the `if` keyword**.
+
+### 11. Manual Rvalue Casting
+- Rvalue casting must be performed using native C++ syntax, not standard helpers.
+
+### 12. Deterministic Destruction
+- The destructor must free owned heap memory **exactly once**.
+
+### 13. Single, Self-Contained Implementation
+- The complete solution must be provided as a single header/implementation unit.
+
+---
+
+## Constraints
+
+- C++20 standard
+- Raw pointers only
+- No conditional `if` statements
+- No standard ownership or move utilities
+- No external libraries
+- Designed to run inside Docker-based evaluation environments
+
+---
+
+## Acceptance Criteria
+
+1. Moving a `FastBuffer` transfers ownership without copying memory.
+2. Move operations complete in constant time.
+3. Moved-from objects are safely destructible.
+4. Self move-assignment does not leak memory or double-free.
+5. The destructor frees memory exactly once.
+6. The implementation compiles cleanly with `-Wall -Wextra -Wpedantic`.
+7. All automated tests pass in a containerized environment.
+
+---
+
+## Requirements Summary
+
+1. **Ownership** — Single raw pointer or no ownership
+2. **Moves** — Pointer transfer only, no copies
+3. **Performance** — Constant-time operations
+4. **Safety** — Leak-free, double-free-free
+5. **Restrictions** — No `if`, no `<utility>`, no helpers
+6. **Structure** — Single header-only implementation
+
+---
+
+## Public API
+
+```cpp
+class FastBuffer;
+
+
+## Commands
+
+### Run the build image
+```bash
+docker compose build
+```
+
+### Run repository_after
+```bash
+docker compose run --rm -e REPO_PATH=repository_after app make -C tests run
+```
+
+### Run evaluation
+```bash
+docker compose run --rm app sh -c "g++ -std=c++20 -o evaluation/evaluation evaluation/evaluation.cpp && ./evaluation/evaluation"
+```
+
