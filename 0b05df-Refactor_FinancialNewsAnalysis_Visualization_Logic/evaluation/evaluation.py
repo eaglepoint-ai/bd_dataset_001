@@ -94,7 +94,7 @@ def run_pytest_with_pythonpath(pythonpath, tests_dir, label):
         sys.executable, "-m", "pytest",
         str(tests_dir),
         "-v",
-        "--tb=short",
+        "--tb=no",
     ]
     
     env = os.environ.copy()

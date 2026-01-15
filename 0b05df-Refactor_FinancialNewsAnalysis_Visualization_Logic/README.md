@@ -31,7 +31,7 @@ docker compose build
 
 ### Run tests (before – expected some failures)
 ```bash
-docker compose run --rm -e PYTHONPATH=/app/repository_before app pytest -q
+docker compose run --rm -e PYTHONPATH=/app/repository_before app pytest -v --tb=no
 ```
 
 **Expected behavior:**
@@ -40,7 +40,7 @@ docker compose run --rm -e PYTHONPATH=/app/repository_before app pytest -q
 
 ### Run tests (after – expected all pass)
 ```bash
-docker compose run --rm -e PYTHONPATH=/app/repository_after app pytest -q
+docker compose run --rm -e PYTHONPATH=/app/repository_after app pytest -v
 ```
 
 **Expected behavior:**
