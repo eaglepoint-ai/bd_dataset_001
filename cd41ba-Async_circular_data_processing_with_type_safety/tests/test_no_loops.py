@@ -5,7 +5,7 @@ from circular_data_processor import DataProcessor, main_loop
 
 def test_no_explicit_loops():
     """
-    Requirement: Avoid all for and while loops; use map(), filter(), or list comprehensions.
+    Avoid all for and while loops; use map(), filter(), or list comprehensions.
     """
     # Get source code of the class and the main function
     try:
@@ -22,8 +22,6 @@ def test_no_explicit_loops():
     for node in ast.walk(tree):
         if isinstance(node, (ast.For, ast.AsyncFor, ast.While)):
             # ast.For, ast.AsyncFor, and ast.While correspond to explicit loop statements.
-            # List comprehensions and generator expressions are permitted as they use 'comprehension' nodes, 
-            # not explicit loop statements in the AST context relevant here.
             
             # Verify strict compliance by failing on any found loop node.
             
