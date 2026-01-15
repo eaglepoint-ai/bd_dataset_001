@@ -177,15 +177,27 @@ function main() {
   const now = new Date();
   const dateStr = now.toISOString().split('T')[0];
   const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-  const outputDir = path.join(projectRoot, 'evaluation', dateStr, timeStr);
-  const outputFile = path.join(outputDir, 'report.json');
-
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
+  const timestampDir = path.join(projectRoot, 'evaluation', dateStr, timeStr);
+  
+  // Create timestamp directory
+  if (!fs.existsSync(timestampDir)) {
+    fs.mkdirSync(timestampDir, { recursive: true });
   }
 
+  // Handle command line output argument like the template
+  const outputFile = process.argv[2] && process.argv[2].startsWith('--output=') 
+    ? path.resolve(process.argv[2].split('=')[1])
+    : path.join(projectRoot, 'report.json');
+
+  // Save to the specified output file (usually root report.json)
   fs.writeFileSync(outputFile, JSON.stringify(report, null, 2));
+  
+  // Also save to timestamped directory for history
+  const historyFile = path.join(timestampDir, 'report.json');
+  fs.writeFileSync(historyFile, JSON.stringify(report, null, 2));
+
   console.log(`\n✅ Report saved to: ${outputFile}`);
+  console.log(`✅ History report saved to: ${historyFile}`);
 
   process.exit(overallSuccess ? 0 : 1);
 }
