@@ -19,7 +19,7 @@
    8. Users can view version history including branches and merges
 
 4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`:
+   - Commands to run tests on `repository_before`:
      ```bash
      docker compose run test-before
      ```
