@@ -1,0 +1,608 @@
+diff --git a/repository_after/__pycache__/__init__.cpython-311.pyc b/repository_after/__pycache__/__init__.cpython-311.pyc
+new file mode 100644
+index 0000000..5629602
+Binary files /dev/null and b/repository_after/__pycache__/__init__.cpython-311.pyc differ
+diff --git a/repository_after/src/__init__.py b/repository_after/src/__init__.py
+new file mode 100644
+index 0000000..4287ca8
+--- /dev/null
++++ b/repository_after/src/__init__.py
+@@ -0,0 +1 @@
++#
+\ No newline at end of file
+diff --git a/repository_after/src/__pycache__/__init__.cpython-311.pyc b/repository_after/src/__pycache__/__init__.cpython-311.pyc
+new file mode 100644
+index 0000000..be219ab
+Binary files /dev/null and b/repository_after/src/__pycache__/__init__.cpython-311.pyc differ
+diff --git a/repository_after/src/__pycache__/ascii_converter.cpython-311.pyc b/repository_after/src/__pycache__/ascii_converter.cpython-311.pyc
+new file mode 100644
+index 0000000..dc45b99
+Binary files /dev/null and b/repository_after/src/__pycache__/ascii_converter.cpython-311.pyc differ
+diff --git a/repository_after/src/__pycache__/color_handler.cpython-311.pyc b/repository_after/src/__pycache__/color_handler.cpython-311.pyc
+new file mode 100644
+index 0000000..d5de2fe
+Binary files /dev/null and b/repository_after/src/__pycache__/color_handler.cpython-311.pyc differ
+diff --git a/repository_after/src/__pycache__/image_processor.cpython-311.pyc b/repository_after/src/__pycache__/image_processor.cpython-311.pyc
+new file mode 100644
+index 0000000..3fd94d6
+Binary files /dev/null and b/repository_after/src/__pycache__/image_processor.cpython-311.pyc differ
+diff --git a/repository_after/src/__pycache__/main.cpython-311.pyc b/repository_after/src/__pycache__/main.cpython-311.pyc
+new file mode 100644
+index 0000000..111081f
+Binary files /dev/null and b/repository_after/src/__pycache__/main.cpython-311.pyc differ
+diff --git a/repository_after/src/__pycache__/output_generator.cpython-311.pyc b/repository_after/src/__pycache__/output_generator.cpython-311.pyc
+new file mode 100644
+index 0000000..3cd3b3c
+Binary files /dev/null and b/repository_after/src/__pycache__/output_generator.cpython-311.pyc differ
+diff --git a/repository_after/src/__pycache__/utils.cpython-311.pyc b/repository_after/src/__pycache__/utils.cpython-311.pyc
+new file mode 100644
+index 0000000..38daf89
+Binary files /dev/null and b/repository_after/src/__pycache__/utils.cpython-311.pyc differ
+diff --git a/repository_after/src/ascii_converter.py b/repository_after/src/ascii_converter.py
+new file mode 100644
+index 0000000..a72299f
+--- /dev/null
++++ b/repository_after/src/ascii_converter.py
+@@ -0,0 +1,121 @@
++from PIL import Image
++import numpy as np
++from typing import List, Dict, Tuple, Optional
++from .color_handler import ColorHandler
++
++CHAR_SETS = {
++    'simple': " .:-=+*#%@"[::-1], # Darkest to lightest usually, or flip for black BG
++    'detailed': "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "[::-1],
++    'block': "█▓▒░ ",
++}
++
++class AsciiConverter:
++    """Converts pixel data into ASCII characters."""
++
++    def __init__(self, char_set: str = 'detailed', custom_set: str = None):
++        if custom_set:
++            self.chars = custom_set
++        else:
++            self.chars = CHAR_SETS.get(char_set, CHAR_SETS['detailed'])
++        self.char_len = len(self.chars)
++
++    def _pixel_to_char(self, value: int) -> str:
++        """Maps 0-255 brightness to character index."""
++        # Ensure value is clamped
++        value = max(0, min(255, value))
++        index = int((value / 255) * (self.char_len - 1))
++        return self.chars[index]
++
++    def convert_braille(self, image: Image.Image) -> List[List[str]]:
++        """
++        Converts image to Unicode Braille patterns.
++        Image must be resized to (W*2, H*4) prior to this.
++        """
++        pixels = np.array(image.convert('L'))
++        height, width = pixels.shape
++        output = []
++
++        # Threshold for "dot on"
++        threshold = 127
++
++        for y in range(0, height - 3, 4):
++            row = []
++            for x in range(0, width - 1, 2):
++                byte = 0
++                if x < width and y < height and pixels[y, x] > threshold: byte |= 0x1
++                if x < width and y+1 < height and pixels[y+1, x] > threshold: byte |= 0x2
++                if x < width and y+2 < height and pixels[y+2, x] > threshold: byte |= 0x4
++                if x+1 < width and y < height and pixels[y, x+1] > threshold: byte |= 0x8
++                if x+1 < width and y+1 < height and pixels[y+1, x+1] > threshold: byte |= 0x10
++                if x+1 < width and y+2 < height and pixels[y+2, x+1] > threshold: byte |= 0x20
++                if x < width and y+3 < height and pixels[y+3, x] > threshold: byte |= 0x40
++                if x+1 < width and y+3 < height and pixels[y+3, x+1] > threshold: byte |= 0x80
++
++                row.append(chr(0x2800 + byte))
++            output.append(row)
++        return output
++
++    def convert_image(self, image: Image.Image, color_mode: str = 'grayscale', dither: bool = False) -> Tuple[List[str], List[List[Tuple[int, int, int]]]]:
++        """
++        Converts image to ASCII grid.
++        Returns: (Lines of text, Color grid (RGB tuples))
++        """
++        # Prepare Grayscale for character mapping
++        gray_image = image.convert('L')
++
++        if dither:
++            # Floyd-Steinberg Dithering for character selection
++            # We map 0-255 range to 0-(N-1) range explicitly
++            arr = np.array(gray_image, dtype=float)
++            h, w = arr.shape
++            quant_error = 0.0
++
++            for y in range(h):
++                for x in range(w):
++                    old_pixel = arr[y, x]
++                    # Quantize
++                    normalized = old_pixel / 255.0
++                    idx = int(normalized * (self.char_len - 1))
++                    idx = max(0, min(self.char_len - 1, idx))
++
++                    new_pixel_val = (idx / (self.char_len - 1)) * 255.0
++                    arr[y, x] = new_pixel_val
++
++                    quant_error = old_pixel - new_pixel_val
++
++                    # Distribute error
++                    if x + 1 < w:
++                        arr[y, x + 1] += quant_error * 7 / 16
++                    if x - 1 >= 0 and y + 1 < h:
++                        arr[y + 1, x - 1] += quant_error * 3 / 16
++                    if y + 1 < h:
++                        arr[y + 1, x] += quant_error * 5 / 16
++                    if x + 1 < w and y + 1 < h:
++                        arr[y + 1, x + 1] += quant_error * 1 / 16
++
++            # Re-read quantized array to chars
++            chars_grid = []
++            for y in range(h):
++                row_str = ""
++                for x in range(w):
++                    val = max(0, min(255, int(arr[y, x])))
++                    idx = int((val / 255) * (self.char_len - 1))
++                    row_str += self.chars[idx]
++                chars_grid.append(row_str)
++
++        else:
++            pixels = np.array(gray_image)
++            chars_grid = []
++            for row in pixels:
++                chars_grid.append("".join([self._pixel_to_char(p) for p in row]))
++
++        colors_grid = []
++        if color_mode != 'grayscale':
++            rgb_image = image.convert('RGB')
++            # For Braille, color extraction is tricky (block average),
++            color_pixels = np.array(rgb_image)
++            for row in color_pixels:
++                row_colors = [tuple(p) for p in row]
++                colors_grid.append(row_colors)
++
++        return chars_grid, colors_grid
+\ No newline at end of file
+diff --git a/repository_after/src/color_handler.py b/repository_after/src/color_handler.py
+new file mode 100644
+index 0000000..70f9c7b
+--- /dev/null
++++ b/repository_after/src/color_handler.py
+@@ -0,0 +1,31 @@
++from typing import Tuple, Optional
++
++class ColorHandler:
++    """Handles color conversion for Terminal and HTML output."""
++
++    @staticmethod
++    def rgb_to_ansi(r: int, g: int, b: int, background: bool = False) -> str:
++        """Converts RGB values to ANSI escape codes (True Color)."""
++        mode = 48 if background else 38
++        return f"\033[{mode};2;{r};{g};{b}m"
++
++    @staticmethod
++    def rgb_to_html(r: int, g: int, b: int) -> str:
++        """Converts RGB values to Hex string."""
++        return f"#{r:02x}{g:02x}{b:02x}"
++
++    @staticmethod
++    def get_reset_code() -> str:
++        """Returns the ANSI reset code."""
++        return "\033[0m"
++
++    @staticmethod
++    def rgb_to_ansi_256(r: int, g: int, b: int) -> str:
++        """Approximates RGB to ANSI 256 color code."""
++        if r == g == b:
++            if r < 8: return "\033[38;5;16m"
++            if r > 248: return "\033[38;5;231m"
++            return f"\033[38;5;{round(((r - 8) / 247) * 24) + 232}m"
++
++        val = 16 + (36 * round(r / 255 * 5)) + (6 * round(g / 255 * 5)) + round(b / 255 * 5)
++        return f"\033[38;5;{val}m"
+\ No newline at end of file
+diff --git a/repository_after/src/image_processor.py b/repository_after/src/image_processor.py
+new file mode 100644
+index 0000000..756f309
+--- /dev/null
++++ b/repository_after/src/image_processor.py
+@@ -0,0 +1,80 @@
++from PIL import Image, ImageEnhance, ImageFilter, ImageOps
++import numpy as np
++from typing import Tuple, Optional, Union
++
++class ImageProcessor:
++    """Handles loading and preprocessing of images."""
++
++    def __init__(self):
++        pass
++
++    def load_image(self, path: str) -> Image.Image:
++        """Loads an image from a file path."""
++        try:
++            return Image.open(path)
++        except IOError:
++            raise ValueError(f"Unable to load image: {path}")
++
++    def preprocess(self, image: Image.Image,
++                   contrast: float = 1.0,
++                   brightness: float = 1.0,
++                   sharpness: float = 1.0,
++                   invert: bool = False,
++                   flip_h: bool = False,
++                   flip_v: bool = False,
++                   edge_detect: bool = False) -> Image.Image:
++        """Applies various image enhancements and transformations."""
++
++        # Color corrections
++        if contrast != 1.0:
++            image = ImageEnhance.Contrast(image).enhance(contrast)
++        if brightness != 1.0:
++            image = ImageEnhance.Brightness(image).enhance(brightness)
++        if sharpness != 1.0:
++            image = ImageEnhance.Sharpness(image).enhance(sharpness)
++
++        # Transformations
++        if flip_h:
++            image = ImageOps.mirror(image)
++        if flip_v:
++            image = ImageOps.flip(image)
++        if invert:
++            # Invert requires RGB or L mode usually
++            if image.mode == 'RGBA':
++                r, g, b, a = image.split()
++                rgb_image = Image.merge('RGB', (r, g, b))
++                inverted = ImageOps.invert(rgb_image)
++                r, g, b = inverted.split()
++                image = Image.merge('RGBA', (r, g, b, a))
++            else:
++                image = ImageOps.invert(image.convert('RGB'))
++
++        # Filters
++        if edge_detect:
++            image = image.filter(ImageFilter.FIND_EDGES)
++
++        return image
++
++    def resize_for_ascii(self, image: Image.Image, width: int, aspect_ratio: float = 0.5, braille: bool = False) -> Image.Image:
++        """
++        Resizes image accounting for terminal character aspect ratio.
++
++        Args:
++            image: Source image.
++            width: Target width in characters.
++            aspect_ratio: Height/Width ratio of a terminal character (usually ~0.5).
++            braille: If True, uses specific calculation for 2x4 dot matrix.
++        """
++        w_orig, h_orig = image.size
++
++        if braille:
++            # Braille uses 2x4 dots per character
++            # We resize the image to the virtual pixel size (2 * chars_width, 4 * chars_height)
++            # To keep aspect, we first calculate target char height
++            r = h_orig / w_orig
++            h_chars = int(width * r * aspect_ratio)
++            return image.resize((width * 2, h_chars * 4), Image.Resampling.LANCZOS)
++
++        r = h_orig / w_orig
++        new_height = int(width * r * aspect_ratio)
++        return image.resize((width, new_height), Image.Resampling.LANCZOS)
+\ No newline at end of file
+diff --git a/repository_after/src/main.py b/repository_after/src/main.py
+new file mode 100644
+index 0000000..8a04d01
+--- /dev/null
++++ b/repository_after/src/main.py
+@@ -0,0 +1,175 @@
++import argparse
++import sys
++import os
++import cv2
++import time
++from tqdm import tqdm
++from pathlib import Path
++
++from .image_processor import ImageProcessor
++from .ascii_converter import AsciiConverter
++from .output_generator import OutputGenerator
++from .utils import load_config
++
++def process_single_image(args, config, img_path):
++    processor = ImageProcessor()
++    converter = AsciiConverter(char_set=args.charset, custom_set=args.custom_chars)
++    generator = OutputGenerator()
++
++    # Load
++    try:
++        img = processor.load_image(img_path)
++    except Exception as e:
++        print(f"Error loading {img_path}: {e}")
++        return
++
++    # Preprocess
++    img = processor.preprocess(
++        img,
++        contrast=args.contrast,
++        brightness=args.brightness,
++        sharpness=args.sharpness,
++        invert=args.invert,
++        flip_h=args.mirror,
++        flip_v=args.flip,
++        edge_detect=args.edge
++    )
++
++    # Resize
++    braille_mode = (args.charset == 'braille')
++    resized_img = processor.resize_for_ascii(
++        img,
++        width=args.width,
++        braille=braille_mode
++    )
++
++    # Convert
++    if braille_mode:
++        ascii_grid = converter.convert_braille(resized_img)
++        # Flatten braille rows to strings
++        ascii_lines = ["".join(row) for row in ascii_grid]
++        # Braille color extraction not implemented in this demo, default to none
++        colors = []
++    else:
++        ascii_lines, colors = converter.convert_image(
++            resized_img,
++            color_mode=args.color_mode,
++            dither=args.dither
++        )
++
++    # Output Handling
++    output_content = ""
++    if args.format == 'terminal':
++        print(generator.generate_terminal(ascii_lines, colors, args.color_mode))
++    else:
++        if args.format == 'html':
++            output_content = generator.generate_html(
++                ascii_lines, colors,
++                original_image=img if args.compare else None,
++                comparison=args.compare
++            )
++            ext = ".html"
++        elif args.format == 'json':
++            meta = vars(args)
++            output_content = generator.generate_json(ascii_lines, meta)
++            ext = ".json"
++        else: # txt
++            output_content = generator.generate_text(ascii_lines)
++            ext = ".txt"
++
++        # Save
++        filename = Path(img_path).stem
++        out_path = os.path.join(args.output_dir, f"{filename}{ext}")
++        generator.save_file(output_content, out_path)
++        print(f"Saved to {out_path}")
++
++def process_video(args, config):
++    cap = cv2.VideoCapture(args.input)
++    if not cap.isOpened():
++        print("Error opening video stream or file")
++        return
++
++    processor = ImageProcessor()
++    converter = AsciiConverter(char_set=args.charset)
++    generator = OutputGenerator()
++
++    # Calculate FPS
++    fps = cap.get(cv2.CAP_PROP_FPS)
++    frame_delay = 1.0 / fps if fps > 0 else 0.1
++
++    try:
++        while cap.isOpened():
++            ret, frame = cap.read()
++            if not ret:
++                break
++
++            # Convert OpenCV frame (BGR) to PIL Image (RGB)
++            img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
++            pil_img = Image.fromarray(img)
++
++            # Minimal preprocessing for speed
++            resized_img = processor.resize_for_ascii(pil_img, width=args.width)
++            ascii_lines, colors = converter.convert_image(resized_img, color_mode=args.color_mode)
++
++            # Clear screen and print
++            output = generator.generate_terminal(ascii_lines, colors, args.color_mode)
++            # ANSI clear screen
++            sys.stdout.write("\033[2J\033[H")
++            sys.stdout.write(output)
++            sys.stdout.flush()
++
++            time.sleep(frame_delay)
++    except KeyboardInterrupt:
++        print("\nStopped.")
++    finally:
++        cap.release()
++
++def main():
++    parser = argparse.ArgumentParser(description="Advanced ASCII Art Generator")
++
++    # Input/Output
++    parser.add_argument('-i', '--input', required=True, help="Input image path, folder, or video")
++    parser.add_argument('-o', '--output-dir', default=".", help="Output directory")
++    parser.add_argument('-w', '--width', type=int, default=100, help="Output width in characters")
++    parser.add_argument('--format', choices=['text', 'html', 'terminal', 'json'], default='terminal')
++    parser.add_argument('--config', help="Path to config file")
++
++    # Character and Color
++    parser.add_argument('--charset', choices=['simple', 'detailed', 'block', 'braille'], default='detailed')
++    parser.add_argument('--custom-chars', help="Custom string of characters")
++    parser.add_argument('--color-mode', choices=['grayscale', 'ansi256', 'truecolor'], default='grayscale')
++
++    # Preprocessing
++    parser.add_argument('--contrast', type=float, default=1.0)
++    parser.add_argument('--brightness', type=float, default=1.0)
++    parser.add_argument('--sharpness', type=float, default=1.0)
++    parser.add_argument('--dither', action='store_true', help="Apply Floyd-Steinberg dithering")
++    parser.add_argument('--edge', action='store_true', help="Edge detection")
++
++    # Transform
++    parser.add_argument('--invert', action='store_true', help="Invert colors")
++    parser.add_argument('--mirror', action='store_true', help="Horizontal flip")
++    parser.add_argument('--flip', action='store_true', help="Vertical flip")
++
++    # Extra
++    parser.add_argument('--compare', action='store_true', help="Show original image in HTML output")
++
++    args = parser.parse_args()
++    config = load_config(args.config)
++
++    # Video check
++    ext = os.path.splitext(args.input)[1].lower()
++    if ext in ['.mp4', '.avi', '.mov', '.mkv']:
++        process_video(args, config)
++    elif os.path.isdir(args.input):
++        # Batch processing
++        files = [os.path.join(args.input, f) for f in os.listdir(args.input)
++                 if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))]
++        for f in tqdm(files, desc="Processing Images"):
++            process_single_image(args, config, f)
++    else:
++        # Single Image
++        process_single_image(args, config, args.input)
++
++if __name__ == "__main__":
++    main()
+\ No newline at end of file
+diff --git a/repository_after/src/output_generator.py b/repository_after/src/output_generator.py
+new file mode 100644
+index 0000000..080c87a
+--- /dev/null
++++ b/repository_after/src/output_generator.py
+@@ -0,0 +1,92 @@
++import json
++import os
++import html
++from typing import List, Tuple
++from .color_handler import ColorHandler
++from PIL import Image
++import io
++import base64
++
++class OutputGenerator:
++    """Generates various output formats."""
++
++    @staticmethod
++    def generate_text(ascii_lines: List[str]) -> str:
++        return "\n".join(ascii_lines)
++
++    @staticmethod
++    def generate_terminal(ascii_lines: List[str], colors: List[List[Tuple]], mode: str) -> str:
++        output = []
++        for y, line in enumerate(ascii_lines):
++            row_str = ""
++            for x, char in enumerate(line):
++                prefix = ""
++                if colors and y < len(colors) and x < len(colors[y]):
++                    r, g, b = colors[y][x]
++                    if mode == 'ansi256':
++                        prefix = ColorHandler.rgb_to_ansi_256(r, g, b)
++                    elif mode == 'truecolor':
++                        prefix = ColorHandler.rgb_to_ansi(r, g, b)
++
++                row_str += f"{prefix}{char}"
++            output.append(row_str + ColorHandler.get_reset_code())
++        return "\n".join(output)
++
++    @staticmethod
++    def generate_html(ascii_lines: List[str], colors: List[List[Tuple]],
++                      original_image: Image.Image = None, comparison: bool = False) -> str:
++
++        # Base template
++        html_content = """
++        <!DOCTYPE html>
++        <html>
++        <head>
++            <style>
++                body { background-color: #1a1a1a; color: #f0f0f0; font-family: 'Courier New', monospace; white-space: pre; line-height: 0.6; }
++                .container { display: flex; gap: 20px; padding: 20px; }
++                .ascii-art { font-size: 8px; overflow-x: auto; }
++                .original { max-width: 50%; }
++                img { width: 100%; height: auto; }
++            </style>
++        </head>
++        <body>
++        <div class="container">
++        """
++
++        # Comparison view logic
++        if comparison and original_image:
++            img_byte_arr = io.BytesIO()
++            original_image.save(img_byte_arr, format='PNG')
++            img_b64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
++            html_content += f'<div class="original"><img src="data:image/png;base64,{img_b64}" /></div>'
++
++        html_content += '<div class="ascii-art">'
++
++        for y, line in enumerate(ascii_lines):
++            for x, char in enumerate(line):
++                color_style = ""
++                if colors and y < len(colors) and x < len(colors[y]):
++                    r, g, b = colors[y][x]
++                    hex_color = ColorHandler.rgb_to_html(r, g, b)
++                    color_style = f"color: {hex_color};"
++
++                # Escape HTML chars
++                safe_char = html.escape(char)
++                html_content += f'<span style="{color_style}">{safe_char}</span>'
++            html_content += "<br>"
++
++        html_content += "</div></div></body></html>"
++        return html_content
++
++    @staticmethod
++    def save_file(content: str, path: str):
++        with open(path, 'w', encoding='utf-8') as f:
++            f.write(content)
++
++    @staticmethod
++    def generate_json(ascii_lines: List[str], metadata: dict) -> str:
++        data = {
++            "metadata": metadata,
++            "content": ascii_lines
++        }
++        return json.dumps(data, indent=2)
+\ No newline at end of file
+diff --git a/repository_after/src/utils.py b/repository_after/src/utils.py
+new file mode 100644
+index 0000000..0a666f1
+--- /dev/null
++++ b/repository_after/src/utils.py
+@@ -0,0 +1,27 @@
++import os
++import yaml
++from typing import Dict, Any, Optional
++
++DEFAULT_CONFIG = {
++    "width": 100,
++    "mode": "detailed",
++    "color": "grayscale",
++    "preprocess": {"contrast": 1.0, "brightness": 1.0, "sharpness": 1.0},
++}
++
++def load_config(config_path: Optional[str]) -> Dict[str, Any]:
++    """Loads configuration from a YAML/JSON file."""
++    config = DEFAULT_CONFIG.copy()
++    if config_path and os.path.exists(config_path):
++        try:
++            with open(config_path, 'r') as f:
++                user_config = yaml.safe_load(f)
++                if user_config:
++                    config.update(user_config)
++        except Exception as e:
++            print(f"Warning: Could not load config file: {e}")
++    return config
++
++def validate_path(path: str) -> bool:
++    """Checks if a file path exists."""
++    return os.path.exists(path)
+\ No newline at end of file
