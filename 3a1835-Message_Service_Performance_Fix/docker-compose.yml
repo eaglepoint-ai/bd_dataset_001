@@ -1,0 +1,46 @@
+services:
+  run_before:
+    build: .
+    volumes:
+      - ./tests:/app/tests:z
+      - ./evaluation:/app/evaluation:z
+    command: >
+      bash -c "
+        cd /app/repository_before &&
+        npx prisma generate --schema=/app/prisma/schema.prisma &&
+        npx prisma db push --skip-generate --schema=/app/prisma/schema.prisma &&
+        cd /app &&
+        npx ts-node --project /app/tsconfig.json tests/messageService.before.test.ts
+      "
+    working_dir: /app
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL:-file:./dev.db}
+    security_opt:
+      - label:disable
+
+  run_after:
+    build: .
+    volumes:
+      - ./tests:/app/tests:z
+      - ./evaluation:/app/evaluation:z
+    command: npx ts-node --project /app/tsconfig.json tests/messageService.after.test.ts
+    working_dir: /app
+    environment:
+      - NODE_ENV=development
+    security_opt:
+      - label:disable
+
+  evaluation:
+    build: .
+    volumes:
+      - ./tests:/app/tests:z
+      - ./evaluation:/app/evaluation:z
+    command: npx ts-node --project /app/tsconfig.json evaluation/evaluation.ts
+    working_dir: /app
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL:-file:./dev.db}
+    security_opt:
+      - label:disable
+

@@ -1,0 +1,21 @@
+{
+  "name": "product-search-optimization",
+  "version": "1.0.0",
+  "description": "Product search performance optimization task",
+  "main": "repository_before/index.js",
+  "scripts": {
+    "test:before": "mocha tests/productSearch.before.test.js",
+    "test:after": "mocha tests/productSearch.after.test.js",
+    "test": "npm run test:after"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^11.7.5"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
+  }
+}
+
