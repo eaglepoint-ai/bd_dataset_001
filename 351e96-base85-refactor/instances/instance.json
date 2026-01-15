@@ -1,0 +1,9 @@
+{
+    "instance_id": "351e96",
+    "problem_statement": "",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/351e96-base85-refactor",
+    "environment_setup": "Dockerfile"
+  }
+  
