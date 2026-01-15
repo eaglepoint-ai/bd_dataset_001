@@ -1,21 +1,42 @@
-/**
- * Evaluation script for TaskProcessor Memory Leak Fix
- * Runs tests on repository_before and repository_after and generates comparison reports
- */
-
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+
+const TASK_ID = "9e3b7a";
+const TASK_NAME = "TaskProcessor Memory Leak Fix";
 
 function parseJestOutput(output) {
   const results = {
     passed: 0,
     failed: 0,
     total: 0,
-    tests: {}
+    tests: []
   };
 
   const lines = output.split('\n');
+  
+  // Extract individual tests - look for common Jest output patterns
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Debug: log lines that might be tests
+    if (trimmed.length > 0 && !trimmed.startsWith('PASS') && !trimmed.startsWith('FAIL') && !trimmed.includes('Tests:')) {
+      // console.log('DEBUG LINE:', JSON.stringify(line));
+    }
+    // Match lines starting with checkmark or X, or containing PASSED/FAILED labels
+    // Jest output usually has ✓ (0x2713) or ✕ (0x2715) or [PASS]/[FAIL]
+    if (/[✓✕]/.test(trimmed) || /\[PASS\]|\[FAIL\]/.test(trimmed) || /√|×/.test(trimmed)) {
+      const outcome = (trimmed.includes('✓') || trimmed.includes('[PASS]') || trimmed.includes('√')) ? 'passed' : 'failed';
+      // Remove the icon and timing like (100 ms)
+      let name = trimmed.replace(/^[✓✕√×\[\]PASSFAIL\s]+/, '').replace(/\s*\(\d+\s*ms\)$/, '').trim();
+      results.tests.push({
+        name,
+        outcome
+      });
+    }
+  }
+
+  // Parse summary counts
   let summaryLine = '';
   for (let i = lines.length - 1; i >= 0; i--) {
     if (lines[i].includes('Tests:')) {
@@ -34,25 +55,24 @@ function parseJestOutput(output) {
     if (totalMatch) results.total = parseInt(totalMatch[1]);
   }
 
-  // If no total found, calculate from passed + failed
-  if (!results.total) {
-    results.total = results.passed + results.failed;
-  }
-
-  // Mark tests
-  for (let i = 0; i < results.passed; i++) {
-    results.tests[`test_passed_${i}`] = 'PASSED';
-  }
-  for (let i = 0; i < results.failed; i++) {
-    results.tests[`test_failed_${i}`] = 'FAILED';
+  if (!results.total && results.tests.length > 0) {
+    results.total = results.tests.length;
+    results.passed = results.tests.filter(t => t.outcome === 'passed').length;
+    results.failed = results.tests.filter(t => t.outcome === 'failed').length;
   }
 
   return results;
 }
 
-function runTests(repoPath) {
+function runTests(repoPath, label) {
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`RUNNING TESTS: ${label.toUpperCase()}`);
+  console.log(`${'='.repeat(60)}`);
+  console.log(`Repository: ${path.basename(repoPath)}`);
+
   const repoName = path.basename(repoPath);
   let output = '';
+  let exitCode = 0;
   
   try {
     output = execSync(
@@ -60,12 +80,9 @@ function runTests(repoPath) {
       {
         encoding: 'utf-8',
         timeout: 60000,
-        env: { ...process.env, REPO: repoName }
+        env: { ...process.env, REPO: repoName, CI: 'true' }
       }
     );
-
-    return parseJestOutput(output);
-
   } catch (error) {
     output = error.stdout ? error.stdout.toString() : '';
     if (!output && error.stderr) {
@@ -74,97 +91,30 @@ function runTests(repoPath) {
     if (!output && error.output) {
       output = error.output.join('');
     }
-
-    const results = parseJestOutput(output);
-    
-    if (!results.total) {
-      results.error = 'Could not parse test results';
-    }
-    
-    return results;
+    exitCode = error.status || 1;
   }
-}
 
-function generateReport(beforeResults, afterResults, outputPath) {
-  const started_at = new Date();
+  const results = parseJestOutput(output);
+  results.success = exitCode === 0;
+
+  console.log(`\nResults: ${results.passed} passed, ${results.failed} failed (total: ${results.total})`);
   
-  const report = {
-    run_id: require('crypto').randomUUID(),
-    started_at: started_at.toISOString(),
-    finished_at: new Date().toISOString(),
-    duration_seconds: (new Date() - started_at) / 1000,
-    environment: {
-      node_version: process.version,
-      platform: `${process.platform}-${process.arch}`
-    },
-    before: {
-      tests: beforeResults.tests,
-      metrics: {
-        total: beforeResults.total,
-        passed: beforeResults.passed,
-        failed: beforeResults.failed
-      },
-      error: beforeResults.error
-    },
-    after: {
-      tests: afterResults.tests,
-      metrics: {
-        total: afterResults.total,
-        passed: afterResults.passed,
-        failed: afterResults.failed
-      },
-      error: afterResults.error
-    },
-    comparison: {
-      tests_fixed: [],
-      tests_broken: [],
-      improvement: 0
-    },
-    success: false,
-    error: null
-  };
-
-  // Calculate comparison
-  const beforeTests = new Set(Object.keys(beforeResults.tests));
-  const afterTests = new Set(Object.keys(afterResults.tests));
-
-  afterTests.forEach(test => {
-    const beforeStatus = beforeResults.tests[test] || 'FAILED';
-    const afterStatus = afterResults.tests[test] || 'FAILED';
-
-    if (beforeStatus === 'FAILED' && afterStatus === 'PASSED') {
-      report.comparison.tests_fixed.push(test);
-    } else if (beforeStatus === 'PASSED' && afterStatus === 'FAILED') {
-      report.comparison.tests_broken.push(test);
-    }
+  results.tests.forEach(test => {
+    const icon = test.outcome === 'passed' ? '✅' : '❌';
+    console.log(`  ${icon} ${test.name}`);
   });
 
-  // Calculate improvement
-  if (afterResults.total > 0) {
-    const beforeRate = (beforeResults.passed / Math.max(beforeResults.total, 1)) * 100;
-    const afterRate = (afterResults.passed / afterResults.total) * 100;
-    report.comparison.improvement = Math.round((afterRate - beforeRate) * 100) / 100;
-  }
+  return results;
+}
 
-  // Determine success
-  report.success = (
-    afterResults.passed === afterResults.total &&
-    afterResults.total > 0 &&
-    !afterResults.error
-  );
-
-  // Update duration
-  report.finished_at = new Date().toISOString();
-  report.duration_seconds = (new Date() - started_at) / 1000;
-
-  // Save report
-  const dir = path.dirname(outputPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
-
-  return report;
+function getEnvironmentInfo() {
+  return {
+    node_version: process.version,
+    platform: os.platform(),
+    os_release: os.release(),
+    architecture: os.arch(),
+    hostname: os.hostname(),
+  };
 }
 
 function main() {
@@ -174,64 +124,71 @@ function main() {
   console.log(`Run ID: ${runId}`);
   console.log(`Started at: ${startedAt.toISOString()}`);
   console.log(`\n${'='.repeat(60)}`);
-  console.log('TASKPROCESSOR MEMORY LEAK FIX EVALUATION');
+  console.log(TASK_NAME.toUpperCase());
   console.log('='.repeat(60));
 
   const projectRoot = path.join(__dirname, '..');
   const repoBefore = path.join(projectRoot, 'repository_before');
   const repoAfter = path.join(projectRoot, 'repository_after');
 
-  // Run tests on repository_before
-  console.log(`\n${'='.repeat(60)}`);
-  console.log('RUNNING TESTS: BEFORE (REPOSITORY_BEFORE)');
-  console.log('='.repeat(60));
-  console.log('Repository: repository_before\n');
-  const beforeResults = runTests(repoBefore);
-  console.log(`\nResults: ${beforeResults.passed} passed, ${beforeResults.failed} failed (total: ${beforeResults.total})`);
-  if (beforeResults.error) {
-    console.log(`Error: ${beforeResults.error}`);
-  }
+  const beforeResults = runTests(repoBefore, 'before (repository_before)');
+  const afterResults = runTests(repoAfter, 'after (repository_after)');
 
-  // Run tests on repository_after
-  console.log(`\n${'='.repeat(60)}`);
-  console.log('RUNNING TESTS: AFTER (REPOSITORY_AFTER)');
-  console.log('='.repeat(60));
-  console.log('Repository: repository_after\n');
-  const afterResults = runTests(repoAfter);
-  console.log(`\nResults: ${afterResults.passed} passed, ${afterResults.failed} failed (total: ${afterResults.total})`);
-  if (afterResults.error) {
-    console.log(`Error: ${afterResults.error}`);
-  }
-
-  // Create output directory with timestamp
-  const now = new Date();
-  const dateStr = now.toISOString().split('T')[0];
-  const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-  const outputDir = path.join(projectRoot, 'evaluation', dateStr, timeStr);
-  const outputFile = path.join(outputDir, 'report.json');
-
-  // Generate report
-  const report = generateReport(beforeResults, afterResults, outputFile);
+  const comparison = {
+    before_tests_passed: beforeResults.success,
+    after_tests_passed: afterResults.success,
+    before_passed: beforeResults.passed,
+    before_failed: beforeResults.failed,
+    after_passed: afterResults.passed,
+    after_failed: afterResults.failed,
+  };
 
   console.log(`\n${'='.repeat(60)}`);
   console.log('EVALUATION SUMMARY');
   console.log('='.repeat(60));
   
   console.log(`\nBefore Implementation (repository_before):`);
-  console.log(`  Overall: ${beforeResults.error ? '❌ ERROR' : beforeResults.failed > 0 ? '❌ FAILED' : '✅ PASSED'}`);
+  console.log(`  Overall: ${beforeResults.success ? '✅ PASSED' : '❌ FAILED'}`);
   console.log(`  Tests: ${beforeResults.passed}/${beforeResults.total} passed`);
 
   console.log(`\nAfter Implementation (repository_after):`);
-  console.log(`  Overall: ${afterResults.error ? '❌ ERROR' : afterResults.failed === 0 && afterResults.total > 0 ? '✅ PASSED' : '❌ FAILED'}`);
+  console.log(`  Overall: ${afterResults.success ? '✅ PASSED' : '❌ FAILED'}`);
   console.log(`  Tests: ${afterResults.passed}/${afterResults.total} passed`);
 
-  console.log(`\nMemory Leaks Fixed: ${report.comparison.tests_fixed.length}`);
-  console.log(`Improvement: ${report.comparison.improvement}%`);
-  console.log(`Overall Success: ${report.success ? '✅ PASSED' : '❌ FAILED'}`);
+  // Overall success depends on after passing and before showing expected failures
+  const overallSuccess = afterResults.success && !beforeResults.success;
 
+  const report = {
+    run_id: runId,
+    task_id: TASK_ID,
+    task_name: TASK_NAME,
+    started_at: startedAt.toISOString(),
+    finished_at: new Date().toISOString(),
+    success: overallSuccess,
+    error: overallSuccess ? null : "Verification failed: repository_after must pass and repository_before should fail",
+    environment: getEnvironmentInfo(),
+    results: {
+      before: beforeResults,
+      after: afterResults,
+      comparison
+    }
+  };
+
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+  const outputDir = path.join(projectRoot, 'evaluation', dateStr, timeStr);
+  const outputFile = path.join(outputDir, 'report.json');
+
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  fs.writeFileSync(outputFile, JSON.stringify(report, null, 2));
   console.log(`\n✅ Report saved to: ${outputFile}`);
 
-  process.exit(report.success ? 0 : 1);
+  process.exit(overallSuccess ? 0 : 1);
 }
 
 main();
+
