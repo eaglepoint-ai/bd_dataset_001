@@ -90,7 +90,8 @@ function runTests(repoPath, label, expectLeaks = false) {
   let exitCode = 0;
   
   try {
-    stdout = execSync('npm test', { 
+    // Redirect stderr to stdout to ensure Jest output is captured
+    stdout = execSync('npm test 2>&1', { 
       env, 
       encoding: 'utf-8', 
       stdio: 'pipe' 
