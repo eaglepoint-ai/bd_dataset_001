@@ -1,0 +1,42 @@
+services:
+  evaluation:
+    build: .
+    volumes:
+      - .:/app
+    command: python3 /app/evaluation/evaluation.py
+
+  test-before:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      - TEST_REPO=/app/repository_before
+    command: pytest -q tests
+    working_dir: /app
+
+  test-after:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      - TEST_REPO=/app/repository_after
+    command: pytest -q tests
+    working_dir: /app
+
+  app:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      - TEST_REPO=/app/repository_after
+    command: pytest -q tests
+    working_dir: /app
+
+  web:
+    build: .
+    volumes:
+      - .:/app
+    working_dir: /app/repository_after
+    command: python3 server.py
+    ports:
+      - "8000:8000"
