@@ -1,8 +1,8 @@
 # ======================
 # Evaluation artifacts
 # ======================
-evaluation/reports/**
-evaluation/reports/*
+evaluation/20*/
+evaluation/reports/
 # ======================
 # Node / Frontend
 # ======================

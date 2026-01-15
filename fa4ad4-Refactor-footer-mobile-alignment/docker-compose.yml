@@ -1,16 +1,7 @@
 services:
-  app:
-    build: .
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/repository_before/demo-app/node_modules
-      - /app/repository_after/demo-app/node_modules
-    environment:
-      - REPO=repository_after
-
   app-before:
     build: .
+    working_dir: /app
     command: npm test
     volumes:
       - .:/app
@@ -22,6 +13,7 @@ services:
 
   app-after:
     build: .
+    working_dir: /app
     command: npm test
     volumes:
       - .:/app
@@ -33,6 +25,7 @@ services:
 
   evaluation:
     build: .
+    working_dir: /app
     command: npm run evaluation
     volumes:
       - .:/app

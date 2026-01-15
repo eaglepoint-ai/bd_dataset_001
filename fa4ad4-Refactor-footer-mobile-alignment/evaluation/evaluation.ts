@@ -31,14 +31,18 @@ function generateRunId(): string {
 function getGitInfo(): { git_commit: string; git_branch: string } {
   const info = { git_commit: 'unknown', git_branch: 'unknown' };
   try {
-    const commit = execSync('git rev-parse HEAD', { encoding: 'utf-8', timeout: 5000 }).trim();
+    const commit = execSync('git rev-parse HEAD', { encoding: 'utf-8', timeout: 5000, stdio: 'pipe' }).trim();
     info.git_commit = commit.substring(0, 8);
-  } catch (e) {}
+  } catch (e) {
+    // Silently ignore git errors (not in a git repo)
+  }
 
   try {
-    const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8', timeout: 5000 }).trim();
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8', timeout: 5000, stdio: 'pipe' }).trim();
     info.git_branch = branch;
-  } catch (e) {}
+  } catch (e) {
+    // Silently ignore git errors (not in a git repo)
+  }
 
   return info;
 }
@@ -134,8 +138,17 @@ function runTestsWithRepo(repoName: string, label: string): EvaluationResult {
 }
 
 function generateOutputPath(): string {
+  // Generate timestamped directory structure like cb4e35
   const projectRoot = path.resolve(__dirname, '..');
-  return path.join(projectRoot, 'report.json');
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+  const outputDir = path.join(projectRoot, 'evaluation', dateStr, timeStr);
+  
+  // Create directory if it doesn't exist
+  fs.mkdirSync(outputDir, { recursive: true });
+  
+  return path.join(outputDir, 'report.json');
 }
 
 function main() {
