@@ -93,5 +93,5 @@ docker compose run --rm test-before
 docker compose run --rm test-after
 
 # Run evaluation and generate reports
-docker compose run --rm evaluate
+docker compose run --rm evaluation
 ```
