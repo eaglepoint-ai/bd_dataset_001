@@ -26,7 +26,7 @@ def run_tests(context_path=None):
         
     try:
         proc = subprocess.run(
-            ["pytest", "tests", "-q"],
+            ["pytest", "tests", "-v", "--tb=no"],
             cwd=ROOT,
             capture_output=True,
             text=True,
@@ -140,10 +140,15 @@ def print_summary(report, report_path):
     for stage, label in [("before", "BEFORE (repository_before)"), ("after", "AFTER (repository_after)")]:
         tests = report[stage]["tests"]
         passed_count, failed_count = parse_test_results(tests["output"])
+        total = passed_count + failed_count
         
         print(f"{label}:")
         print(f"  Tests passed: {tests['passed']}")
         print(f"  Passed: {passed_count} | Failed: {failed_count}")
+        if total > 0:
+            print(f"  Requirements covered: {passed_count}/{total}")
+        else:
+            print(f"  Requirements covered: 0/0")
         print()
 
     print("COMPARISON:")
