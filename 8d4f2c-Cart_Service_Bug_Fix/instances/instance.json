@@ -1,27 +1,12 @@
 {
-  "instance_id": "8d4f2c",
+  "instance_id": "8d4f2c-Cart_Service_Bug_Fix",
   "problem_statement": "Fix bugs in the CartService including mixed merchant validation, quantity validation, race conditions, discount logic, return values, and cart total calculations.",
-  "base_commit": "repository_before",
-  "test_patch": "tests/",
-  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/8d4f2c-Cart_Service_Bug_Fix",
-  "environment_setup": "Dockerfile",
-  "FAIL_TO_PASS": [
-    "tests/cartService.test.js::Requirement 1: Different merchant validation::should throw error when adding item from different merchant",
-    "tests/cartService.test.js::Requirement 2: Quantity validation::should reject quantity of 0",
-    "tests/cartService.test.js::Requirement 2: Quantity validation::should reject negative quantity",
-    "tests/cartService.test.js::Requirement 2: Quantity validation::should reject non-integer quantity",
-    "tests/cartService.test.js::Requirement 3: Atomic duplicate prevention::should prevent duplicate items using atomic operation",
-    "tests/cartService.test.js::Requirement 4: Discount application::should apply discounted price when discount is active and within date range",
-    "tests/cartService.test.js::Requirement 5: removeFromCart returns cart::should return updated cart instead of null",
-    "tests/cartService.test.js::Requirement 6: Recalculate pricing.subtotal::should update subtotal after updateCartItem",
-    "tests/cartService.test.js::Requirement 7: Recalculate pricing.totalItems::should update totalItems after updateCartItem",
-    "tests/cartService.test.js::Requirement 8: Handle missing merchantId on cart::should set merchantId when cart has items but merchantId is null"
-  ],
-  "PASS_TO_PASS": [
-    "tests/cartService.test.js::Requirement 1: Different merchant validation::should allow adding items from same merchant",
-    "tests/cartService.test.js::Requirement 2: Quantity validation::should accept valid positive integer quantity",
-    "tests/cartService.test.js::Requirement 9: Decimal128 conversion::should correctly convert Decimal128 price to number",
-    "tests/cartService.test.js::Requirement 9: Decimal128 conversion::should correctly convert Decimal128 subtotal to number"
-  ]
+  "base_commit": "",
+  "test_patch": "",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001",
+  "environment_setup": {
+    "dockerfile": "Dockerfile",
+    "docker_compose": "docker-compose.yml"
+  }
 }
 
