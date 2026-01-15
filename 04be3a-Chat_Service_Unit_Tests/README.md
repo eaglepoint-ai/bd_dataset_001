@@ -11,11 +11,13 @@ Write comprehensive unit tests for the `ChatService` class in `chatService.test.
 ## Requirements
 
 ### Test Setup
+
 1. Mock Prisma client correctly using `jest.mock`
 2. Set up `beforeEach`/`afterEach` for test isolation
 3. Reset mocks between tests
 
 ### Tests to Write
+
 4. `createConversation` - success case, duplicate title (409)
 5. `getConversationById` - found, not found (404)
 6. `getAllConversations` - with results, empty results, pagination
@@ -24,6 +26,7 @@ Write comprehensive unit tests for the `ChatService` class in `chatService.test.
 9. `getMessagesByConversation` - with results, pagination, empty
 
 ### Edge Cases
+
 10. Test pagination edge cases (page 0, negative page)
 11. Test empty string inputs
 12. Test very large limit values
@@ -46,9 +49,26 @@ Write comprehensive unit tests for the `ChatService` class in `chatService.test.
 ## Running Tests
 
 ```bash
+docker compose run test
+```
+
+### 2. Run the Meta-Tests
+
+```bash
+docker compose run metatest
+```
+
+### 3. Run the Evaluation
+
+```bash
+docker compose run evaluation
+```
+
+<!--
+```bash
 npm install
 npm test
-```
+``` -->
 
 ## Files
 
@@ -56,4 +76,3 @@ npm test
 - `chatService.test.ts` - Write your tests here
 - `lib/database.ts` - Prisma client stub (mock this)
 - `middleware/errorHandler.ts` - Error helper function
-
