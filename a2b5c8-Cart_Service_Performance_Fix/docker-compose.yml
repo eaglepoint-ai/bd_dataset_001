@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  cart-service-task:
+    build: .
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    command: /bin/sh -c "echo 'Cart Service task environment ready'"
+    stdin_open: true
+    tty: true
+
