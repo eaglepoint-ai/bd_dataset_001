@@ -1,92 +1,210 @@
-# project template
+# Robust File Transfer System
 
-Starter scaffold for bd dataset task.
+A production-ready TCP socket-based file transfer system with multi-threaded server and resilient client implementation.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+## Features
 
----
+### Server (`server.py`)
+- **Multi-threaded**: Handles multiple concurrent clients using threading
+- **Progress Tracking**: Logs transfer progress every 10%
+- **Configurable Port**: Accept custom port via command line
+- **File Integrity**: Calculates MD5 checksums for verification
+- **Comprehensive Logging**: All operations logged to timestamped files
+- **Graceful Shutdown**: Handles SIGINT (Ctrl+C) cleanly
+- **Error Handling**: Robust error handling for network issues
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+### Client (`client.py`)
+- **Retry Logic**: Exponential backoff (1s → 2s → 4s → 8s → 16s → 32s max)
+- **Real-time Progress Bar**: Visual progress display with MB transferred
+- **Checksum Verification**: Validates file integrity after download
+- **Network Timeout Handling**: 10-second socket timeout with error recovery
+- **Command-line Arguments**: Flexible host/port/filename specification
+- **Comprehensive Logging**: All operations logged to timestamped files
+- **Graceful Shutdown**: Handles SIGINT (Ctrl+C) cleanly
 
-### Setup Steps
+## Installation
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
+No external dependencies required - uses Python standard library only.
 
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+```bash
+# Ensure Python 3.6+ is installed
+python3 --version
 ```
 
-### Report Schema
+## Usage
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+### Starting the Server
+
+```bash
+# Default port (9999)
+python server.py
+
+# Custom port
+python server.py 8080
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+The server will:
+- Create `server_files/` directory for files to serve
+- Create `logs/` directory for operation logs
+- Listen for incoming connections
+- Handle multiple clients concurrently
 
----
+### Running the Client
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+```bash
+# Basic usage (localhost:9999)
+python client.py filename.txt
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+# Specify host
+python client.py filename.txt 192.168.1.100
+
+# Specify host and port
+python client.py filename.txt 192.168.1.100 8080
+```
+
+The client will:
+- Create `client_downloads/` directory for received files
+- Create `logs/` directory for operation logs
+- Attempt connection with retry logic
+- Display real-time progress bar
+- Verify file integrity with checksum
+
+## Directory Structure
+
+```
+.
+├── server.py                 # Server script
+├── client.py                 # Client script
+├── README.md                 # This file
+├── server_files/             # Place files here to serve (created automatically)
+├── client_downloads/         # Downloaded files stored here (created automatically)
+└── logs/                     # Operation logs (created automatically)
+    ├── server_YYYYMMDD_HHMMSS.log
+    └── client_YYYYMMDD_HHMMSS.log
+```
+
+## Example Workflow
+
+1. **Prepare a file on the server:**
+```bash
+# Create a test file
+echo "Hello, World!" > server_files/test.txt
+
+# Or copy an existing file
+cp /path/to/myfile.pdf server_files/
+```
+
+2. **Start the server:**
+```bash
+python server.py
+```
+
+3. **Download from client (in another terminal):**
+```bash
+python client.py test.txt
+```
+
+## Technical Details
+
+### Protocol Specification
+
+**Client Request:**
+```
+[4 bytes: filename length (uint32)] + [filename (UTF-8)]
+```
+
+**Server Response:**
+```
+[2 bytes: "OK" or 5 bytes: "ERROR" + error message]
+
+If OK:
+[4 bytes: filename length (uint32)]
+[filename (UTF-8)]
+[8 bytes: file size (uint64)]
+[32 bytes: MD5 checksum (hex string)]
+[file data in chunks]
+```
+
+### Configuration
+
+Edit these constants in the scripts:
+
+**Server:**
+- `DEFAULT_PORT`: Default listening port (9999)
+- `BUFFER_SIZE`: Chunk size for file transfer (4096 bytes)
+- `SERVER_FILES_DIR`: Directory containing files to serve
+
+**Client:**
+- `DEFAULT_HOST`: Default server host (localhost)
+- `DEFAULT_PORT`: Default server port (9999)
+- `BUFFER_SIZE`: Chunk size for file transfer (4096 bytes)
+- `MAX_RETRIES`: Maximum connection attempts (5)
+- `INITIAL_BACKOFF`: Initial retry delay (1 second)
+- `MAX_BACKOFF`: Maximum retry delay (32 seconds)
+
+### Error Handling
+
+Both scripts handle:
+- Network timeouts
+- Connection failures
+- Interrupted transfers
+- File not found errors
+- Checksum mismatches
+- Graceful shutdown (SIGINT)
+
+### Logging
+
+All operations are logged with timestamps:
+- Connection events
+- File transfer progress
+- Errors and warnings
+- Checksum verification results
+
+Logs are stored in `logs/` directory with timestamps in filenames.
+
+## Testing
+
+### Test Multiple Concurrent Clients
+
+```bash
+# Terminal 1: Start server
+python server.py
+
+# Terminal 2-4: Start multiple clients simultaneously
+python client.py file1.txt &
+python client.py file2.txt &
+python client.py file3.txt &
+```
+
+### Test Retry Logic
+
+```bash
+# Start client before server to test retry
+python client.py test.txt
+
+# Start server within 63 seconds (sum of backoff times)
+python server.py
+```
+
+### Test Graceful Shutdown
+
+Press `Ctrl+C` during transfer to test graceful shutdown handling.
+
+## Requirements
+
+- Python 3.6 or higher
+- TCP network connectivity between client and server
+- Sufficient disk space for file transfers
+
+## Security Considerations
+
+This is a basic implementation for educational/internal use. For production:
+- Add authentication/authorization
+- Implement encryption (TLS/SSL)
+- Add rate limiting
+- Validate file paths to prevent directory traversal
+- Implement access control lists
+
+## License
+
+MIT License - Free to use and modify.
