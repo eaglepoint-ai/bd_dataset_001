@@ -1,0 +1,9 @@
+{
+    "instance_id": "af65da",
+    "problem_statement": "The current test suite for AdjacentSum validates only a small subset of possible inputs and does not fully exercise the method’s behavior under edge cases, boundary conditions, or extreme integer values, leaving potential defects undiscovered. Adding new tests is necessary to ensure the implementation behaves correctly for empty and minimal-length arrays, mixed positive and negative values, zero-containing arrays, and integer overflow or underflow scenarios that arise from Java’s int arithmetic. Expanding test coverage improves confidence in correctness, guards against future regressions, and ensures the method’s behavior is well-defined and verifiable across the full range of valid and exceptional inputs.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/af65da-Expand_Test_Coverage_for_AdjacentSum_Edge_Cases",
+    "environment_setup": "Dockerfile"
+  }
+  
