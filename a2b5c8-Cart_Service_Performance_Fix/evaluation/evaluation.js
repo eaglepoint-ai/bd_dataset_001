@@ -6,6 +6,7 @@ const { execSync } = require("child_process");
 
 const ROOT = path.join(__dirname, "..");
 const REPORTS = path.join(__dirname, "reports");
+const TESTS_DIR = path.join(ROOT, "tests");
 
 function truncateMiddle(text, maxLen) {
   if (typeof text !== "string") return "";
@@ -99,8 +100,11 @@ function parseTestOutput(output, returnCode) {
     }
   }
 
+  // Do NOT trust process exit codes for "before" runs; rely on parsed counts.
+  const passed = totalCount > 0 && failedCount === 0;
+
   return {
-    passed: returnCode === 0,
+    passed,
     return_code: returnCode,
     output: output.slice(0, 8000),
     test_count: totalCount,
@@ -110,10 +114,12 @@ function parseTestOutput(output, returnCode) {
 }
 
 function runTests(repoName) {
-  const testArg = repoName === "repository_before" ? "before" : "after";
+  const repoPath = repoName === "repository_before" ? path.join(ROOT, "repository_before") : path.join(ROOT, "repository_after");
   try {
-    const out = execSync(`node tests/test_all.js ${testArg}`, {
-      cwd: ROOT,
+    const env = { ...process.env, TEST_REPO_PATH: repoPath };
+    const out = execSync("npm test 2>&1", {
+      cwd: TESTS_DIR,
+      env,
       encoding: "utf8",
       timeout: 120000,
       stdio: "pipe",
@@ -207,6 +213,14 @@ function main() {
   fs.writeFileSync(path.join(REPORTS, "report.json"), JSON.stringify(report, null, 2));
   fs.writeFileSync(path.join(REPORTS, "report_content"), formatReportContent(report));
   fs.writeFileSync(path.join(REPORTS, "log_summary"), formatLogSummary(report));
+
+  // Also write the sample-style nested report directory (YYYY-MM-DD/HH-MM-SS/report.json),
+  // while keeping the mandatory root artifacts above.
+  const dateStr = now.toISOString().split("T")[0];
+  const timeStr = now.toTimeString().split(" ")[0].replace(/:/g, "-");
+  const nestedDir = path.join(REPORTS, dateStr, timeStr);
+  fs.mkdirSync(nestedDir, { recursive: true });
+  fs.writeFileSync(path.join(nestedDir, "report.json"), JSON.stringify(report, null, 2));
 
   console.log(`Report written to ${reportPath}`);
   console.log("\nEvaluation Summary:");
