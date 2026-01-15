@@ -51,13 +51,6 @@ def test_sync_blocking_task_behavior():
         assert not hasattr(circular_data_processor, 'DATA_STORE'), "Refactored code should not have global DATA_STORE"
 
 def test_multiple_blocking_tasks_accumulate_state():
-    """
-    Test accumulation of state.
-    
-    Repository Before: Accumulates in global list.
-    Repository After: Should pass by virtue of not having the legacy flaws (verified in other tests),
-                      here we just assert the legacy path is gone.
-    """
     processor = circular_data_processor.DataProcessor("Worker1")
     
     if hasattr(processor, 'sync_blocking_task'):
@@ -70,6 +63,4 @@ def test_multiple_blocking_tasks_accumulate_state():
         assert circular_data_processor.DATA_STORE == [1, 2, 3]
     else:
         # Refactored checks
-        # Confirming absence of legacy API is sufficient for this 'legacy' test file when running against 'after'.
-        # The positive behavior of 'after' is tested in test_memory.py, test_encapsulation.py, etc.
         assert not hasattr(processor, 'sync_blocking_task'), "Refactored code should not have sync_blocking_task"
