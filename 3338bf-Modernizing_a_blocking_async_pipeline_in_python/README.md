@@ -1,31 +1,85 @@
 # Async Processing Pipeline
 
-This repository demonstrates modernizing a blocking async pipeline in Python. The `repository_before` directory represents the initial state with blocking code, while `repository_after` will contain the optimized, non-blocking implementation.
+This repository demonstrates modernizing a blocking async pipeline in Python. The `repository_before` directory represents the initial state with blocking code, while `repository_after` contains the optimized, non-blocking implementation.
 
 ## Requirements
 
 - [Docker](https://www.docker.com/get-started)
 - [Docker Compose](https://docs.docker.com/compose/)
+- Python 3.11+ (for local runs)
 
-## Quick Start
+## Docker Execution Instructions
 
-### 1. Run Tests for `repository_before`
+### Running the Evaluation (Comparison of Before and After)
 
-```bash
-docker compose run --rm tests python repository_before/async_processing_pipeline.py
-```
-
-### 2. Run Tests for `repository_after`
+Build the Docker image and run the evaluation harness (report will be inside the container in `evaluation/reports`):
 
 ```bash
-# No command specified
+docker build -t async-pipeline .
+docker run --rm async-pipeline python evaluation/evaluation.py --trials 3 --items 5 --buffer 3
 ```
 
-### 3. Run Evaluations
+> **Tip:** To save evaluation reports to your host machine, add a volume mount for the `reports` folder:
+> - On Windows (CMD or PowerShell):
+>   ```bash
+>   docker run --rm -v "C:/absolute/path/to/evaluation/reports:/app/evaluation/reports" async-pipeline python evaluation/evaluation.py --trials 3 --items 5 --buffer 3
+>   ```
+> - On Linux/macOS:
+>   ```bash
+>   docker run --rm -v $(pwd)/evaluation/reports:/app/evaluation/reports async-pipeline python evaluation/evaluation.py --trials 3 --items 5 --buffer 3
+>   ```
+> Replace the path with your actual project directory if needed.
+
+### Running Individual Stages
+
+#### Evaluation Only
+
+Run the evaluation script locally:
 
 ```bash
-# No command specified
+py evaluation/evaluation.py --trials 3 --items 5 --buffer 3
 ```
+
+#### Tests Only (After Implementation)
+
+Run the test suite for the refactored implementation:
+
+```bash
+py -m tests.test_refactored
+```
+
+#### Repository Before Analysis
+
+Run the legacy pipeline for baseline behavior:
+
+```bash
+python repository_before/async_processing_pipeline.py
+```
+
+#### Repository After Analysis
+
+Run the refactored pipeline directly:
+
+```bash
+python repository_after/refactored.py
+```
+
+### Viewing Results
+
+- Evaluation reports are saved in the `evaluation/reports/` folder with a timestamped filename (e.g., `report-YYYY-MM-DD-HH-MM-SS.json`).
+- Test results are printed to the console.
+- For detailed output, inspect the generated JSON report or console logs.
+
+## Technologies Used
+
+- Python 3.11+
+- Docker
+- asyncio, collections, typing (Python stdlib)
+- pytest (for testing)
+
+## Conclusion
+
+This project demonstrates the transformation of a blocking, stateful async pipeline into a modern, type-safe, non-blocking, and memory-efficient solution using Python 3.12+ features. The evaluation harness and test suite ensure correctness and performance improvements are measurable and reproducible.
 
 ## Projects
 
