@@ -66,7 +66,41 @@ Bug Fix
 ## Commands
 
 ```bash
-# Build and run syntax check
-docker-compose run --rm run_before
+# Build Docker image
+docker compose build
+
+# Run tests on repository_before (expected: some tests fail)
+docker compose run --rm test_before
+
+# Run tests on repository_after (expected: all tests pass)
+docker compose run --rm test_after
+
+# Run evaluation (compares both implementations)
+docker compose run --rm evaluation
 ```
+
+## Run Locally
+
+```bash
+# Install dependencies
+npm install
+
+# Run tests on repository_before
+npm run test:before
+
+# Run tests on repository_after
+npm run test:after
+
+# Run evaluation
+npm run evaluate
+```
+
+## Folder Structure
+
+- `repository_before/` — Original buggy implementation
+- `repository_after/` — Fixed implementation with bug fixes
+- `tests/` — Jest test suite for all 9 requirements
+- `evaluation/` — Evaluation script and reports
+- `patches/` — Diff between before and after implementations
+
 

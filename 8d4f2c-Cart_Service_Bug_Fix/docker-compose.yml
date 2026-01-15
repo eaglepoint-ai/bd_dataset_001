@@ -1,5 +1,24 @@
 services:
-  run_before:
+  # Run tests on repository_before (expected: some tests fail)
+  test_before:
     build: .
-    command: sh -c "npm install && npm start"
+    environment:
+      - REPOSITORY_PATH=../repository_before
+    command: node node_modules/jest/bin/jest.js tests/ --testTimeout=60000 --forceExit --config={} --silent
+    working_dir: /app
+    
+  # Run tests on repository_after (expected: all tests pass)
+  test_after:
+    build: .
+    environment:
+      - REPOSITORY_PATH=../repository_after
+    command: node node_modules/jest/bin/jest.js tests/ --testTimeout=60000 --forceExit --config={} --silent
+    working_dir: /app
 
+  # Run evaluation script
+  evaluation:
+    build: .
+    command: node evaluation/evaluation.js
+    working_dir: /app
+    volumes:
+      - ./evaluation:/app/evaluation
