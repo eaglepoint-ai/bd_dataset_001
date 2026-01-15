@@ -62,12 +62,6 @@ def parse_pytest_verbose_output(output):
         line = line.strip()
         if not line:
             continue
-            
-        # We are looking for lines that end with a status (PASSED, FAILED, etc.)
-        # Typical formats with -v:
-        # tests/test_file.py::test_func PASSED [ 10%]
-        # tests/test_file.py::test_func PASSED
-        # tests/test_file.py FAILED [ 50%] (sometimes just file if collection failed or other error)
         
         # Split line by whitespace to find status
         parts = line.split()
@@ -81,7 +75,7 @@ def parse_pytest_verbose_output(output):
         # Valid statuses
         valid_statuses = {"PASSED", "FAILED", "SKIPPED", "ERROR", "XFAIL", "XPASS"}
         
-        # Iterate backwards to find status (ignoring [12%] progress indicators)
+        # Iterate backwards to find status 
         for i, part in enumerate(reversed(parts)):
             if part in valid_statuses:
                 status = part.lower()
@@ -92,7 +86,7 @@ def parse_pytest_verbose_output(output):
              # Everything before status is the nodeid
             nodeid = " ".join(parts[:status_index])
             
-            # Simple heuristic: It should look like a test path
+            # It should look like a test path
             if nodeid.startswith("tests/"):
                 # Extract name
                 if "::" in nodeid:
@@ -147,7 +141,7 @@ def run_tests_with_reporting(repo_name: str, label: str):
         total_count = len(tests)
         
         # If parsing failed but we have output, maybe something went wrong with the pattern matching.
-        # Print raw output to help debug if running interactively, or at least ensure it's in the log.
+        # Print raw output to help debug if running interactively or ensure it's in the log.
         if total_count == 0 and len(output) > 0:
             print("WARNING: No tests parsed from pytest output. Raw output start:")
             print(output[:500])
@@ -215,7 +209,7 @@ def run_evaluation():
         "after_failed": after_result["summary"]["failed"]
     }
     
-    # Success definition: After must pass
+    # Success definition is After must pass
     success = after_result["success"]
     
     # Print Summary to Stdout
@@ -234,7 +228,7 @@ def run_evaluation():
     else:
         print("❌ After implementation: Some tests failed")
 
-    # Construct final report dict
+    # Construct final report
     report = {
         "run_id": run_id,
         "started_at": start.isoformat(),
@@ -256,7 +250,7 @@ def main():
     REPORTS.mkdir(parents=True, exist_ok=True)
     report = run_evaluation()
     
-    # Generate path based on simplified date/time structure
+    # Generate path based on date/time structure
     now = datetime.utcnow()
     date_str = now.strftime("%Y-%m-%d")
     time_str = now.strftime("%H-%M-%S")
