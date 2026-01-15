@@ -2,6 +2,9 @@
 evaluation/reports/*
 !evaluation/reports/.gitkeep
 
+# Mandatory evaluation artifact (generated during CI)
+report.json
+
 # Python cache
 evaluation/__pycache__/
 *.pyc

@@ -5,6 +5,8 @@ services:
     build: .
     volumes:
       - ./evaluation/reports:/app/evaluation/reports
+      # Write mandatory artifact to host workspace without overriding /app
+      - .:/app_host
     command: node evaluation/evaluation.js
 
   test-before:

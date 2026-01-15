@@ -17,6 +17,8 @@ const REPORTS_DIR = path.join(ROOT, 'evaluation', 'reports');
 
 const REPO_BEFORE = path.join(ROOT, 'repository_before');
 const REPO_AFTER = path.join(ROOT, 'repository_after');
+const HOST_MOUNT_DIR = process.env.HOST_MOUNT_DIR || '/app_host';
+const HOST_REPORT_PATH = process.env.REPORT_PATH || path.join(HOST_MOUNT_DIR, 'report.json');
 
 function safeMkdirp(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -200,6 +202,17 @@ function main() {
 
   const reportPath = path.join(reportDir, 'report.json');
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+
+  // Also write a flat artifact `report.json` for evaluation platforms that
+  // expect it at the workspace root (mounted via docker-compose to /app_host).
+  try {
+    if (fs.existsSync(HOST_MOUNT_DIR) && fs.statSync(HOST_MOUNT_DIR).isDirectory()) {
+      fs.writeFileSync(HOST_REPORT_PATH, JSON.stringify(report, null, 2));
+      console.log(`Artifact report written to: ${HOST_REPORT_PATH}`);
+    }
+  } catch (e) {
+    // Best-effort: evaluation should still succeed even if host mount isn't present.
+  }
 
   console.log('\n' + '='.repeat(60));
   console.log('Evaluation Complete');
