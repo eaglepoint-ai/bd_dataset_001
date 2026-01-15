@@ -19,6 +19,18 @@ docker build -t async-pipeline .
 docker run --rm async-pipeline python evaluation/evaluation.py --trials 3 --items 5 --buffer 3
 ```
 
+### Running Repository Before (Legacy) in Docker
+
+```bash
+docker run --rm async-pipeline python repository_before/async_processing_pipeline.py
+```
+
+### Running Repository After (Refactored) in Docker
+
+```bash
+docker run --rm async-pipeline python repository_after/refactored.py
+```
+
 > **Tip:** To save evaluation reports to your host machine, add a volume mount for the `reports` folder:
 > - On Windows (CMD or PowerShell):
 >   ```bash
