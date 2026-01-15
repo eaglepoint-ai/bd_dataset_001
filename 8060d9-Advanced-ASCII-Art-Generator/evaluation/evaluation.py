@@ -155,7 +155,6 @@ def main():
         sys.exit(1)
 
     # 3. Run Tests
-    print(f"Running evaluation {run_id}...")
     detailed_results = run_evaluation_tests(tests_dir)
 
     # 4. Finalize Timing
