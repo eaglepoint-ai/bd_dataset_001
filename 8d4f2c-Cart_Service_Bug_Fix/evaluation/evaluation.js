@@ -128,16 +128,14 @@ function generateReport(beforeResults, afterResults) {
     }
   };
 
-  // Save report to evaluation/report.json (expected by Aquila)
-  const mainReportPath = path.join(__dirname, 'report.json');
-  fs.writeFileSync(mainReportPath, JSON.stringify(report, null, 2));
-  console.log(`\nReport saved to: ${mainReportPath}`);
-
-  // Also save a timestamped copy for history
+  // Save report
   const reportsDir = path.join(__dirname, 'reports', dateStr, timeStr);
   fs.mkdirSync(reportsDir, { recursive: true });
-  const historyReportPath = path.join(reportsDir, 'report.json');
-  fs.writeFileSync(historyReportPath, JSON.stringify(report, null, 2));
+  
+  const reportPath = path.join(reportsDir, 'report.json');
+  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  
+  console.log(`\nReport saved to: ${reportPath}`);
   
   return report;
 }
