@@ -1,0 +1,61 @@
+{
+  "run_id": "546eece6-591c-4573-bac3-ca6577272ed2",
+  "started_at": "2026-01-15T16:56:21.148Z",
+  "finished_at": "2026-01-15T16:56:21.149Z",
+  "duration_seconds": 0.001,
+  "environment": {
+    "node_version": "v18.20.8",
+    "platform": "linux-x64"
+  },
+  "before": {
+    "tests": {
+      "Criterion 1: Each wiki page must store multiple immutable versions": "FAILED",
+      "Criterion 2: Every edit creates a new version and may branch from any previous version": "FAILED",
+      "Criterion 3: Version history must be represented as a DAG": "FAILED",
+      "Criterion 4: Versions reference one or more parent versions": "FAILED",
+      "Criterion 5: Two versions of the same page can be merged into a new version": "FAILED",
+      "Criterion 6: Automatic merging is attempted; conflicts are detected when edits overlap": "FAILED",
+      "Criterion 7: Conflicts can be manually resolved to produce a final merged version": "FAILED",
+      "Criterion 8: Users can view version history including branches and merges": "FAILED"
+    },
+    "metrics": {
+      "total": 8,
+      "passed": 0,
+      "failed": 8
+    },
+    "error": null
+  },
+  "after": {
+    "tests": {
+      "Criterion 1: Each wiki page must store multiple immutable versions": "PASSED",
+      "Criterion 2: Every edit creates a new version and may branch from any previous version": "PASSED",
+      "Criterion 3: Version history must be represented as a DAG": "PASSED",
+      "Criterion 4: Versions reference one or more parent versions": "PASSED",
+      "Criterion 5: Two versions of the same page can be merged into a new version": "PASSED",
+      "Criterion 6: Automatic merging is attempted; conflicts are detected when edits overlap": "PASSED",
+      "Criterion 7: Conflicts can be manually resolved to produce a final merged version": "PASSED",
+      "Criterion 8: Users can view version history including branches and merges": "PASSED"
+    },
+    "metrics": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0
+    },
+    "error": null
+  },
+  "comparison": {
+    "tests_fixed": [
+      "Criterion 1: Each wiki page must store multiple immutable versions",
+      "Criterion 2: Every edit creates a new version and may branch from any previous version",
+      "Criterion 3: Version history must be represented as a DAG",
+      "Criterion 4: Versions reference one or more parent versions",
+      "Criterion 5: Two versions of the same page can be merged into a new version",
+      "Criterion 6: Automatic merging is attempted; conflicts are detected when edits overlap",
+      "Criterion 7: Conflicts can be manually resolved to produce a final merged version",
+      "Criterion 8: Users can view version history including branches and merges"
+    ],
+    "tests_broken": [],
+    "improvement": 100
+  },
+  "success": true
+}

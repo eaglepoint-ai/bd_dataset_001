@@ -1,155 +1,211 @@
-import { spawn, exec } from 'child_process';
-import fs from 'fs';
-import path from 'path';
-import net from 'net';
+import { runTests, TestResult } from "../tests/test_criteria";
+import * as fs from "fs";
+import * as path from "path";
 
-// Helper to check if port is open
-function checkPortHelper(port: number, timeoutMs: number): Promise<boolean> {
-    return new Promise((resolve) => {
-        const start = Date.now();
-        
-        const check = () => {
-            const socket = new net.Socket();
-            socket.setTimeout(500);
-            
-            socket.on('connect', () => {
-                socket.destroy();
-                resolve(true);
-            });
-            
-            socket.on('timeout', () => {
-                socket.destroy();
-                retry();
-            });
-            
-            socket.on('error', () => {
-                socket.destroy();
-                retry();
-            });
-            
-            socket.connect(port, 'localhost');
-        };
+// Define URLs for services in Docker Compose network
+// Note: We expect 'app' and 'app-before' to be accessible by service name.
+const REPO_AFTER_URL = "http://app:3000/api";
+const REPO_BEFORE_URL = "http://app-before:3000/api";
 
-        const retry = () => {
-            if (Date.now() - start < timeoutMs) {
-                setTimeout(check, 500);
-            } else {
-                resolve(false);
-            }
-        };
-
-        check();
-    });
+interface Results {
+  passed: number;
+  failed: number;
+  total: number;
+  tests: { [key: string]: "PASSED" | "FAILED" };
+  error: string | null;
 }
 
-async function runEvaluator() {
-    const REPO_DIR = path.resolve(__dirname, '../repository_after');
-    const REPORT_FILE = path.join(__dirname, 'report.json');
+async function runTestsForUrl(url: string, label: string): Promise<Results> {
+  console.log(`\n🔍 Evaluating ${label}...`);
+  const results: Results = {
+    passed: 0,
+    failed: 0,
+    total: 0,
+    tests: {},
+    error: null,
+  };
 
-    console.log("Starting Evaluation...");
-    
-    // 1. Start Server
-    console.log("Launching Next.js server...");
-    const server = spawn('npm', ['run', 'dev'], { 
-        cwd: REPO_DIR,
-        stdio: 'ignore', // Ignore output to clean logs
-        shell: true 
+  try {
+    const testResults = await runTests(url);
+    results.total = testResults.length;
+
+    testResults.forEach((r) => {
+      if (r.status === "PASSED") {
+        results.passed++;
+        results.tests[r.name] = "PASSED";
+      } else {
+        results.failed++;
+        results.tests[r.name] = "FAILED";
+      }
     });
 
-    // Ensure we kill the server on exit
-    const cleanup = () => {
-        console.log("Stopping server...");
-        // This is a rough kill, might leave orphan if not careful, but okay for container
-        if (process.platform === 'win32') {
-             exec(`taskkill /pid ${server.pid} /T /F`);
-        } else {
-             server.kill('SIGTERM'); 
-             // If shell=true on linux, we might need to kill the process group, 
-             // but 'node:alpine' usually handles pid 1 or plain kill reasonably well for dev.
-             // Actually, since we spawned with shell=true, server.pid is the shell.
-             try {
-                 process.kill(-server.pid!, 'SIGTERM');
-             } catch(e) {
-                 server.kill();
-             }
-        }
-    };
-    
-    process.on('SIGINT', cleanup);
-    process.on('exit', cleanup);
+    console.log(`   ✓ Passed: ${results.passed}`);
+    console.log(`   ✗ Failed: ${results.failed}`);
 
-    // 2. Wait for Port 3000
-    const ready = await checkPortHelper(3000, 60000); // 60s timeout
-    if (!ready) {
-        console.error("Server failed to start on port 3000.");
-        cleanup();
-        process.exit(1);
+    // If all failed, it might be a connection error, but runTests catches exceptions.
+    // We can check if any error message indicates connection failure?
+    // But for now, reporting individual failures is correct.
+  } catch (e: any) {
+    console.log(`   ⚠ Error: ${e.message}`);
+    results.error = e.message;
+  }
+
+  return results;
+}
+
+function generateReport(
+  beforeResults: Results,
+  afterResults: Results,
+  outputPath: string
+) {
+  const started_at = new Date();
+
+  const report = {
+    run_id: uuidv4(),
+    started_at: started_at.toISOString(),
+    finished_at: new Date().toISOString(),
+    duration_seconds: 0,
+    environment: {
+      node_version: process.version,
+      platform: `${process.platform}-${process.arch}`,
+    },
+    before: {
+      tests: beforeResults.tests,
+      metrics: {
+        total: beforeResults.total,
+        passed: beforeResults.passed,
+        failed: beforeResults.failed,
+      },
+      error: beforeResults.error,
+    },
+    after: {
+      tests: afterResults.tests,
+      metrics: {
+        total: afterResults.total,
+        passed: afterResults.passed,
+        failed: afterResults.failed,
+      },
+      error: afterResults.error,
+    },
+    comparison: {
+      tests_fixed: [] as string[],
+      tests_broken: [] as string[],
+      improvement: 0,
+    },
+    success: false,
+  };
+
+  // Calculate comparison
+  const tests = new Set([
+    ...Object.keys(beforeResults.tests),
+    ...Object.keys(afterResults.tests),
+  ]);
+
+  tests.forEach((test) => {
+    const beforeStatus = beforeResults.tests[test] || "FAILED";
+    const afterStatus = afterResults.tests[test] || "FAILED";
+
+    if (beforeStatus === "FAILED" && afterStatus === "PASSED") {
+      report.comparison.tests_fixed.push(test);
+    } else if (beforeStatus === "PASSED" && afterStatus === "FAILED") {
+      report.comparison.tests_broken.push(test);
     }
-    console.log("Server is up!");
+  });
 
-    // 3. Run Jest
-    console.log("Running Tests...");
-    // We run jest and ask for json output
-    exec('npm test -- --json --outputFile=../evaluation/test-results.json', { cwd: REPO_DIR }, (error, stdout, stderr) => {
-        
-        const resultsPath = path.join(__dirname, 'test-results.json');
-        
-        let score = 0;
-        let requirements: any[] = [];
-        let success = false;
+  // Calculate improvement
+  if (afterResults.total > 0) {
+    const beforeRate =
+      (beforeResults.passed / Math.max(beforeResults.total, 1)) * 100;
+    const afterRate = (afterResults.passed / afterResults.total) * 100;
+    report.comparison.improvement =
+      Math.round((afterRate - beforeRate) * 100) / 100;
+  }
 
-        if (fs.existsSync(resultsPath)) {
-            try {
-                const raw = fs.readFileSync(resultsPath, 'utf8');
-                const json = JSON.parse(raw);
-                success = json.success;
-                
-                json.testResults.forEach((suite: any) => {
-                    suite.assertionResults.forEach((res: any) => {
-                        const passed = res.status === 'passed';
-                        if (passed) score += 12.5;
-                        requirements.push({
-                            title: res.title,
-                            status: passed ? 'pass' : 'fail',
-                            duration: res.duration
-                        });
-                    });
-                });
-            } catch (e) {
-                console.error("Error parsing test results", e);
-            }
-        } else {
-            console.error("No test-results.json found. Tests probably crashed.");
-            if (stderr) console.error(stderr);
-        }
+  // Determine success (simplified rules for this context)
+  report.success =
+    afterResults.passed === afterResults.total &&
+    afterResults.total > 0 &&
+    afterResults.error === null;
 
-        // 4. Generate Report
-        const report = {
-            run_id: new Date().getTime().toString(),
-            score: Math.min(100, Math.round(score)),
-            success: score === 100,
-            requirements,
-            environment: { node: process.version },
-            timestamp: new Date().toISOString()
-        };
+  // Update duration
+  report.finished_at = new Date().toISOString();
+  report.duration_seconds =
+    (new Date().getTime() - started_at.getTime()) / 1000;
 
-        // Create date structure for reports like the python one did
-        // evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
-        const now = new Date();
-        const dateStr = now.toISOString().split('T')[0];
-        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-        const reportDir = path.join(__dirname, 'reports', dateStr, timeStr);
-        
-        fs.mkdirSync(reportDir, { recursive: true });
-        fs.writeFileSync(path.join(reportDir, 'report.json'), JSON.stringify(report, null, 2));
-        fs.writeFileSync(REPORT_FILE, JSON.stringify(report, null, 2)); // Save to latest as well
+  // Save report
+  const dir = path.dirname(outputPath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
 
-        console.log(`Evaluation Complete. Score: ${report.score}`);
-        console.log(`Report written to ${path.join(reportDir, 'report.json')}`);
-        
-        cleanup();
-        process.exit(0);
-    });
+  return report;
 }
 
-runEvaluator();
+// Minimal UUID implementation if not available in context (it is available in test_criteria, but let's be safe)
+function uuidv4() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+async function main() {
+  console.log("=".repeat(60));
+  console.log("Text Version Control System Evaluation");
+  console.log("=".repeat(60));
+
+  const projectRoot = "/workspace"; // Mapped in docker-compose
+
+  // Output path matching the reference
+  const now = new Date();
+  const dateStr = now.toISOString().split("T")[0];
+  const timeStr = now.toTimeString().split(" ")[0].replace(/:/g, "-");
+  const outputDir = path.join(projectRoot, "evaluation", dateStr, timeStr);
+  const outputFile = path.join(outputDir, "report.json");
+
+  console.log(`\n📄 Output: ${outputFile}\n`);
+
+  // Run tests
+  const beforeResults = await runTestsForUrl(
+    REPO_BEFORE_URL,
+    "repository_before (http://app-before:3000)"
+  );
+  const afterResults = await runTestsForUrl(
+    REPO_AFTER_URL,
+    "repository_after (http://app:3000)"
+  );
+
+  // Generate report
+  console.log("\n📊 Generating report...");
+  const report = generateReport(beforeResults, afterResults, outputFile);
+
+  console.log(`   Report saved to: ${outputFile}`);
+  console.log(`\n${"=".repeat(60)}`);
+  console.log("EVALUATION SUMMARY");
+  console.log("=".repeat(60));
+  console.log(`Tests Fixed: ${report.comparison.tests_fixed.length}`);
+  if (report.comparison.tests_fixed.length > 0) {
+    report.comparison.tests_fixed.forEach((test) => {
+      console.log(`  ✓ ${test}`);
+    });
+  }
+
+  console.log(`\nTests Broken: ${report.comparison.tests_broken.length}`);
+  if (report.comparison.tests_broken.length > 0) {
+    report.comparison.tests_broken.forEach((test) => {
+      console.log(`  ✗ ${test}`);
+    });
+  }
+
+  console.log(`\nImprovement: ${report.comparison.improvement}%`);
+  console.log(`Overall Success: ${report.success ? "✓ PASS" : "✗ FAIL"}`);
+  console.log("=".repeat(60));
+
+  process.exit(report.success ? 0 : 1);
+}
+
+if (require.main === module) {
+  main();
+}
