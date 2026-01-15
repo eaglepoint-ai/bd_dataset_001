@@ -32,16 +32,3 @@
    - t = √(100/4.9) ≈ 4.52 seconds
    - v = -9.8 × 4.52 ≈ -44.3 m/s
      This matches the implementation output.
-
-8. **Create Comprehensive Test Suite:**
-   I created pytest tests covering:
-
-   - Repulsive zone start (h = 150m → infinite time)
-   - Attractive zone start (h = 100m → ~4.52s, ~-44.3 m/s)
-   - Boundary condition (h = 100m → finite time, valid velocity)
-
-9. **Dockerize for Reproducibility:**
-   The solution includes Docker support for consistent evaluation across environments, with timestamped report generation for tracking multiple runs.
-
-10. **Result: Physically Correct Piecewise Simulation:**
-    The solution correctly models the dual-zone gravitational field, returns infinite time when physics prevents impact, uses standard kinematics for the attractive zone, and passes all verification tests. The implementation respects the non-standard physics without forcing terrestrial assumptions.
