@@ -1,0 +1,9 @@
+{
+    "instance_id": "cb4e35",
+    "problem_statement": "A full-stack application is needed to allow users to define customizable IF-THEN rules as personal laws, which can conflict and override each other, creating a dynamic rule engine. This system must algorithmically evaluate any user-provided scenario by applying all relevant rules, detecting conflicts, and resolving overrides to produce a single, deterministic outcome. Furthermore, the application must clearly present the complete reasoning path, explaining which rules fired and how any conflicts were resolved, to provide users with transparent, explainable decision-making.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/cb4e35-rule-engine",
+    "environment_setup": "Dockerfile"
+  }
+  
