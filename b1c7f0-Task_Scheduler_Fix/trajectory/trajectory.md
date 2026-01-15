@@ -20,4 +20,4 @@
 - Ran `node evaluation/evaluation.js` → no hang; report created at `evaluation/reports/latest.json`; after passed (success true).
 
 ## 5) Result
-- After implementation satisfies README acceptance criteria; evaluation is deterministic and reports both before (fail) and after (pass).***
+- After implementation satisfies acceptance criteria; evaluation is deterministic and reports both before (fail) and after (pass).***

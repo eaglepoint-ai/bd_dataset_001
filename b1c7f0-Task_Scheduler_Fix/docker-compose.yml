@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  task-scheduler:
+  app:
     image: node:20-alpine
-    working_dir: /workspace
+    working_dir: /app
     volumes:
-      - ./:/workspace
+      - ./:/app
     command: /bin/sh -c "echo 'Task Scheduler Fix Environment Ready'"
     stdin_open: true
     tty: true

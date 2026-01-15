@@ -1,76 +1,76 @@
 # Task Scheduler Fix
 
-## Problem Statement
-Noticed a critical reliability issue with a legacy TaskScheduler class that handles background job processing with dependencies, priorities, and retries. The system suffers from circular dependency infinite loops, race conditions on concurrent task completion, memory leaks from uncleaned timeouts, no way to cancel running tasks, O(n log n) priority sorting on every cycle, and tasks with failed dependencies waiting forever — all while needing to add pause/resume, graceful shutdown, event emission, and exponential backoff retry while maintaining the exact same public API.
+This dataset task contains a production-style TaskScheduler class with intentional bugs and performance issues.
+The objective is to **completely refactor** the implementation while preserving **exact public API compatibility** and fixing all critical issues.
 
-## Prompt
-Role: Senior Backend Engineer
+ 
+## Folder Layout
 
-Context: Your company has a legacy task scheduler that processes background jobs. The current implementation has severe performance issues and bugs. You need to completely refactor it while maintaining the exact same public API (addTask, run, cancel, getStatus).
+- `repository_before/` - Original implementation with bugs
+- `repository_after/` - Refactored implementation with fixes
+- `tests/` - Acceptance tests and invariants
+- `patches/` - Diff between before/after
 
-CORE REQUIREMENTS (Must Fix):
-1. Dependency Cycle Detection
-   - Detect cycles before run(), throw: "Circular dependency detected: A → B → C → A"
-2. Dependency Failure Propagation
-   - Mark all dependent tasks as failed recursively
-3. Concurrency Control
-   - Respect maxConcurrent strictly, async-safe (no race conditions when multiple tasks complete via Promise.all)
-4. Timeout Cleanup
-   - Clear timers when task completes/fails
-5. Exponential Backoff Retry
-   - Formula: delay = min(baseDelay * 2^attempt, maxDelay)
-6. Cancel Running Tasks
-   - Pending: remove from queue
-   - Running: abort via AbortController if task.fn supports AbortSignal
+ 
+## Run with Docker
 
-BONUS REQUIREMENTS:
-7. Priority Queue Efficiency - O(log n) heap instead of O(n log n) sort
-8. Event Emission - Extend EventEmitter, events: taskStart, taskComplete, taskFail, taskRetry, taskCancel
-9. Pause/Resume Support - Let running tasks complete, don't start new ones
-10. Graceful Shutdown - Wait for running tasks, reject pending, prevent new tasks
-11. Task Result Caching - Return cached result for completed tasks
-
-CONSTRAINTS:
-- No external dependencies
-- Same public API (addTask, run, cancel, getStatus)
-- Async-safe (no race conditions)
-- Memory efficient
-
-## Requirements
-- Dependency Cycle Detection - Detect cycles before running, throw descriptive error with path
-- Dependency Failure Propagation - Mark dependent tasks as failed recursively
-- Proper Concurrency Control - Respect maxConcurrent strictly, no race conditions
-- Exponential Backoff Retry - Formula: delay = min(baseDelay * 2^attempt, maxDelay)
-- Timeout Cleanup - Clear timers when task completes
-- Cancel Running Tasks - Support AbortController for running tasks
-- Priority Queue Efficiency - O(log n) heap instead of O(n log n) sort
-- Event Emission - taskStart, taskComplete, taskFail, taskRetry, taskCancel events
-- Pause/Resume Support - Let running tasks complete, don't start new ones
-- Task Result Caching - Return cached result for completed tasks, support force re-run
-- Graceful Shutdown - Wait for running tasks, reject pending, prevent new tasks
-
-## Acceptance Criteria
-1. Cycle test: A→B→C→A throws Error with "Circular dependency detected: A → B → C → A"
-2. Concurrency test: maxConcurrent=2, never exceeds 2 running simultaneously
-3. Retry test: 3 failures show exponential delays (~100ms, ~200ms, ~400ms)
-4. Dependency failure: If A fails, B (depends on A) also marked failed
-5. Timeout cleanup: No memory leaks from lingering timers
-6. Cancel: cancel('taskId') returns true for pending, aborts running if supported
-
-## Commands
-
-### Run tests on repository_before
+### Build image
 ```bash
-cd repository_before && node test.js
+docker compose build
 ```
 
-### Run tests on repository_after
+### Run tests (before – expected some failures)
 ```bash
-cd repository_after && node test.js
+docker compose run --rm app node tests/test.js before
+```
+
+**Expected behavior:**
+- Some tests: ❌ FAIL (expected - bugs present in original implementation)
+
+### Run tests (after – expected all pass)
+```bash
+docker compose run --rm app node tests/test.js after
+```
+
+**Expected behavior:**
+- All tests: ✅ PASS (bugs fixed, requirements implemented)
+
+### Run evaluation (compares both implementations)
+```bash
+docker compose run --rm app node evaluation/evaluation.js
+```
+
+This will:
+- Run tests for both before and after implementations
+- Compare results and verify improvements
+- Generate a report at `evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json`
+
+## Run locally
+
+### Install dependencies
+```bash
+npm install
+```
+
+### Run tests
+```bash
+# Test before implementation
+node tests/test.js before
+
+# Test after implementation
+node tests/test.js after
 ```
 
 ### Run evaluation
 ```bash
 node evaluation/evaluation.js
+```
+
+## Regenerate patch
+
+From repo root:
+
+```bash
+git diff --no-index repository_before repository_after > patches/task_scheduler.patch
 ```
 
