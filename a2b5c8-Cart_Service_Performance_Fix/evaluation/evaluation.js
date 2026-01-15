@@ -7,6 +7,59 @@ const { execSync } = require("child_process");
 const ROOT = path.join(__dirname, "..");
 const REPORTS = path.join(__dirname, "reports");
 
+function truncateMiddle(text, maxLen) {
+  if (typeof text !== "string") return "";
+  if (text.length <= maxLen) return text;
+  const head = Math.floor(maxLen * 0.7);
+  const tail = maxLen - head - 30;
+  return `${text.slice(0, head)}\n... (truncated) ...\n${text.slice(-tail)}`;
+}
+
+function formatReportContent(report) {
+  const beforePassed = report?.before?.tests?.passed;
+  const afterPassed = report?.after?.tests?.passed;
+  const beforeCode = report?.before?.tests?.return_code;
+  const afterCode = report?.after?.tests?.return_code;
+  const beforeOut = report?.before?.tests?.output || "";
+  const afterOut = report?.after?.tests?.output || "";
+
+  return [
+    "## Summary",
+    `- **success**: \`${Boolean(report?.success)}\``,
+    `- **passed_gate**: \`${Boolean(report?.comparison?.passed_gate)}\``,
+    `- **improvement_summary**: ${report?.comparison?.improvement_summary || ""}`,
+    "",
+    "## Before (`repository_before`)",
+    `- **passed**: \`${Boolean(beforePassed)}\``,
+    `- **return_code**: \`${typeof beforeCode === "number" ? beforeCode : ""}\``,
+    "### Output (truncated)",
+    "```",
+    truncateMiddle(beforeOut, 6000),
+    "```",
+    "",
+    "## After (`repository_after`)",
+    `- **passed**: \`${Boolean(afterPassed)}\``,
+    `- **return_code**: \`${typeof afterCode === "number" ? afterCode : ""}\``,
+    "### Output (truncated)",
+    "```",
+    truncateMiddle(afterOut, 6000),
+    "```",
+    "",
+  ].join("\n");
+}
+
+function formatLogSummary(report) {
+  return [
+    "CART SERVICE PERFORMANCE EVALUATION",
+    "",
+    `success: ${Boolean(report?.success)}`,
+    `passed_gate: ${Boolean(report?.comparison?.passed_gate)}`,
+    `before.passed: ${Boolean(report?.before?.tests?.passed)}`,
+    `after.passed: ${Boolean(report?.after?.tests?.passed)}`,
+    "",
+  ].join("\n");
+}
+
 function getUUID() {
   try {
     return require("crypto").randomUUID();
@@ -148,7 +201,12 @@ function main() {
   const timestamp = now.toISOString().replace(/:/g, "-").replace(/\..+/, "").replace("T", "_");
   const reportPath = path.join(REPORTS, `${timestamp}.json`);
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+
+  // Stable, mandatory artifacts (expected by dataset evaluators).
   fs.writeFileSync(path.join(REPORTS, "latest.json"), JSON.stringify(report, null, 2));
+  fs.writeFileSync(path.join(REPORTS, "report.json"), JSON.stringify(report, null, 2));
+  fs.writeFileSync(path.join(REPORTS, "report_content"), formatReportContent(report));
+  fs.writeFileSync(path.join(REPORTS, "log_summary"), formatLogSummary(report));
 
   console.log(`Report written to ${reportPath}`);
   console.log("\nEvaluation Summary:");
