@@ -1,0 +1,8 @@
+{
+    "instance_id": "ba6ce0",
+    "problem_statement": "The migration of the customer payment endpoint from Nuxt.js to NestJS is necessary to address growing backend complexity and long-term scalability concerns. The current Nuxt.js server API tightly couples critical payment logic, authentication context, and database access to the frontend application, making the system harder to test, reuse, and evolve independently. As payment workflows (Stripe) and data access (Supabase) become more business-critical, they require a dedicated backend architecture with clear service boundaries, stronger error handling, and consistent security practices. Moving this endpoint to NestJS enables a modular, backend-first design, improves maintainability and testability, supports independent deployment and scaling, and provides a more robust foundation for future payment features and integrations.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/ba6ce0-Nestjs_Payment_Service",
+    "environment_setup": "Dockerfile"
+}  
