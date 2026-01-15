@@ -1,10 +1,3 @@
-FROM node:20-slim AS builder
-WORKDIR /build
-COPY repository_after/package.json repository_after/package-lock.json repository_after/tsconfig.json ./
-RUN npm install
-COPY repository_after/src ./src
-RUN npm run build
-
 FROM python:3.11-slim
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -46,7 +39,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xdg-utils \
   && rm -rf /var/lib/apt/lists/*
 ENV CHROME_BIN=/usr/bin/chromium
-COPY --from=builder /build/dist ./repository_after/dist
 COPY repository_after ./repository_after
 COPY repository_before ./repository_before
 COPY tests ./tests

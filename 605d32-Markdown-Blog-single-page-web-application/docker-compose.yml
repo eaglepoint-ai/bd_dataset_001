@@ -1,11 +1,32 @@
 services:
-  app:
+  evaluation:
     build: .
+    volumes:
+      - ./evaluation/reports:/app/evaluation/reports
+    command: python3 /app/evaluation/evaluation.py
+
+  test-before:
+    build: .
+    environment:
+      - TEST_REPO=/app/repository_before
     command: pytest -q tests
     working_dir: /app
-    # Do NOT mount the host workspace:
-    # mounting would hide the image-built TypeScript output in repository_after/dist,
-    # causing SPA runtime/Selenium tests to fail.
+
+  test-after:
+    build: .
+    environment:
+      - TEST_REPO=/app/repository_after
+    command: pytest -q tests
+    working_dir: /app
+
+  app:
+    build: .
+    environment:
+      - TEST_REPO=/app/repository_after
+    command: pytest -q tests
+    working_dir: /app
+    # Intentionally do NOT mount the host workspace:
+    # keep evaluation deterministic (no reliance on local build artifacts or node_modules).
 
   web:
     build: .

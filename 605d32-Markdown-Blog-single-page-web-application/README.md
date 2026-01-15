@@ -130,27 +130,16 @@ evaluation/
 - Only `report.json` should be present inside each timestamp folder.
 - The reports output is gitignored via `.gitignore` (`evaluation/reports/**/report.json`).
 
-Run evaluation inside Docker (report created inside container):
+Run evaluation inside Docker (reports persisted to your host via the `evaluation` service volume):
 
 ```bash
-docker-compose build app
-docker-compose run --rm app python3 /app/evaluation/evaluation.py
-```
-
-If you run with `--rm` and no volume, the report is created in the container and removed with it.
-To persist reports on your host, mount `evaluation/reports`:
-
-```bash
-mkdir -p evaluation/reports
-docker-compose build app
-docker-compose run --rm \
-  -v "$(pwd)/evaluation/reports:/app/evaluation/reports" \
-  app python3 /app/evaluation/evaluation.py
+docker-compose build evaluation
+docker-compose run --rm evaluation
 ```
 
 ### Notes about Docker workflow
-- The Compose setup intentionally does **not** mount the workspace by default (to avoid hiding built artifacts like `repository_after/dist/`).
-- If you change TypeScript source, run `docker-compose build app` again so the updated bundle is rebuilt into the image.
+- Compose intentionally does **not** mount the host workspace by default (keeps evaluation deterministic).
+- If you change TypeScript source, re-build the browser bundle into `repository_after/dist/app.js` before running Docker tests/evaluation.
 
 ## Trajectory template (Audit → Contract → Design → Execute → Verify)
 
