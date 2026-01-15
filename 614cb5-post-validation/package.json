@@ -4,15 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "server": "json-server --watch db.json --port 5173 --routes routes.json",
-    "preview": "vite preview",
     "evaluate": "node evaluation/evaluation.js",
     "test:before": "cross-env TEST_TARGET=before vitest run tests/tests_after.test.js",
-    "test:after": "cross-env TEST_TARGET=after vitest run tests/tests_after.test.js",
-    "test:ui": "vitest --ui"
+    "test:after": "cross-env TEST_TARGET=after vitest run tests/tests_after.test.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

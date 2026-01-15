@@ -99,7 +99,8 @@ This project uses a unified test and evaluation setup to compare two codebases (
 
 
 ### 1. Run Tests on `repository_before`
-`docker compose run --rm test-before`
+<!-- before command empty for full-stack -->
+``
 
 ### 2. Run Tests on `repository_after`
 `docker compose run --rm test-after`
@@ -124,9 +125,9 @@ All services mount the project root and node_modules for fast builds and reprodu
 
 ## Example Workflow
 
-1. Run tests on both codebases:
+1. Run tests on repository_after codebase:
   ```sh
-  docker compose run --rm test-before
+  
   docker compose run --rm test-after
   ```
 2. Run evaluation and generate reports:

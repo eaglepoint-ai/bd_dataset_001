@@ -22,4 +22,4 @@ EXPOSE 3000
 
 # Run the application (adjust command based on your package.json scripts)
 # Default to 'start' but can be overridden in docker-compose
-CMD ["npm", "start"]
+# CMD ["npm", "test:after"]
