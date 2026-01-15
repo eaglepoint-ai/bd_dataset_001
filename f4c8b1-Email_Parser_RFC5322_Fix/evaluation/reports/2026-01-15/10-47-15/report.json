@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-01-15T10:47:15.795685",
+  "run_date": "2026-01-15 10:47:15",
+  "before": {
+    "tests": {
+      "total": 25,
+      "passed": 25,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "return_code": 0,
+    "passed": true,
+    "output": {
+      "text": "============================= test session starts ==============================\nplatform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python3.11\ncachedir: .pytest_cache\nrootdir: /app\ncollecting ... collected 25 items\n\ntests/test_email_parser.py::TestSimpleEmails::test_simple_plaintext_email PASSED [  4%]\ntests/test_email_parser.py::TestSimpleEmails::test_html_email PASSED     [  8%]\ntests/test_email_parser.py::TestSimpleEmails::test_multipart_with_attachments PASSED [ 12%]\ntests/test_email_parser.py::TestSimpleEmails::test_rfc2047_subject_decoding PASSED [ 16%]\ntests/test_email_parser.py::TestSimpleEmails::test_quoted_printable_body PASSED [ 20%]\ntests/test_email_parser.py::TestSimpleEmails::test_base64_body_with_linebreaks PASSED [ 24%]\ntests/test_email_parser.py::TestEdgeCases::test_nested_multipart PASSED  [ 28%]\ntests/test_email_parser.py::TestEdgeCases::test_header_folding PASSED    [ 32%]\ntests/test_email_parser.py::TestEdgeCases::test_multiple_received_headers PASSED [ 36%]\ntests/test_email_parser.py::TestEdgeCases::test_boundary_in_body_content PASSED [ 40%]\ntests/test_email_parser.py::TestEdgeCases::test_missing_content_type PASSED [ 44%]\ntests/test_email_parser.py::TestEdgeCases::test_crlf_vs_lf_mixed PASSED  [ 48%]\ntests/test_email_parser.py::TestEdgeCases::test_rfc2231_filename_encoding PASSED [ 52%]\ntests/test_email_parser.py::TestEdgeCases::test_inline_attachments PASSED [ 56%]\ntests/test_email_parser.py::TestErrorHandling::test_malformed_email_partial_parse PASSED [ 60%]\ntests/test_email_parser.py::TestErrorHandling::test_invalid_base64_graceful PASSED [ 64%]\ntests/test_email_parser.py::TestErrorHandling::test_missing_boundary PASSED [ 68%]\ntests/test_email_parser.py::TestErrorHandling::test_invalid_charset PASSED [ 72%]\ntests/test_email_parser.py::TestPublicAPI::test_get_headers PASSED       [ 76%]\ntests/test_email_parser.py::TestPublicAPI::test_get_body PASSED          [ 80%]\ntests/test_email_parser.py::TestPublicAPI::test_get_attachments PASSED   [ 84%]\ntests/test_email_parser.py::TestBeforeVsAfter::test_before_has_bugs PASSED [ 88%]\ntests/test_email_parser.py::TestBeforeVsAfter::test_after_fixes_bugs PASSED [ 92%]\ntests/test_email_parser.py::TestBeforeVsAfter::test_before_header_folding_fails PASSED [ 96%]\ntests/test_email_parser.py::TestBeforeVsAfter::test_after_header_folding_works PASSED [100%]\n\n============================== 25 passed in 1.69s ==============================\n",
+      "truncated": false,
+      "original_length": 2466
+    },
+    "errors": {
+      "text": "",
+      "truncated": false,
+      "original_length": 0
+    }
+  },
+  "after": {
+    "tests": {
+      "total": 25,
+      "passed": 25,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "return_code": 0,
+    "passed": true,
+    "output": {
+      "text": "============================= test session starts ==============================\nplatform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python3.11\ncachedir: .pytest_cache\nrootdir: /app\ncollecting ... collected 25 items\n\ntests/test_email_parser.py::TestSimpleEmails::test_simple_plaintext_email PASSED [  4%]\ntests/test_email_parser.py::TestSimpleEmails::test_html_email PASSED     [  8%]\ntests/test_email_parser.py::TestSimpleEmails::test_multipart_with_attachments PASSED [ 12%]\ntests/test_email_parser.py::TestSimpleEmails::test_rfc2047_subject_decoding PASSED [ 16%]\ntests/test_email_parser.py::TestSimpleEmails::test_quoted_printable_body PASSED [ 20%]\ntests/test_email_parser.py::TestSimpleEmails::test_base64_body_with_linebreaks PASSED [ 24%]\ntests/test_email_parser.py::TestEdgeCases::test_nested_multipart PASSED  [ 28%]\ntests/test_email_parser.py::TestEdgeCases::test_header_folding PASSED    [ 32%]\ntests/test_email_parser.py::TestEdgeCases::test_multiple_received_headers PASSED [ 36%]\ntests/test_email_parser.py::TestEdgeCases::test_boundary_in_body_content PASSED [ 40%]\ntests/test_email_parser.py::TestEdgeCases::test_missing_content_type PASSED [ 44%]\ntests/test_email_parser.py::TestEdgeCases::test_crlf_vs_lf_mixed PASSED  [ 48%]\ntests/test_email_parser.py::TestEdgeCases::test_rfc2231_filename_encoding PASSED [ 52%]\ntests/test_email_parser.py::TestEdgeCases::test_inline_attachments PASSED [ 56%]\ntests/test_email_parser.py::TestErrorHandling::test_malformed_email_partial_parse PASSED [ 60%]\ntests/test_email_parser.py::TestErrorHandling::test_invalid_base64_graceful PASSED [ 64%]\ntests/test_email_parser.py::TestErrorHandling::test_missing_boundary PASSED [ 68%]\ntests/test_email_parser.py::TestErrorHandling::test_invalid_charset PASSED [ 72%]\ntests/test_email_parser.py::TestPublicAPI::test_get_headers PASSED       [ 76%]\ntests/test_email_parser.py::TestPublicAPI::test_get_body PASSED          [ 80%]\ntests/test_email_parser.py::TestPublicAPI::test_get_attachments PASSED   [ 84%]\ntests/test_email_parser.py::TestBeforeVsAfter::test_before_has_bugs PASSED [ 88%]\ntests/test_email_parser.py::TestBeforeVsAfter::test_after_fixes_bugs PASSED [ 92%]\ntests/test_email_parser.py::TestBeforeVsAfter::test_before_header_folding_fails PASSED [ 96%]\ntests/test_email_parser.py::TestBeforeVsAfter::test_after_header_folding_works PASSED [100%]\n\n============================== 25 passed in 0.83s ==============================\n",
+      "truncated": false,
+      "original_length": 2466
+    },
+    "errors": {
+      "text": "",
+      "truncated": false,
+      "original_length": 0
+    }
+  },
+  "comparison": {
+    "improvement": false,
+    "tests_fixed": 0,
+    "all_tests_pass": true,
+    "summary": "After implementation: 25/25 tests passed. Improvement: 0 additional tests passing."
+  },
+  "success": true
+}
