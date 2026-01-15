@@ -3,7 +3,7 @@ set -e
 
 IMAGE_NAME="input-validation"
 
-echo "Building Docker image: $IMAGE_NAME..."
-docker build -t $IMAGE_NAME .
+echo "Building Docker image using Docker Compose..."
+docker compose build input-validation
 
 echo "Build complete."

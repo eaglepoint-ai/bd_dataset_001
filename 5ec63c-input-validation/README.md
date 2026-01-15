@@ -11,8 +11,22 @@ If you prefer to run commands manually, use the following steps:
 ### 1. Build and Run
 
 ```bash
-# Build and run using Docker Compose
-docker compose up --build
+# Start the container (optional, for persistent background use)
+docker compose up -d
+
+# Or run specific tasks directly (container creates and destroys automatically with --rm)
+```
+
+# run tests (quick validation)
+
+```bash
+docker compose run --rm input-validation python -m pytest tests/
+```
+
+# Run evaluation script
+
+```bash
+docker compose run --rm input-validation python evaluation/evaluation.py
 ```
 
 ## 🚀 Automation Scripts
@@ -31,26 +45,10 @@ To simplify your workflow, three bash scripts are provided to handle everything 
 
 ## Standard Demo Output:
 
-```bash
-docker exec input-validation python repository_after/main.py
-```
-
-# Run tests with coverage
+### Demo
 
 ```bash
-docker exec input-validation pytest --cov=repository_after tests/
-```
-
-# Build + run tests (quick validation)
-
-```bash
-docker compose up --build
-```
-
-# Run evaluation script
-
-```bash
-docker exec input-validation python evaluation/evaluation.py
+docker compose run --rm input-validation python repository_after/main.py
 ```
 
 # Test Suite Overview

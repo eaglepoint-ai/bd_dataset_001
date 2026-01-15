@@ -10,6 +10,4 @@ if [[ "$(docker images -q $IMAGE_NAME 2> /dev/null)" == "" ]]; then
 fi
 
 echo "Running main demo..."
-docker rm -f $CONTAINER_NAME 2>/dev/null || true
-docker run -d --name $CONTAINER_NAME $IMAGE_NAME
-docker exec $CONTAINER_NAME python repository_after/main.py
+docker compose run --rm input-validation python repository_after/main.py
