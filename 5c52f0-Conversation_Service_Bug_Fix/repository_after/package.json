@@ -1,5 +1,5 @@
 {
-  "name": "conversation-service",
+  "name": "conversation-service-after",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -20,4 +20,3 @@
     "typescript": "^5.1.0"
   }
 }
-

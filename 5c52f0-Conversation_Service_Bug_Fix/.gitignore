@@ -8,3 +8,10 @@ coverage/
 .nyc_output/
 *.tsbuildinfo
 
+# Generated reports and logs
+evaluation/
+reports/
+report.json
+
+# Dependencies lock
+package-lock.json
