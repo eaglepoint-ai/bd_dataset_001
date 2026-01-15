@@ -1,282 +1,273 @@
 #!/usr/bin/env node
 /**
- * Evaluation script for CartService Bug Fix
+ * Evaluation script for CartService Bug Fix.
  * 
- * Runs tests on both repository_before and repository_after
- * and generates a report comparing the results.
+ * This script evaluates the bug fixes for both repository_before and repository_after,
+ * comparing them against the 9 required bug fix criteria.
  * 
- * Output format matches Aquila expected structure.
+ * Requirements tested:
+ * 1. Throw error when adding item from different merchant
+ * 2. Validate quantity is a positive integer greater than zero
+ * 3. Use atomic operation to prevent duplicate items
+ * 4. Apply discounted price when discount is active and within date range
+ * 5. Return updated cart from removeFromCart instead of null
+ * 6. Recalculate cart pricing.subtotal after any item modification
+ * 7. Recalculate cart pricing.totalItems after any item modification
+ * 8. Handle edge case when cart has items but merchantId is not set
+ * 9. Ensure all Decimal128 price values are converted correctly
  */
 
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const crypto = require('crypto');
 
-const REQUIREMENTS = [
-  { id: 1, description: 'Throw error when adding item from different merchant than existing cart items' },
-  { id: 2, description: 'Validate quantity is a positive integer greater than zero' },
-  { id: 3, description: 'Use atomic operation to prevent duplicate items on concurrent requests' },
-  { id: 4, description: 'Apply discounted price when discount is active and within valid date range' },
-  { id: 5, description: 'Return updated cart from removeFromCart instead of null' },
-  { id: 6, description: 'Recalculate cart pricing.subtotal after any item modification' },
-  { id: 7, description: 'Recalculate cart pricing.totalItems after any item modification' },
-  { id: 8, description: 'Handle edge case when cart has items but merchantId is not set' },
-  { id: 9, description: 'Ensure all Decimal128 price values are converted correctly' }
-];
+const ROOT = path.resolve(__dirname, '..');
+const REPORTS = path.join(ROOT, 'evaluation', 'reports');
 
-function runTests(repoPath) {
-  console.log(`\n${'='.repeat(60)}`);
-  console.log(`Running tests for: ${repoPath}`);
-  console.log('='.repeat(60));
+function environmentInfo() {
+  return {
+    node_version: process.version,
+    platform: `${os.type()} ${os.release()}`
+  };
+}
 
+function runTests(repoName) {
+  /**
+   * Run Jest tests on the repository and return results.
+   */
+  const repoPath = `../${repoName}`;
   const basePath = '/app';
-  let stdout = '';
-  let stderr = '';
-  let jestOutput = null;
   
   try {
-    stdout = execSync(
+    const result = execSync(
       `REPOSITORY_PATH=${repoPath} node node_modules/jest/bin/jest.js tests/ --json --testTimeout=60000 --forceExit --config={}`,
       { 
         encoding: 'utf-8',
         cwd: basePath,
-        maxBuffer: 10 * 1024 * 1024
+        maxBuffer: 10 * 1024 * 1024,
+        stdio: ['pipe', 'pipe', 'pipe']
       }
     );
-    jestOutput = JSON.parse(stdout);
+    
+    const jestOutput = JSON.parse(result);
+    return {
+      passed: jestOutput.success === true,
+      return_code: 0,
+      output: `Tests: ${jestOutput.numPassedTests} passed, ${jestOutput.numFailedTests} failed, ${jestOutput.numTotalTests} total`
+    };
   } catch (error) {
-    stderr = error.stderr || '';
     if (error.stdout) {
-      stdout = error.stdout;
       try {
-        jestOutput = JSON.parse(error.stdout);
+        const jestOutput = JSON.parse(error.stdout);
+        return {
+          passed: jestOutput.success === true,
+          return_code: 1,
+          output: `Tests: ${jestOutput.numPassedTests} passed, ${jestOutput.numFailedTests} failed, ${jestOutput.numTotalTests} total`
+        };
       } catch (e) {
-        console.error('Failed to parse test output');
+        // Parse error
       }
     }
-  }
-  
-  return { jestOutput, stdout, stderr };
-}
-
-function parseTestResults(runResult) {
-  const { jestOutput, stdout, stderr } = runResult;
-  
-  if (!jestOutput || !jestOutput.testResults) {
-    return { 
-      passed: 0, 
-      failed: 0, 
-      errors: 0,
-      skipped: 0,
-      total: 0, 
-      tests: [],
-      stdout: stdout || '',
-      stderr: stderr || ''
+    return {
+      passed: false,
+      return_code: 1,
+      output: `Error running tests: ${error.message}`
     };
   }
+}
 
-  const tests = [];
-  let passed = 0;
-  let failed = 0;
-  let skipped = 0;
+function runMetrics(repoName) {
+  /**
+   * Collect metrics for the repository.
+   */
+  const repoPath = `../${repoName}`;
+  const basePath = '/app';
+  
+  try {
+    const result = execSync(
+      `REPOSITORY_PATH=${repoPath} node node_modules/jest/bin/jest.js tests/ --json --testTimeout=60000 --forceExit --config={}`,
+      { 
+        encoding: 'utf-8',
+        cwd: basePath,
+        maxBuffer: 10 * 1024 * 1024,
+        stdio: ['pipe', 'pipe', 'pipe']
+      }
+    );
+    
+    const jestOutput = JSON.parse(result);
+    return {
+      tests_passed: jestOutput.numPassedTests,
+      tests_failed: jestOutput.numFailedTests,
+      tests_total: jestOutput.numTotalTests,
+      pass_percentage: jestOutput.numTotalTests > 0 
+        ? (jestOutput.numPassedTests / jestOutput.numTotalTests) * 100 
+        : 0
+    };
+  } catch (error) {
+    if (error.stdout) {
+      try {
+        const jestOutput = JSON.parse(error.stdout);
+        return {
+          tests_passed: jestOutput.numPassedTests,
+          tests_failed: jestOutput.numFailedTests,
+          tests_total: jestOutput.numTotalTests,
+          pass_percentage: jestOutput.numTotalTests > 0 
+            ? (jestOutput.numPassedTests / jestOutput.numTotalTests) * 100 
+            : 0
+        };
+      } catch (e) {
+        // Parse error
+      }
+    }
+    return {};
+  }
+}
 
-  for (const suite of jestOutput.testResults) {
-    for (const test of suite.assertionResults) {
-      const outcome = test.status === 'passed' ? 'passed' : 
-                      test.status === 'skipped' ? 'skipped' : 'failed';
-      
-      tests.push({
-        nodeid: `tests/cartService.test.js::${test.fullName || test.title}`,
-        name: test.fullName || test.title,
-        outcome: outcome,
-        requirement: extractRequirementNumber(test.fullName || test.title)
-      });
-      
-      if (test.status === 'passed') passed++;
-      else if (test.status === 'skipped') skipped++;
-      else failed++;
+function evaluate(repoName) {
+  /**
+   * Evaluate a single repository.
+   */
+  const tests = runTests(repoName);
+  const metrics = runMetrics(repoName);
+  return {
+    tests: tests,
+    metrics: metrics
+  };
+}
+
+function runEvaluation() {
+  /**
+   * Run the full evaluation comparing repository_before and repository_after.
+   * Returns the complete evaluation report.
+   */
+  const runId = crypto.randomUUID();
+  const start = new Date();
+  
+  try {
+    console.log('Evaluating repository_before...');
+    const before = evaluate('repository_before');
+    
+    console.log('Evaluating repository_after...');
+    const after = evaluate('repository_after');
+    
+    // Success rule: after.tests.passed == true
+    const passedGate = after.tests.passed;
+    
+    // Generate improvement summary
+    const beforePassed = before.metrics.tests_passed || 0;
+    const afterPassed = after.metrics.tests_passed || 0;
+    const total = after.metrics.tests_total || 0;
+    
+    let improvementSummary;
+    if (passedGate) {
+      improvementSummary = `After implementation passed all tests (${afterPassed}/${total} vs ${beforePassed}/${total} before)`;
+    } else {
+      improvementSummary = `After implementation incomplete (${afterPassed}/${total} tests passed vs ${beforePassed}/${total} before)`;
+    }
+    
+    const comparison = {
+      passed_gate: passedGate,
+      improvement_summary: improvementSummary
+    };
+    
+    const end = new Date();
+    
+    return {
+      run_id: runId,
+      started_at: start.toISOString().replace('+00:00', 'Z'),
+      finished_at: end.toISOString().replace('+00:00', 'Z'),
+      duration_seconds: (end.getTime() - start.getTime()) / 1000,
+      environment: environmentInfo(),
+      before: before,
+      after: after,
+      comparison: comparison,
+      success: passedGate,
+      error: null
+    };
+    
+  } catch (e) {
+    const end = new Date();
+    return {
+      run_id: runId,
+      started_at: start.toISOString().replace('+00:00', 'Z'),
+      finished_at: end.toISOString().replace('+00:00', 'Z'),
+      duration_seconds: (end.getTime() - start.getTime()) / 1000,
+      environment: environmentInfo(),
+      before: null,
+      after: null,
+      comparison: null,
+      success: false,
+      error: e.message || String(e)
+    };
+  }
+}
+
+function main() {
+  /**
+   * Main entry point.
+   */
+  console.log('Running evaluation...');
+  console.log('='.repeat(60));
+  
+  const report = runEvaluation();
+  
+  // Print summary
+  console.log(`\nRun ID: ${report.run_id}`);
+  console.log(`Duration: ${report.duration_seconds.toFixed(2)} seconds`);
+  console.log('');
+  
+  if (report.error) {
+    console.log(`ERROR: ${report.error}`);
+  } else {
+    console.log('BEFORE (repository_before):');
+    console.log(`  Tests passed: ${report.before.tests.passed}`);
+    console.log(`  Results: ${report.before.metrics.tests_passed || 'N/A'}/${report.before.metrics.tests_total || 'N/A'}`);
+    console.log('');
+    console.log('AFTER (repository_after):');
+    console.log(`  Tests passed: ${report.after.tests.passed}`);
+    console.log(`  Results: ${report.after.metrics.tests_passed || 'N/A'}/${report.after.metrics.tests_total || 'N/A'}`);
+    console.log('');
+    console.log('COMPARISON:');
+    console.log(`  Passed gate: ${report.comparison.passed_gate}`);
+    console.log(`  Summary: ${report.comparison.improvement_summary}`);
+  }
+  
+  console.log('');
+  console.log('='.repeat(60));
+  console.log(`SUCCESS: ${report.success}`);
+  console.log('='.repeat(60));
+  
+  // Create report directory with format: reports/YYYY-MM-DD/HH-MM-SS/
+  const now = new Date();
+  const dateDir = now.toISOString().split('T')[0];
+  const timeDir = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+  const reportDir = path.join(REPORTS, dateDir, timeDir);
+  
+  try {
+    // Ensure the base reports directory exists first
+    fs.mkdirSync(REPORTS, { recursive: true });
+    fs.mkdirSync(reportDir, { recursive: true });
+    
+    // Write report
+    const reportPath = path.join(reportDir, 'report.json');
+    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+    console.log(`\nReport written to ${reportPath}`);
+  } catch (e) {
+    if (e.code === 'EACCES' || e.code === 'EPERM') {
+      // If we can't write to the mounted volume, print the report to stdout instead
+      console.log('\nWARNING: Could not write report to file (permission denied)');
+      console.log('Report JSON output:');
+      console.log(JSON.stringify(report, null, 2));
+    } else {
+      console.log(`\nWARNING: Could not write report to file: ${e.message}`);
+      console.log('Report JSON output:');
+      console.log(JSON.stringify(report, null, 2));
     }
   }
-
-  return {
-    passed,
-    failed,
-    errors: 0,
-    skipped,
-    total: passed + failed + skipped,
-    tests,
-    success: jestOutput.success,
-    stdout: stdout || '',
-    stderr: stderr || ''
-  };
-}
-
-function extractRequirementNumber(testName) {
-  const match = testName.match(/Requirement (\d+)/i);
-  return match ? parseInt(match[1]) : null;
-}
-
-function getGitInfo() {
-  try {
-    const branch = execSync('git rev-parse --abbrev-ref HEAD 2>/dev/null', { encoding: 'utf-8' }).trim();
-    const commit = execSync('git rev-parse HEAD 2>/dev/null', { encoding: 'utf-8' }).trim();
-    return { branch, commit };
-  } catch {
-    return { branch: 'unknown', commit: 'unknown' };
-  }
-}
-
-function generateReport(beforeResults, afterResults, startTime) {
-  const now = new Date();
-  const dateStr = now.toISOString().split('T')[0];
-  const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-  const durationSeconds = (now.getTime() - startTime.getTime()) / 1000;
   
-  const gitInfo = getGitInfo();
-  
-  // Aquila-compatible report format
-  const report = {
-    run_id: `${dateStr}_${timeStr}`,
-    started_at: startTime.toISOString(),
-    finished_at: now.toISOString(),
-    duration_seconds: durationSeconds,
-    success: afterResults.success === true,
-    error: null,
-    environment: {
-      node_version: process.version,
-      platform: process.platform,
-      os: `${os.type()} ${os.release()}`,
-      hostname: os.hostname(),
-      git_branch: gitInfo.branch,
-      git_commit: gitInfo.commit
-    },
-    results: {
-      before: {
-        tests: beforeResults.tests,
-        summary: {
-          total: beforeResults.total,
-          passed: beforeResults.passed,
-          failed: beforeResults.failed,
-          errors: beforeResults.errors,
-          skipped: beforeResults.skipped
-        },
-        stdout: beforeResults.stdout,
-        stderr: beforeResults.stderr
-      },
-      after: {
-        tests: afterResults.tests,
-        summary: {
-          total: afterResults.total,
-          passed: afterResults.passed,
-          failed: afterResults.failed,
-          errors: afterResults.errors,
-          skipped: afterResults.skipped
-        },
-        stdout: afterResults.stdout,
-        stderr: afterResults.stderr
-      },
-      comparison: {
-        before_tests_passed: beforeResults.success === true,
-        after_tests_passed: afterResults.success === true,
-        before_total: beforeResults.total,
-        before_passed: beforeResults.passed,
-        before_failed: beforeResults.failed,
-        after_total: afterResults.total,
-        after_passed: afterResults.passed,
-        after_failed: afterResults.failed
-      }
-    },
-    requirements: REQUIREMENTS.map(req => {
-      const afterTest = afterResults.tests.find(t => t.requirement === req.id);
-      const beforeTest = beforeResults.tests.find(t => t.requirement === req.id);
-      
-      return {
-        id: req.id,
-        description: req.description,
-        before_status: beforeTest?.outcome || 'not_run',
-        after_status: afterTest?.outcome || 'not_run',
-        fixed: beforeTest?.outcome !== 'passed' && afterTest?.outcome === 'passed'
-      };
-    })
-  };
-
-  // Save report to evaluation/report.json (expected by Aquila)
-  const mainReportPath = path.join(__dirname, 'report.json');
-  fs.writeFileSync(mainReportPath, JSON.stringify(report, null, 2));
-  console.log(`\nReport saved to: ${mainReportPath}`);
-
-  // Also save a timestamped copy for history
-  const reportsDir = path.join(__dirname, 'reports', dateStr, timeStr);
-  fs.mkdirSync(reportsDir, { recursive: true });
-  const historyReportPath = path.join(reportsDir, 'report.json');
-  fs.writeFileSync(historyReportPath, JSON.stringify(report, null, 2));
-  
-  return report;
-}
-
-function printSummary(report) {
-  // Print log_summary artifact (structured for Aquila)
-  console.log('\n' + '='.repeat(60));
-  console.log('LOG_SUMMARY');
-  console.log('='.repeat(60));
-  console.log(JSON.stringify({
-    run_id: report.run_id,
-    duration_seconds: report.duration_seconds,
-    before: report.results.comparison,
-    success: report.success
-  }, null, 2));
-  
-  console.log('\n' + '='.repeat(60));
-  console.log('EVALUATION SUMMARY');
-  console.log('='.repeat(60));
-  
-  console.log('\nBefore Implementation (repository_before):');
-  console.log(`  Passed: ${report.results.before.summary.passed}/${report.results.before.summary.total}`);
-  
-  console.log('\nAfter Implementation (repository_after):');
-  console.log(`  Passed: ${report.results.after.summary.passed}/${report.results.after.summary.total}`);
-  
-  console.log('\nRequirements Status:');
-  for (const req of report.requirements) {
-    const status = req.fixed ? '✅ FIXED' : (req.after_status === 'passed' ? '✓ PASS' : '✗ FAIL');
-    console.log(`  ${req.id}. ${status} - ${req.description}`);
-  }
-  
-  console.log('\n' + '='.repeat(60));
-  console.log(`OVERALL: ${report.success ? 'PASSED ✅' : 'FAILED ✗'}`);
-  console.log('='.repeat(60));
-  
-  // Print report_content artifact (full report for Aquila)
-  console.log('\n' + '='.repeat(60));
-  console.log('REPORT_CONTENT');
-  console.log('='.repeat(60));
-  console.log(JSON.stringify(report, null, 2));
-}
-
-async function main() {
-  const startTime = new Date();
-  
-  console.log('CartService Bug Fix Evaluation');
-  console.log('==============================\n');
-
-  // Run tests on before implementation
-  const beforeRunResult = runTests('../repository_before');
-  const beforeResults = parseTestResults(beforeRunResult);
-  
-  // Run tests on after implementation
-  const afterRunResult = runTests('../repository_after');
-  const afterResults = parseTestResults(afterRunResult);
-  
-  // Generate and print report
-  const report = generateReport(beforeResults, afterResults, startTime);
-  printSummary(report);
-  
-  // Exit with appropriate code
   process.exit(report.success ? 0 : 1);
 }
 
-main().catch(error => {
-  console.error('Evaluation failed:', error);
-  process.exit(1);
-});
+main();
