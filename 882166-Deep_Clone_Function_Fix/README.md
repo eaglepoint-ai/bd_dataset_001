@@ -103,6 +103,11 @@ function deepClone(obj) → clonedObj
 
 ## Commands
 
+### Run the build image
+```bash
+docker compose build
+```
+
 ### Run repository_before
 ```bash
 docker compose run --rm -e REPO_PATH=repository_before app npm test
