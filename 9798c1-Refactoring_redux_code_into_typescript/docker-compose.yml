@@ -7,6 +7,8 @@ services:
       - ./evaluation/reports:/app/evaluation/reports
       # Write mandatory artifact to host workspace without overriding /app
       - .:/app_host
+      # Also write artifact at dataset-repo root (one level up)
+      - ..:/workspace
     command: node evaluation/evaluation.js
 
   test-before:

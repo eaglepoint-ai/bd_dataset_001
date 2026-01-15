@@ -19,6 +19,8 @@ const REPO_BEFORE = path.join(ROOT, 'repository_before');
 const REPO_AFTER = path.join(ROOT, 'repository_after');
 const HOST_MOUNT_DIR = process.env.HOST_MOUNT_DIR || '/app_host';
 const HOST_REPORT_PATH = process.env.REPORT_PATH || path.join(HOST_MOUNT_DIR, 'report.json');
+const WORKSPACE_MOUNT_DIR = process.env.WORKSPACE_MOUNT_DIR || '/workspace';
+const WORKSPACE_REPORT_PATH = path.join(WORKSPACE_MOUNT_DIR, 'report.json');
 
 function safeMkdirp(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -205,13 +207,20 @@ function main() {
 
   // Also write a flat artifact `report.json` for evaluation platforms that
   // expect it at the workspace root (mounted via docker-compose to /app_host).
-  try {
-    if (fs.existsSync(HOST_MOUNT_DIR) && fs.statSync(HOST_MOUNT_DIR).isDirectory()) {
-      fs.writeFileSync(HOST_REPORT_PATH, JSON.stringify(report, null, 2));
-      console.log(`Artifact report written to: ${HOST_REPORT_PATH}`);
+  const artifactTargets = [
+    { dir: HOST_MOUNT_DIR, path: HOST_REPORT_PATH },
+    { dir: WORKSPACE_MOUNT_DIR, path: WORKSPACE_REPORT_PATH },
+  ];
+
+  for (const target of artifactTargets) {
+    try {
+      if (fs.existsSync(target.dir) && fs.statSync(target.dir).isDirectory()) {
+        fs.writeFileSync(target.path, JSON.stringify(report, null, 2));
+        console.log(`Artifact report written to: ${target.path}`);
+      }
+    } catch (e) {
+      // Best-effort: evaluation should still succeed even if mounts aren't present.
     }
-  } catch (e) {
-    // Best-effort: evaluation should still succeed even if host mount isn't present.
   }
 
   console.log('\n' + '='.repeat(60));
