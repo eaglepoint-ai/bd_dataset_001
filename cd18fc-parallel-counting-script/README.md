@@ -1,92 +1,96 @@
-# project template
+# Prime Counter — Parallel Segmented Sieve
 
-Starter scaffold for bd dataset task.
+Problem statement
+-----------------
+Count all prime numbers up to 10^7 efficiently and portably using Python
+standard library only. The implementation must:
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+- Use a Sieve of Eratosthenes to generate base primes up to sqrt(limit).
+- Use a segmented sieve to process the range in fixed-size chunks (10,000).
+- Use multiprocessing to distribute grouped chunks across CPU cores.
+- Avoid materializing the full 10 million boolean array in memory.
+- Be cross-platform (Windows/macOS/Linux) and avoid global mutable shared state.
+
+Prompt used
+-----------
+Implement a parallel prime counting script in Python that:
+
+- Finds all primes <= 10^7.
+- Auto-detects CPU cores and uses multiprocessing to parallelize work.
+- Uses chunk-based segmented sieve (chunk size fixed at 10,000).
+- Aggregates results and prints a short summary: `Time: X.XX seconds  Primes found: N`.
+- Targets execution < 0.09s on a modern 8-core CPU (reference).
+
+Requirements
+------------
+- Correctness: Matches known prime counts (e.g., π(10^7) = 664579).
+- Memory efficient: No full-range materialization; per-chunk allocations only.
+- Performance: Group tasks and minimize pickling/scheduling overhead.
+- Cross-platform: Use `fork` when available; fall back to `spawn` with initializer.
+- No external dependencies beyond the Python standard library.
+
+How the implementation works (summary)
+------------------------------------
+- `generate_base_primes(limit)`: Sieve of Eratosthenes to produce base primes up to sqrt(limit).
+- `create_chunks(start, end, chunk_size)`: produce 10k chunks.
+- `count_primes_in_segment((start,end, base_primes))`: segmented sieve for that slice using `bytearray` and slice assignment for marking multiples.
+- `count_primes_parallel(limit, chunk_size)`: groups adjacent 10k chunks into larger tasks, provides base primes to workers via fork inheritance or an initializer, and aggregates results via `imap_unordered`.
+
+Commands
+--------
+
+Local (no Docker)
+
+Run the project's custom test runner (recommended because it collects performance metrics):
+```bash
+python3 tests/test_after.py
+```
+
+Run pytest directly (will attempt to discover tests):
+```bash
+pytest -q
+```
+
+Docker (recommended for reproducible environment)
+
+Build the image:
+```bash
+docker compose build --no-cache app
+```
+
+Run tests against `repository_after` (custom runner):
+```bash
+docker compose run --rm -e PYTHONPATH=/app/repository_after app python tests/test_after.py
+```
+
+Run pytest inside container (requires `pytest` in image):
+```bash
+docker compose run --rm -e PYTHONPATH=/app/repository_after app pytest -q
+```
+
+Run evaluation script to produce a JSON report:
+```bash
+docker compose run --rm -e PYTHONPATH=/app/repository_after app python evaluation/evaluation.py
+```
+
+Notes
+-----
+- There is no `repository_before` application code in this task — the focus
+  is the optimized implementation in `repository_after`.
+- The Docker image installs `pytest` via `requirements.txt` to support
+  running tests inside containers.
+- The test runner prints measured execution time and prime count; the
+  evaluation script captures these into a JSON report under `evaluation/`.
+
+Contact / Next steps
+--------------------
+If you want, I can:
+
+- Add a small benchmark harness that runs multiple iterations and reports
+  median/p95 timings.
+- Add a `Makefile` with convenient targets (`make build`, `make test`, `make eval`).
+- Commit the changes and add a short changelog entry.
 
 ---
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
-
-### Setup Steps
-
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
-```
-
-### Report Schema
-
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
-```
-
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
-
----
-
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
-
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+End of README.

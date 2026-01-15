@@ -1,6 +1,12 @@
+version: '3.8'
+
 services:
   app:
     build: .
-    command: pytest -q tests
     volumes:
-      - .:/app
+      - .:/app:rw
+    working_dir: /app
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true
