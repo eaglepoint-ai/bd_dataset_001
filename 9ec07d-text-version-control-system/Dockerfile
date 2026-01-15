@@ -1,5 +1,16 @@
-FROM python:3.11-slim
+FROM node:18-alpine
+
 WORKDIR /app
-COPY . /app
-RUN pip install --no-cache-dir -r requirements.txt
-CMD ["pytest", "-q", "tests"]
+
+# Copy package.json from the repository_after subdirectory
+COPY repository_after/package.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application code
+COPY repository_after/ .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]
