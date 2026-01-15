@@ -1,0 +1,9 @@
+{
+    "instance_id": "bbda48",
+    "problem_statement": "A Python program must be developed to implement Huffman coding, starting by reading a text file specified via command line to calculate character frequencies and build a canonical Huffman tree using a priority queue. The system must then generate optimal binary codes through a tree traversal, encode the original text, and output a complete table listing each character's frequency and corresponding Huffman code. Finally, the implementation must calculate and display the original and encoded bit counts along with the compression ratio, all within a strict 150-line constraint and with robust error handling for edge cases like empty or single-character files.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/bbda48-huffman-coding",
+    "environment_setup": "Dockerfile"
+  }
+  
