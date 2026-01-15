@@ -1,92 +1,127 @@
-# project template
+# Rule Engine - Personal Laws System
 
-Starter scaffold for bd dataset task.
+This dataset task involves building a full-stack Next.js application where users can define their own laws as IF-THEN rules. The system evaluates scenarios, detects conflicts, and provides explainable reasoning paths.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+## Folder Layout
 
----
+- `repository_before/` - Empty baseline (no implementation)
+- `repository_after/` - Complete Next.js rule engine implementation
+- `tests/` - Test suite validating all requirements
+- `patches/` - Diff between before/after
+- `evaluation/` - Evaluation runner with report generation
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+## Problem Statement
 
-### Setup Steps
+A full-stack application is needed to allow users to define customizable IF-THEN rules as personal "laws," which can conflict and override each other, creating a dynamic rule engine. This system must algorithmically evaluate any user-provided scenario by applying all relevant rules, detecting conflicts, and resolving overrides to produce a single, deterministic outcome. Furthermore, the application must clearly present the complete reasoning path, explaining which rules fired and how any conflicts were resolved, to provide users with transparent, explainable decision-making.
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
+## Prompt Used
 
 ```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+Build a full-stack Next.js application where users can define their own laws as IF-THEN rules. 
+Each law has a condition and a consequence, and rules can override or conflict with each other. 
+The system evaluates a scenario by applying all relevant rules, detects conflicts, and outputs 
+a deterministic, explainable result showing which rules applied and which were overridden. 
+The app is essentially a rule engine for personal decision-making, where the reasoning path 
+is visible to the user.
 ```
 
-### Report Schema
+## Example Scenario
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+**User defines the following rules:**
+- **Law A**: IF it's raining, THEN carry an umbrella
+- **Law B**: IF it's raining AND it's windy, THEN do not carry an umbrella
+- **Law C**: IF it's a weekend, THEN relax
+
+**Scenario Evaluation:**
+Today is raining, windy, and a weekend.
+
+**Applied Rules:**
+- Law B overrides Law A → do not carry an umbrella
+- Law C → relax
+
+**Result:**
+Do not carry an umbrella. Relax.
+
+System shows conflict resolution (Law B overrides Law A) and reasoning path.
+
+## Functional Requirements
+
+1. Users can create laws as IF-THEN rules with conditions and consequences
+2. Rules can override or conflict with other rules
+3. The system evaluates a scenario by applying all relevant rules
+4. Conflicts between rules must be detected and resolved deterministically
+5. The system produces a reasoning path showing which rules were applied or overridden
+6. Users can view the final outcome and explanation
+7. No auth required
+8. Minimal User Interface
+
+## Technical Stack
+
+- **Language**: TypeScript
+- **Framework**: Next.js
+- **Database**: MongoDB
+- **Testing**: Jest, React Testing Library
+- **Styling**: Tailwind CSS (minimal UI)
+
+## Run with Docker
+
+### Build image
+```bash
+docker compose build
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+### Run tests (before – expected N/A since no implementation)
+```bash
+# repository_before has no implementation, so no tests to run
+```
 
----
+### Run tests (after – expected pass)
+```bash
+docker compose run --rm app-after
+```
+*Expected: All requirement-based tests PASS.*
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+### Run evaluation
+```bash
+docker compose run --rm evaluation
+```
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+### Run the application
+```bash
+docker compose up app
+```
+*Visit: http://localhost:3000*
+
+## Run Locally
+
+```bash
+# Navigate to repository_after
+cd repository_after
+
+# Install dependencies
+npm install
+
+# Set up MongoDB (or use MongoDB Atlas connection string)
+# Create .env.local file:
+# MONGODB_URI=mongodb://localhost:27017/rule-engine
+
+# Run development server
+npm run dev
+
+# Run tests
+npm test
+
+# Build for production
+npm run build
+npm start
+```
+
+## Run Evaluation Locally
+
+```bash
+# Install dependencies
+npm install
+
+# Run evaluation
+npm run evaluate
+```
