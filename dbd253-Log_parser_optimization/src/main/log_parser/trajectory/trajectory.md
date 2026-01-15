@@ -31,13 +31,6 @@ Real-world logs are messy. The parser handles:
 - **Null/Empty Lines:** Skips them gracefully.
 - **Malformed Lines:** If a line contains "ERROR" but no valid error token follows, it captures what it can or skips, ensuring the process never crashes.
 
-## 5. Evaluation and Verification
-
-### Python-to-Java Port of Evaluation
-The original requirement provided a Python `evaluate.py`. I ported this logic to `Evaluation.java`.
-- **JSON Report:** Generates a `report.json` with the exact schema required (run_id, environment, duration, tests, summary).
-- **Self-Contained Tests:** Includes internal methods `testBasicParsing`, `testEmptyInput`, etc., acting as a lightweight unit test framework.
-- **Performance Gate:** Includes a `testPerformanceLargeScale` that processes 1,000,000 lines. The threshold is set to 2 seconds, but the implementation typically finishes in <200ms.
 
 ## 6. Docker and Deployment
 

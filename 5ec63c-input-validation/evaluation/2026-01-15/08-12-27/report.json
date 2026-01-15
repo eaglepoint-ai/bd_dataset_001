@@ -1,0 +1,360 @@
+{
+  "run_id": "47370dcf",
+  "started_at": "2026-01-15T08:12:14.377083",
+  "finished_at": "2026-01-15T08:12:27.478999",
+  "duration_seconds": 13.101916,
+  "success": true,
+  "error": null,
+  "environment": {
+    "python_version": "3.11.14",
+    "platform": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "os": "Linux",
+    "os_release": "5.15.167.4-microsoft-standard-WSL2",
+    "architecture": "x86_64",
+    "hostname": "b9b9faa8a49b",
+    "git_commit": "unknown",
+    "git_branch": "unknown"
+  },
+  "results": {
+    "before": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "tests/decorators/test_decorators.py::test_safe_execute_catches_error",
+          "name": "test_safe_execute_catches_error",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/decorators/test_decorators.py::test_safe_execute_reraise",
+          "name": "test_safe_execute_reraise",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/decorators/test_decorators.py::test_retry_on_error_success_after_retry",
+          "name": "test_retry_on_error_success_after_retry",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/decorators/test_decorators.py::test_retry_on_error_fails_max_retries",
+          "name": "test_retry_on_error_fails_max_retries",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/decorators/test_decorators.py::test_retry_on_ignore_other_categories",
+          "name": "test_retry_on_ignore_other_categories",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/enums/test_error_types.py::test_error_category_members",
+          "name": "test_error_category_members",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/enums/test_error_types.py::test_error_severity_members",
+          "name": "test_error_severity_members",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/enums/test_error_types.py::test_error_severity_ordering",
+          "name": "test_error_severity_ordering",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_base_error.py::test_categorized_error_init",
+          "name": "test_categorized_error_init",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_base_error.py::test_categorized_error_to_dict",
+          "name": "test_categorized_error_to_dict",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_specific_errors.py::test_validation_error_defaults",
+          "name": "test_validation_error_defaults",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_specific_errors.py::test_network_error_defaults",
+          "name": "test_network_error_defaults",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_specific_errors.py::test_database_error_defaults",
+          "name": "test_database_error_defaults",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_specific_errors.py::test_unknown_error_defaults",
+          "name": "test_unknown_error_defaults",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/handlers/test_error_handler.py::test_handler_filtering_severity",
+          "name": "test_handler_filtering_severity",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/handlers/test_error_handler.py::test_handler_filtering_category",
+          "name": "test_handler_filtering_category",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/handlers/test_error_handler.py::test_handler_history_and_stats",
+          "name": "test_handler_history_and_stats",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/handlers/test_error_handler.py::test_graceful_shutdown_trigger",
+          "name": "test_graceful_shutdown_trigger",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/integrations/test_integration.py::test_full_integration_flow",
+          "name": "test_full_integration_flow",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_email_valid",
+          "name": "test_email_valid",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_email_invalid",
+          "name": "test_email_invalid",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_range_valid",
+          "name": "test_range_valid",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_range_invalid_high",
+          "name": "test_range_invalid_high",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_range_invalid_low",
+          "name": "test_range_invalid_low",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_length_valid",
+          "name": "test_length_valid",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_length_too_short",
+          "name": "test_length_too_short",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_length_too_long",
+          "name": "test_length_too_long",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_not_none_fail",
+          "name": "test_not_none_fail",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_positive_fail",
+          "name": "test_positive_fail",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_in_choices_fail",
+          "name": "test_in_choices_fail",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 30,
+        "passed": 30,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python\ncachedir: .pytest_cache\nrootdir: /app\ncollecting ... collected 30 items\n\ntests/decorators/test_decorators.py::test_safe_execute_catches_error PASSED [  3%]\ntests/decorators/test_decorators.py::test_safe_execute_reraise PASSED    [  6%]\ntests/decorators/test_decorators.py::test_retry_on_error_success_after_retry PASSED [ 10%]\ntests/decorators/test_decorators.py::test_retry_on_error_fails_max_retries PASSED [ 13%]\ntests/decorators/test_decorators.py::test_retry_on_ignore_other_categories PASSED [ 16%]\ntests/enums/test_error_types.py::test_error_category_members PASSED      [ 20%]\ntests/enums/test_error_types.py::test_error_severity_members PASSED      [ 23%]\ntests/enums/test_error_types.py::test_error_severity_ordering PASSED     [ 26%]\ntests/errors/test_base_error.py::test_categorized_error_init PASSED      [ 30%]\ntests/errors/test_base_error.py::test_categorized_error_to_dict PASSED   [ 33%]\ntests/errors/test_specific_errors.py::test_validation_error_defaults PASSED [ 36%]\ntests/errors/test_specific_errors.py::test_network_error_defaults PASSED [ 40%]\ntests/errors/test_specific_errors.py::test_database_error_defaults PASSED [ 43%]\ntests/errors/test_specific_errors.py::test_unknown_error_defaults PASSED [ 46%]\ntests/handlers/test_error_handler.py::test_handler_filtering_severity PASSED [ 50%]\ntests/handlers/test_error_handler.py::test_handler_filtering_category PASSED [ 53%]\ntests/handlers/test_error_handler.py::test_handler_history_and_stats PASSED [ 56%]\ntests/handlers/test_error_handler.py::test_graceful_shutdown_trigger PASSED [ 60%]\ntests/integrations/test_integration.py::test_full_integration_flow PASSED [ 63%]\ntests/validators/test_input_validator.py::test_email_valid PASSED        [ 66%]\ntests/validators/test_input_validator.py::test_email_invalid PASSED      [ 70%]\ntests/validators/test_input_validator.py::test_range_valid PASSED        [ 73%]\ntests/validators/test_input_validator.py::test_range_invalid_high PASSED [ 76%]\ntests/validators/test_input_validator.py::test_range_invalid_low PASSED  [ 80%]\ntests/validators/test_input_validator.py::test_length_valid PASSED       [ 83%]\ntests/validators/test_input_validator.py::test_length_too_short PASSED   [ 86%]\ntests/validators/test_input_validator.py::test_length_too_long PASSED    [ 90%]\ntests/validators/test_input_validator.py::test_not_none_fail PASSED      [ 93%]\ntests/validators/test_input_validator.py::test_positive_fail PASSED      [ 96%]\ntests/validators/test_input_validator.py::test_in_choices_fail PASSED    [100%]\n\n============================== 30 passed in 4.44s ==============================\n",
+      "stderr": ""
+    },
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "tests/decorators/test_decorators.py::test_safe_execute_catches_error",
+          "name": "test_safe_execute_catches_error",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/decorators/test_decorators.py::test_safe_execute_reraise",
+          "name": "test_safe_execute_reraise",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/decorators/test_decorators.py::test_retry_on_error_success_after_retry",
+          "name": "test_retry_on_error_success_after_retry",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/decorators/test_decorators.py::test_retry_on_error_fails_max_retries",
+          "name": "test_retry_on_error_fails_max_retries",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/decorators/test_decorators.py::test_retry_on_ignore_other_categories",
+          "name": "test_retry_on_ignore_other_categories",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/enums/test_error_types.py::test_error_category_members",
+          "name": "test_error_category_members",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/enums/test_error_types.py::test_error_severity_members",
+          "name": "test_error_severity_members",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/enums/test_error_types.py::test_error_severity_ordering",
+          "name": "test_error_severity_ordering",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_base_error.py::test_categorized_error_init",
+          "name": "test_categorized_error_init",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_base_error.py::test_categorized_error_to_dict",
+          "name": "test_categorized_error_to_dict",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_specific_errors.py::test_validation_error_defaults",
+          "name": "test_validation_error_defaults",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_specific_errors.py::test_network_error_defaults",
+          "name": "test_network_error_defaults",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_specific_errors.py::test_database_error_defaults",
+          "name": "test_database_error_defaults",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/errors/test_specific_errors.py::test_unknown_error_defaults",
+          "name": "test_unknown_error_defaults",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/handlers/test_error_handler.py::test_handler_filtering_severity",
+          "name": "test_handler_filtering_severity",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/handlers/test_error_handler.py::test_handler_filtering_category",
+          "name": "test_handler_filtering_category",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/handlers/test_error_handler.py::test_handler_history_and_stats",
+          "name": "test_handler_history_and_stats",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/handlers/test_error_handler.py::test_graceful_shutdown_trigger",
+          "name": "test_graceful_shutdown_trigger",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/integrations/test_integration.py::test_full_integration_flow",
+          "name": "test_full_integration_flow",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_email_valid",
+          "name": "test_email_valid",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_email_invalid",
+          "name": "test_email_invalid",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_range_valid",
+          "name": "test_range_valid",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_range_invalid_high",
+          "name": "test_range_invalid_high",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_range_invalid_low",
+          "name": "test_range_invalid_low",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_length_valid",
+          "name": "test_length_valid",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_length_too_short",
+          "name": "test_length_too_short",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_length_too_long",
+          "name": "test_length_too_long",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_not_none_fail",
+          "name": "test_not_none_fail",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_positive_fail",
+          "name": "test_positive_fail",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/validators/test_input_validator.py::test_in_choices_fail",
+          "name": "test_in_choices_fail",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 30,
+        "passed": 30,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python\ncachedir: .pytest_cache\nrootdir: /app\ncollecting ... collected 30 items\n\ntests/decorators/test_decorators.py::test_safe_execute_catches_error PASSED [  3%]\ntests/decorators/test_decorators.py::test_safe_execute_reraise PASSED    [  6%]\ntests/decorators/test_decorators.py::test_retry_on_error_success_after_retry PASSED [ 10%]\ntests/decorators/test_decorators.py::test_retry_on_error_fails_max_retries PASSED [ 13%]\ntests/decorators/test_decorators.py::test_retry_on_ignore_other_categories PASSED [ 16%]\ntests/enums/test_error_types.py::test_error_category_members PASSED      [ 20%]\ntests/enums/test_error_types.py::test_error_severity_members PASSED      [ 23%]\ntests/enums/test_error_types.py::test_error_severity_ordering PASSED     [ 26%]\ntests/errors/test_base_error.py::test_categorized_error_init PASSED      [ 30%]\ntests/errors/test_base_error.py::test_categorized_error_to_dict PASSED   [ 33%]\ntests/errors/test_specific_errors.py::test_validation_error_defaults PASSED [ 36%]\ntests/errors/test_specific_errors.py::test_network_error_defaults PASSED [ 40%]\ntests/errors/test_specific_errors.py::test_database_error_defaults PASSED [ 43%]\ntests/errors/test_specific_errors.py::test_unknown_error_defaults PASSED [ 46%]\ntests/handlers/test_error_handler.py::test_handler_filtering_severity PASSED [ 50%]\ntests/handlers/test_error_handler.py::test_handler_filtering_category PASSED [ 53%]\ntests/handlers/test_error_handler.py::test_handler_history_and_stats PASSED [ 56%]\ntests/handlers/test_error_handler.py::test_graceful_shutdown_trigger PASSED [ 60%]\ntests/integrations/test_integration.py::test_full_integration_flow PASSED [ 63%]\ntests/validators/test_input_validator.py::test_email_valid PASSED        [ 66%]\ntests/validators/test_input_validator.py::test_email_invalid PASSED      [ 70%]\ntests/validators/test_input_validator.py::test_range_valid PASSED        [ 73%]\ntests/validators/test_input_validator.py::test_range_invalid_high PASSED [ 76%]\ntests/validators/test_input_validator.py::test_range_invalid_low PASSED  [ 80%]\ntests/validators/test_input_validator.py::test_length_valid PASSED       [ 83%]\ntests/validators/test_input_validator.py::test_length_too_short PASSED   [ 86%]\ntests/validators/test_input_validator.py::test_length_too_long PASSED    [ 90%]\ntests/validators/test_input_validator.py::test_not_none_fail PASSED      [ 93%]\ntests/validators/test_input_validator.py::test_positive_fail PASSED      [ 96%]\ntests/validators/test_input_validator.py::test_in_choices_fail PASSED    [100%]\n\n============================== 30 passed in 4.94s ==============================\n",
+      "stderr": ""
+    },
+    "comparison": {
+      "before_tests_passed": true,
+      "after_tests_passed": true,
+      "before_total": 30,
+      "before_passed": 30,
+      "before_failed": 0,
+      "after_total": 30,
+      "after_passed": 30,
+      "after_failed": 0
+    }
+  }
+}
