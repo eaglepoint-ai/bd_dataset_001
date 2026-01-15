@@ -3,7 +3,7 @@
     "problem_statement": "",
     "base_commit": "repository_before",
     "test_patch": "tests/",
-    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/06e4b7-simplex-algorithm",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/06e4b7-simplex-algorithm",
     "environment_setup": "Dockerfile"
   }
   
