@@ -1,10 +1,46 @@
 --- repository_before/cartService.js	2026-01-15 14:52:40.170072500 +0300
-+++ repository_after/cartService.js	2026-01-15 15:06:15.595620500 +0300
-@@ -65,6 +65,11 @@
++++ repository_after/cartService.js	2026-01-15 16:26:56.422788800 +0300
+@@ -5,6 +5,35 @@
+ const logger = require("./config/logger");
+ 
+ class CartService {
++  // BUG FIX 9: Helper to convert Decimal128 values to numbers
++  _formatCartResponse(cart) {
++    if (!cart) {
++      return { _id: null, items: [], pricing: { subtotal: 0, totalItems: 0 } };
++    }
++    return {
++      _id: cart._id,
++      merchantId: cart.merchantId,
++      items: cart.items.map(item => ({
++        _id: item._id,
++        menuItemId: item.menuItemId?._id || item.menuItemId,
++        name: item.name,
++        price: parseFloat(item.price?.toString() || '0'),
++        quantity: item.quantity,
++        variations: item.variations,
++        addOns: (item.addOns || []).map(a => ({
++          _id: a._id,
++          name: a.name,
++          price: parseFloat(a.price?.toString() || '0')
++        })),
++        subtotal: parseFloat(item.subtotal?.toString() || '0'),
++      })),
++      pricing: {
++        subtotal: parseFloat(cart.pricing?.subtotal?.toString() || '0'),
++        totalItems: cart.pricing?.totalItems || 0
++      }
++    };
++  }
++
+   async getCart(customerId) {
+     try {
+       const cart = await Cart.findOne({ customerId })
+@@ -65,6 +94,11 @@
      try {
        const { menuItemId, quantity, variations = [], addOns = [] } = itemData;
  
-+      // Bug fix: Validate quantity is a positive integer greater than zero
++      // BUG FIX 2: Validate quantity is a positive integer greater than zero
 +      if (!Number.isInteger(quantity) || quantity <= 0) {
 +        throw new HttpError("Quantity must be a positive integer greater than zero", 400);
 +      }
@@ -12,7 +48,13 @@
        const menuItem = await MenuItem.findById(menuItemId).lean();
        if (!menuItem) {
          throw new HttpError("Menu item not found", 404);
-@@ -97,10 +102,10 @@
+@@ -92,15 +126,15 @@
+       
+       let basePrice = variantPrice !== null ? variantPrice : parseFloat(menuItem.price.toString());
+       
++      // BUG FIX 4: Fix inverted discount logic - apply discount when within date range
+       if (menuItem.discount && menuItem.discount.isActive) {
+         const now = new Date();
          const validFrom = menuItem.discount.validFrom ? new Date(menuItem.discount.validFrom) : null;
          const validUntil = menuItem.discount.validUntil ? new Date(menuItem.discount.validUntil) : null;
          
@@ -20,95 +62,89 @@
 -          if (menuItem.discountedPrice) {
 -            basePrice = parseFloat(menuItem.discountedPrice.toString());
 -          }
-+        // Bug fix: Apply discount when WITHIN date range (was inverted)
 +        const isWithinDateRange = (!validFrom || now >= validFrom) && (!validUntil || now <= validUntil);
 +        if (isWithinDateRange && menuItem.discountedPrice) {
 +          basePrice = parseFloat(menuItem.discountedPrice.toString());
          }
        }
  
-@@ -121,6 +126,18 @@
+@@ -121,6 +155,15 @@
            merchantId: menuItem.merchantId,
            items: []
          });
-+      } else if (cart.items.length > 0) {
-+        // Bug fix: Throw error when adding item from different merchant
-+        const cartMerchantId = cart.merchantId ? cart.merchantId.toString() : null;
-+        const itemMerchantId = menuItem.merchantId.toString();
-+        
-+        if (cartMerchantId && cartMerchantId !== itemMerchantId) {
++      } else {
++        // BUG FIX 1: Check merchant mismatch
++        if (cart.merchantId && cart.merchantId.toString() !== menuItem.merchantId.toString()) {
 +          throw new HttpError("Cannot add items from different merchants. Please clear your cart first.", 400);
 +        }
-+        // Bug fix: Handle edge case when cart has items but merchantId is not set
-+        if (!cartMerchantId) {
++        // BUG FIX 8: Set merchantId if cart exists but merchantId is not set
++        if (!cart.merchantId) {
 +          cart.merchantId = menuItem.merchantId;
 +        }
        }
  
        const existingItem = cart.items.find(item => {
-@@ -144,8 +161,25 @@
-         addOns: addOnsWithPrices,
-         subtotal,
+@@ -146,6 +189,11 @@
        };
--      cart.items.push(newItem);
+       cart.items.push(newItem);
  
-+      // Bug fix: Use atomic operation to prevent duplicate items on concurrent requests
-+      const updateResult = await Cart.findOneAndUpdate(
-+        { customerId, 'items.menuItemId': { $ne: menuItem._id } },
-+        { 
-+          $push: { items: newItem },
-+          $set: { merchantId: menuItem.merchantId }
-+        },
-+        { new: true, upsert: true, setDefaultsOnInsert: true }
-+      );
-+
-+      if (!updateResult) {
-+        throw new HttpError("This exact item configuration is already in your cart.", 409);
-+      }
-+      cart = updateResult;
-+
-+      // Bug fix: Recalculate cart pricing after adding item
++      // BUG FIX 6 & 7: Recalculate cart pricing after adding item
++      cart.pricing = cart.pricing || { subtotal: 0, totalItems: 0 };
 +      cart.pricing.subtotal = cart.items.reduce((sum, item) => sum + parseFloat(item.subtotal.toString()), 0);
 +      cart.pricing.totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
++
        await cart.save();
  
        await cart.populate({
-@@ -224,6 +258,10 @@
+@@ -157,7 +205,8 @@
+         }
+       });
+ 
+-      return cart;
++      // BUG FIX 9: Return cart with Decimal128 values converted to numbers
++      return this._formatCartResponse(cart);
+     } catch (error) {
+       logger.error(`Error adding to cart: ${error.message}`);
+       throw error;
+@@ -224,8 +273,13 @@
          cartItem.subtotal = newSubtotal;
        }
  
-+      // Bug fix: Recalculate cart pricing after any item modification
++      // BUG FIX 6 & 7: Recalculate cart pricing after update
++      cart.pricing = cart.pricing || { subtotal: 0, totalItems: 0 };
 +      cart.pricing.subtotal = cart.items.reduce((sum, item) => sum + parseFloat(item.subtotal.toString()), 0);
 +      cart.pricing.totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 +
        await cart.save();
-       return cart;
+-      return cart;
++      return this._formatCartResponse(cart);
      } catch (error) {
-@@ -243,8 +281,13 @@
+       logger.error(`Error updating cart item: ${error.message}`);
+       throw error;
+@@ -243,8 +297,14 @@
          (item) => item._id.toString() !== itemId
        );
  
-+      // Bug fix: Recalculate cart pricing after removal
++      // BUG FIX 6 & 7: Recalculate cart pricing after removal
++      cart.pricing = cart.pricing || { subtotal: 0, totalItems: 0 };
 +      cart.pricing.subtotal = cart.items.reduce((sum, item) => sum + parseFloat(item.subtotal.toString()), 0);
 +      cart.pricing.totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 +
        await cart.save();
 -      return null;
-+      // Bug fix: Return updated cart instead of null
-+      return cart;
++      // BUG FIX 5: Return updated cart instead of null
++      return this._formatCartResponse(cart);
      } catch (error) {
        logger.error(`Error removing from cart: ${error.message}`);
        throw error;
-@@ -259,8 +302,11 @@
+@@ -259,8 +319,9 @@
        }
  
        cart.items = [];
-+      // Bug fix: Reset pricing when clearing cart
-+      cart.pricing.subtotal = 0;
-+      cart.pricing.totalItems = 0;
++      cart.pricing = { subtotal: 0, totalItems: 0 };
        await cart.save();
 -      return null;
-+      return cart;
++      return this._formatCartResponse(cart);
      } catch (error) {
        logger.error(`Error clearing cart: ${error.message}`);
        throw error;
