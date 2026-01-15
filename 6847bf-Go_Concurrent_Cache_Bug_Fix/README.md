@@ -14,6 +14,7 @@ Fix the concurrent cache implementation that has race conditions, goroutine leak
 5. Fix the Stop method to properly signal shutdown, wait for cleanup goroutine to exit, and close channels safely
 6. Ensure Set operation properly resets TTL timer when updating existing keys
 7. Fix potential panic from closing already-closed channel or sending on closed channel
+8. If you are not familiar with Go, use an AI assistant to help implement the fixes in repository_after based on the requirements above
 
 ## Category
 Bug Fix
@@ -22,4 +23,3 @@ Bug Fix
 ```bash
 docker-compose run --rm run_before
 ```
-
