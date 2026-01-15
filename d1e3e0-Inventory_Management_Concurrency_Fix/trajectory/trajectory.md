@@ -53,3 +53,9 @@ Commands established for reproducible testing:
 
 ## Conclusion
 The refactoring successfully resolved all concurrency and performance issues. By enforcing pessimistic locking and strict transaction scoping, we achieved 100% data integrity under concurrent load, verified by the automated test suite.
+
+## References
+*   [TypeORM Pessimistic Locking](https://typeorm.io/select-query-builder#locking)
+*   [TypeORM Transactions](https://typeorm.io/transactions)
+*   [NestJS Pagination](https://docs.nestjs.com/techniques/database#pagination)
+*   [TypeORM Relations](https://typeorm.io/relations)
