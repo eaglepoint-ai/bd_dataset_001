@@ -1,10 +1,15 @@
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
-COPY repository_before/ .
+# Copy project files
+COPY . /app
 
+# Install dependencies
 RUN npm install
 
-CMD ["npm", "start"]
+# Set environment
+ENV NODE_ENV=test
 
+# Default command
+CMD ["npm", "test"]
