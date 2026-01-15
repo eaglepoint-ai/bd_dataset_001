@@ -51,7 +51,7 @@ def generate_output_path():
     time_str = now.strftime("%H-%M-%S")
 
     project_root = Path(__file__).parent.parent
-    output_dir = project_root / "evaluation" / date_str / time_str
+    output_dir = project_root / "evaluation" / "reports" / date_str / time_str
     output_dir.mkdir(parents=True, exist_ok=True)
 
     return output_dir / "report.json"
@@ -131,7 +131,6 @@ def main():
     tests_dir = project_root / "tests"
 
     # 3. Run Tests
-    print(f"Running evaluation {run_id}...")
     detailed_results = run_evaluation_tests(tests_dir)
 
     # 4. Finalize Timing
