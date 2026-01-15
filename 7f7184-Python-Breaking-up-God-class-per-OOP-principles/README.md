@@ -20,7 +20,7 @@ You are given a python class to refactor following the proper OOP principles. Yo
 Run the tests against the initial state. This is expected to fail or error out due to the monolithic structure and missing classes.
 
 ```bash
-docker-compose run --rm -e PYTHONPATH=repository_before app pytest tests/test_main.py
+docker compose run --rm -e PYTHONPATH=/app/repository_before app pytest -v --tb=no
 ```
 
 ### Run tests on `repository_after`
@@ -28,7 +28,7 @@ docker-compose run --rm -e PYTHONPATH=repository_before app pytest tests/test_ma
 Run the tests against the refactored solution. This should pass all checks for inheritance, attribute placement, and functionality.
 
 ```bash
-docker-compose run --rm -e PYTHONPATH=repository_after app pytest tests/test_main.py
+docker compose run --rm -e PYTHONPATH=/app/repository_after app pytest -v --tb=no
 ```
 
 ### Run Evaluation
