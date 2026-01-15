@@ -1,0 +1,35 @@
+name: Check PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches: [main]
+
+jobs:
+  check-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # Regex pattern: 
+          # ^ - start of string
+          # [a-z0-9]{6} - exactly 6 lowercase letters or digits
+          # - - a hyphen
+          # [a-zA-Z0-9_]+ - one or more letters, numbers, or underscores
+          # $ - end of string
+          PATTERN="^[a-z0-9]{6}-[a-zA-Z0-9_]+$"
+          
+          if [[ ! "$TITLE" =~ $PATTERN ]]; then
+            echo "Error: Invalid PR title format."
+            echo "Current title: '$TITLE'"
+            echo "Expected format: 6 lowercase letters/digits + hyphen + letters/numbers/underscores"
+            echo "Example valid titles:"
+            echo "  3gu4a1-Todo_list_app"
+            echo "  8235d7-Test_LRU_cache_test_generation"
+            echo "  13488f-Full_stack_ai_web_tool"
+            exit 1
+          else
+            echo "Success: PR title matches the required format."
+          fi
