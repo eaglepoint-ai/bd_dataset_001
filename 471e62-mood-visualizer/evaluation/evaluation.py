@@ -189,7 +189,11 @@ def main():
         
         report = run_evaluation()
         
-        # Write latest.json
+        # Write report.json in root (for Aquila/evaluation systems)
+        root_report = ROOT / "report.json"
+        root_report.write_text(json.dumps(report, indent=2))
+        
+        # Write latest.json in reports directory
         latest_path = REPORTS / "latest.json"
         latest_path.write_text(json.dumps(report, indent=2))
         
@@ -205,6 +209,7 @@ def main():
         print("\n" + "=" * 60)
         print("EVALUATION RESULTS")
         print("=" * 60)
+        print(f"✅ Report written to: {root_report}")
         print(f"✅ Report written to: {latest_path}")
         print(f"📊 Timestamped: {timestamped_path}")
         print(f"\nSuccess: {report['success']}")
@@ -237,6 +242,10 @@ def main():
         
         try:
             REPORTS.mkdir(parents=True, exist_ok=True)
+            # Write error report in root (for Aquila)
+            root_error = ROOT / "report.json"
+            root_error.write_text(json.dumps(error_report, indent=2))
+            # Also write in reports directory
             error_path = REPORTS / "latest.json"
             error_path.write_text(json.dumps(error_report, indent=2))
         except Exception:

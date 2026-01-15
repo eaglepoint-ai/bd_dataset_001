@@ -37,3 +37,6 @@ __pycache__/
 # Evaluation reports (keep structure, ignore content)
 evaluation/reports/*
 !evaluation/reports/.gitkeep
+
+# Allow report.json in root for evaluation systems
+!report.json
