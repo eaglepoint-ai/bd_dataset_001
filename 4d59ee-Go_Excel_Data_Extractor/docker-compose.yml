@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  run_before:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go_excel_extractor_before
+
