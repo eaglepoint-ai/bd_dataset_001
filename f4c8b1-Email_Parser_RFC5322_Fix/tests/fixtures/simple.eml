@@ -1,0 +1,9 @@
+From: sender@example.com
+To: recipient@example.com
+Subject: Simple Test Email
+Date: Mon, 15 Jan 2026 10:00:00 +0000
+Content-Type: text/plain; charset=utf-8
+
+This is a simple plain text email for testing.
+It has multiple lines.
+And should parse correctly.
