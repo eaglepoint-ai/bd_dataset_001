@@ -108,14 +108,8 @@ From `bd_dataset_001/a2b5c8-Cart_Service_Performance_Fix/`:
 # Build container
 docker-compose build
 
-# Run "before" tests inside container (expected: FAIL)
-docker-compose run --rm cart-service-task /bin/sh -lc "sh ./setup.sh && sh ./run_before.sh"
-
-# Run "after" tests inside container (expected: PASS)
-docker-compose run --rm cart-service-task /bin/sh -lc "sh ./setup.sh && sh ./run_after.sh"
-
-# Run evaluation inside container (generates report + latest.json)
-docker-compose run --rm cart-service-task /bin/sh -lc "sh ./setup.sh && sh ./run_evaluation.sh"
+# One-shot: build, run before/after, run evaluation, list reports
+docker-compose build && docker-compose run --rm test-before && docker-compose run --rm test-after && docker-compose run --rm evaluation && ls -la evaluation/reports | sed -n '1,40p'
 ```
 
 ## Notes
