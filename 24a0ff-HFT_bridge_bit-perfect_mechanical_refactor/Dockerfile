@@ -7,4 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "repository_before/hft_parity_refactor.py"]
+RUN chmod +x test_docker.sh
+
+ENTRYPOINT ["bash", "./test_docker.sh"]
+
+
