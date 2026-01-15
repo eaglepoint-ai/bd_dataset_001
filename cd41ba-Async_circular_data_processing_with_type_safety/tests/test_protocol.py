@@ -4,18 +4,10 @@ from typing import Protocol, runtime_checkable
 
 @runtime_checkable
 class ExpectedProcessorProtocol(Protocol):
-    """
-    Reference protocol matching requirements:
-    - process_item method
-    - Strict @runtime_checkable decoration
-    """
     def process_item(self, item: typing.Any) -> typing.Any:
         ...
 
 def test_protocol_conformance():
-    """
-    Requirement: Implement strict type hinting with typing.Protocol for the processor interface.
-    """
     from circular_data_processor import DataProcessor
     
     # Verify explicit protocol usage.
