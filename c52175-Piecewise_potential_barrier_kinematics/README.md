@@ -1,92 +1,125 @@
-# project template
+# Piecewise Potential Barrier Kinematics
 
-Starter scaffold for bd dataset task.
+This dataset task contains a Python kinematics simulation for a dual-zone gravitational field. The objective is to correctly compute time-to-impact and final velocity for an object released from rest, accounting for a gravity inversion at a specific altitude threshold.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
-
----
-
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
-
-### Setup Steps
-
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
+## Folder layout
 
 ```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+repository_before/    # Original implementation (placeholder)
+repository_after/     # Implemented kinematics solution
+tests/                # pytest tests for behavior validation
+patches/              # Diff between before/after
+evaluation/           # Evaluation runner and generated reports
+instances/            # Task metadata
+trajectory/           # AI reasoning documentation
 ```
 
-### Report Schema
+## Run with Docker
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+### Build image
+
+```bash
+docker compose build
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+### Run tests
 
----
+```bash
+docker compose run --rm test
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+**Expected behavior:**
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+- ✅ `test_repulsive_zone_start`: PASS (h=150 returns infinite time)
+- ✅ `test_attractive_zone_start`: PASS (h=100 falls correctly)
+- ✅ `test_exact_boundary`: PASS (boundary condition handled)
+
+### Run evaluation
+
+```bash
+docker compose run --rm evaluate
+```
+
+This will:
+
+1. Run `test_calculate.py` (expected to PASS)
+2. Generate a report at `evaluation/YYYY-MM-DD/HH-MM-SS/report.json`
+
+## Run locally
+
+### Prerequisites
+
+- Python 3.11+
+
+### Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Run tests
+
+```bash
+# Activate virtual environment
+source venv/bin/activate  # or venv/bin/activate.fish
+
+# Run all tests
+pytest tests/ -v
+
+# Run specific test file
+pytest tests/test_calculate.py -v
+```
+
+### Run the script directly
+
+```bash
+python repository_after/calculate.py
+```
+
+## Physics Model
+
+### Dual-Zone Gravity
+
+| Zone           | Altitude | Acceleration | Effect                     |
+| -------------- | -------- | ------------ | -------------------------- |
+| **Repulsive**  | y > 100m | +9.8 m/s²    | Pushes object upward       |
+| **Attractive** | y ≤ 100m | -9.8 m/s²    | Pulls object toward ground |
+
+### Key Behavior
+
+- Object released from **h > 100m** with **v₀ = 0**:
+
+  - Repulsive gravity accelerates it **away** from the ground
+  - It never reaches the 100m boundary
+  - Returns `(math.inf, None)`
+
+- Object released from **h ≤ 100m** with **v₀ = 0**:
+  - Normal attractive gravity applies
+  - Falls to ground using standard kinematics
+  - Returns `(time, final_velocity)`
+
+## What Changed (Before → After)
+
+| Aspect             | Before            | After                           |
+| ------------------ | ----------------- | ------------------------------- |
+| Implementation     | Empty/placeholder | Full piecewise kinematics       |
+| Zone handling      | None              | Separate logic for each zone    |
+| Infinite time case | Not handled       | Returns `math.inf, None`        |
+| Quadratic solver   | None              | Proper discriminant calculation |
+
+## Scenario: h = 150m
+
+```
+Start Height: 150m
+Time to Impact: inf
+Velocity at Impact: None
+```
+
+The object starts in the repulsive zone (above 100m) with zero velocity. The upward acceleration prevents it from ever reaching the attractive zone, so it drifts away indefinitely.
+
+## Success Criteria
+
+- ✅ `test_calculate.py` passes (all 3 tests)
+- ✅ Piecewise gravity correctly modeled
+- ✅ Infinite time returned for unreachable ground scenarios
+- ✅ Standard kinematics for attractive zone

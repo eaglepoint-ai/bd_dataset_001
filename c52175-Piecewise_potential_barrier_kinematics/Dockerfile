@@ -1,5 +1,11 @@
 FROM python:3.11-slim
+
 WORKDIR /app
-COPY . /app
+
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
-CMD ["pytest", "-q", "tests"]
+
+COPY . /app
+
+# Default command runs tests
+CMD ["pytest", "-v", "tests"]

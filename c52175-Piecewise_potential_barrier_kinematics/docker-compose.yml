@@ -1,6 +1,13 @@
 services:
   app:
     build: .
-    command: pytest -q tests
+
+  test:
+    build: .
+    command: pytest -v tests
+
+  evaluate:
+    build: .
+    command: python evaluation/evaluation.py --output /output/report.json
     volumes:
-      - .:/app
+      - ./evaluation/reports:/output:z
