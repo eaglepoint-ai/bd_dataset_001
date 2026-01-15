@@ -1,6 +1,43 @@
 services:
-  app:
+  # Evaluation service - runs tests and generates reports
+  evaluation:
     build: .
-    command: pytest -q tests
+    command: python3 evaluation/evaluation.py
     volumes:
       - .:/app
+    environment:
+      - CI=true
+    working_dir: /app
+
+  # Frontend dev server - runs the React app
+  frontend:
+    build: .
+    command: sh -c "cd repository_after && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/repository_after/node_modules
+    environment:
+      - NODE_ENV=development
+    working_dir: /app/repository_after
+
+  # Test service - runs tests only (without evaluation)
+  test:
+    build: .
+    command: sh -c "cd repository_after && npm test"
+    volumes:
+      - .:/app
+      - /app/repository_after/node_modules
+    environment:
+      - CI=true
+    working_dir: /app/repository_after
+
+  # Build service - builds the production bundle
+  build:
+    build: .
+    command: sh -c "cd repository_after && npm run build"
+    volumes:
+      - .:/app
+      - /app/repository_after/node_modules
+    working_dir: /app/repository_after

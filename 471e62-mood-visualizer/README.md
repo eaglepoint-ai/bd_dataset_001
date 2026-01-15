@@ -1,92 +1,89 @@
-# project template
+# MoodMorph - Mood Visualization App
 
-Starter scaffold for bd dataset task.
+A React app that transforms your mood into animated geometric shapes. Type how you feel, and watch it come to life as a colorful, moving shape.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+## Quick Start
 
----
+### Option 1: Local Development
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
-
-### Setup Steps
-
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+```bash
+cd repository_after
+npm install
+npm run dev
 ```
 
-### Report Schema
+Open http://localhost:3000
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+### Option 2: Docker
+
+```bash
+# Run evaluation (tests + reports)
+docker-compose up
+
+# Run frontend dev server
+docker-compose up frontend
+
+# Run tests only
+docker-compose up test
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+## Requirements
 
----
+All 4 requirements are implemented and tested:
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+1. ✅ **Save moods locally** - Uses LocalStorage
+2. ✅ **Canvas animations** - 5 animation types (rotate, pulse, bounce, wave, jitter)
+3. ✅ **Empty input shows error** - Validates before submission
+4. ✅ **Randomized shapes always valid** - Mathematically guaranteed
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+## Running Tests
+
+```bash
+cd repository_after
+npm test
+```
+
+**Result:** 66 tests, all passing ✅
+
+## Project Structure
+
+```
+repository_after/
+├── src/
+│   ├── lib/              # Core logic (moodToShape, storage, canvas)
+│   ├── components/       # React components
+│   ├── pages/            # HomePage, GalleryPage
+│   └── __tests__/        # Test suite
+```
+
+## How It Works
+
+1. User types a mood (e.g., "happy and excited")
+2. Algorithm converts mood to shape properties (deterministic)
+3. Canvas animates the shape with colors and motion
+4. User can save to gallery (stored in LocalStorage)
+
+## Tech Stack
+
+- TypeScript + React 18
+- Tailwind CSS
+- Vite
+- Jest + React Testing Library
+- Canvas API for animations
+
+## Docker Services
+
+- `evaluation` - Runs tests and generates reports
+- `frontend` - Dev server (port 3000)
+- `test` - Jest test suite
+- `build` - Production build
+
+## Evaluation
+
+After running `docker-compose up`, check the report:
+
+```bash
+cat evaluation/reports/latest.json
+```
+
+Success means `"success": true` and all tests passed.
