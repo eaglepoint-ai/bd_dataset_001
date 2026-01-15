@@ -24,7 +24,7 @@ services:
   evaluation:
     build: .
     working_dir: /app
-    command: npm run evaluate
+    command: npm run evaluation
     volumes:
       - .:/app
       - /app/node_modules

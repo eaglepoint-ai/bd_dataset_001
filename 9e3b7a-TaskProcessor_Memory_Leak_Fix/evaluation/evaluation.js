@@ -6,6 +6,10 @@ const os = require('os');
 const TASK_ID = "9e3b7a";
 const TASK_NAME = "TaskProcessor Memory Leak Fix";
 
+function generateRunId() {
+  return Math.random().toString(36).substring(2, 10);
+}
+
 function getGitInfo() {
   const info = { git_commit: 'unknown', git_branch: 'unknown' };
   try {
@@ -32,43 +36,42 @@ function getEnvironmentInfo() {
   };
 }
 
-function parseJestOutput(output) {
+function parseJestOutput(stdout) {
   const tests = [];
-  const lines = output.split('\n');
+  const lines = stdout.split('\n');
   
   for (const line of lines) {
     const trimmed = line.trim();
-    if (/[✓✕]/.test(trimmed) || /\[PASS\]|\[FAIL\]/.test(trimmed) || /√|×/.test(trimmed)) {
-      const outcome = (trimmed.includes('✓') || trimmed.includes('[PASS]') || trimmed.includes('√')) ? 'passed' : 'failed';
-      let name = trimmed.replace(/^[✓✕√×\[\]PASSFAIL\s]+/, '').replace(/\s*\(\d+\s*ms\)$/, '').trim();
-      tests.push({
-        nodeid: `memory-leaks.test.js::${name}`,
-        name: name,
-        outcome: outcome
-      });
+    // Support both reference format [PASS] and Jest format ✓/✕/PASS/FAIL
+    if (/[✓✕√×]/.test(trimmed) || /\[PASS\]|\[FAIL\]/.test(trimmed) || trimmed.startsWith('PASS ') || trimmed.startsWith('FAIL ')) {
+      const outcome = (trimmed.includes('✓') || trimmed.includes('[PASS]') || trimmed.includes('√') || trimmed.startsWith('PASS ')) ? 'passed' : 'failed';
+      
+      // Extract name - handle both [PASS] Name and ✓ Name
+      let name = trimmed
+        .replace(/^[✓✕√×\[\]PASSFAIL\s]+/, '')
+        .replace(/\s*\(\d+\s*ms\)$/, '') // Remove (123 ms)
+        .trim();
+
+      if (name) {
+        tests.push({
+          nodeid: `memory-leaks.test.js::${name}`,
+          name: name,
+          outcome: outcome
+        });
+      }
     }
   }
 
-  // Summary counts
-  let passed = 0, failed = 0;
-  let summaryLine = lines.find(l => l.includes('Tests:'));
-  if (summaryLine) {
-    const passMatch = summaryLine.match(/(\d+)\s+passed/);
-    const failMatch = summaryLine.match(/(\d+)\s+failed/);
-    passed = passMatch ? parseInt(passMatch[1]) : 0;
-    failed = failMatch ? parseInt(failMatch[1]) : 0;
-  } else {
-    passed = tests.filter(t => t.outcome === 'passed').length;
-    failed = tests.filter(t => t.outcome === 'failed').length;
-  }
+  const passed = tests.filter(t => t.outcome === 'passed').length;
+  const failed = tests.filter(t => t.outcome === 'failed').length;
 
   return {
     tests,
     summary: {
-      total: passed + failed,
+      total: tests.length,
       passed,
       failed,
-      errors: 0,
+      errors: 0, 
       skipped: 0
     }
   };
@@ -81,30 +84,25 @@ function runTests(repoPath, label, expectLeaks = false) {
   console.log(`Repository: ${path.basename(repoPath)}`);
 
   const repoName = path.basename(repoPath);
+  const env = { ...process.env, REPO: repoName, EXPECT_LEAKS: expectLeaks ? 'true' : 'false', CI: 'true' };
   let stdout = '';
   let stderr = '';
   let exitCode = 0;
   
   try {
-    stdout = execSync(
-      'npx jest tests/ --verbose --forceExit 2>&1',
-      {
-        encoding: 'utf-8',
-        timeout: 60000,
-        env: { ...process.env, REPO: repoName, EXPECT_LEAKS: expectLeaks ? 'true' : 'false', CI: 'true' }
-      }
-    );
-  } catch (error) {
-    stdout = error.stdout ? error.stdout.toString() : '';
-    stderr = error.stderr ? error.stderr.toString() : '';
-    exitCode = error.status || 1;
-    if (stdout) {
-      console.log(`--- Captured Output for ${repoName} ---`);
-      console.log(stdout.substring(0, 1000) + (stdout.length > 1000 ? '...' : ''));
-    }
+    stdout = execSync('npm test', { 
+      env, 
+      encoding: 'utf-8', 
+      stdio: 'pipe' 
+    });
+  } catch (e) {
+    stdout = e.stdout?.toString() || '';
+    stderr = e.stderr?.toString() || '';
+    exitCode = e.status || 1;
   }
 
   const { tests, summary } = parseJestOutput(stdout);
+  summary.errors = (exitCode !== 0 && summary.failed === 0) ? 1 : 0;
 
   console.log(`\nResults: ${summary.passed} passed, ${summary.failed} failed (total: ${summary.total})`);
   tests.forEach(test => {
@@ -122,8 +120,18 @@ function runTests(repoPath, label, expectLeaks = false) {
   };
 }
 
+function generateOutputPath() {
+  const projectRoot = path.resolve(__dirname, '..');
+  const now = new Date();
+  const dateStr = now.toISOString().split('T')[0];
+  const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+  const outputDir = path.join(projectRoot, 'evaluation', dateStr, timeStr);
+  fs.mkdirSync(outputDir, { recursive: true });
+  return path.join(outputDir, 'report.json');
+}
+
 function main() {
-  const runId = Math.random().toString(36).substring(2, 10);
+  const runId = generateRunId();
   const startedAt = new Date();
 
   console.log(`Run ID: ${runId}`);
@@ -179,20 +187,16 @@ function main() {
   };
 
   const outputPath = process.argv[2] && process.argv[2].startsWith('--output=') 
-    ? path.resolve(process.argv[2].split('=')[1])
+    ? process.argv[2].split('=')[1]
     : path.join(projectRoot, 'report.json');
 
-  const now = new Date();
-  const timestampDir = path.join(projectRoot, 'evaluation', now.toISOString().split('T')[0], now.toTimeString().split(' ')[0].replace(/:/g, '-'));
-  if (!fs.existsSync(timestampDir)) fs.mkdirSync(timestampDir, { recursive: true });
-
   fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
-  fs.writeFileSync(path.join(timestampDir, 'report.json'), JSON.stringify(report, null, 2));
-
   console.log(`\n✅ Report saved to: ${outputPath}`);
+
   process.exit(success ? 0 : 1);
 }
 
 main();
+
 
 
