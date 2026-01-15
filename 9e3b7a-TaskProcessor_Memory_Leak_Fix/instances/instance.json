@@ -1,0 +1,12 @@
+{
+  "instance_id": "9e3b7a-TaskProcessor_Memory_Leak_Fix",
+  "problem_statement": "Fix memory leaks in TaskProcessor class including unclosed intervals, unreleased event listeners, unbounded Maps, and retained references causing memory growth in long-running Node.js service.",
+  "base_commit": "",
+  "test_patch": "",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001",
+  "environment_setup": {
+    "dockerfile": "Dockerfile",
+    "docker_compose": "docker-compose.yml"
+  }
+}
+

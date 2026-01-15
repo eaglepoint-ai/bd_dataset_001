@@ -1,0 +1,5 @@
+services:
+  run_before:
+    build: .
+    command: sh -c "npm install && npm start"
+
