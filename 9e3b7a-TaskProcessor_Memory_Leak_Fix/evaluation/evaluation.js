@@ -184,20 +184,11 @@ function main() {
     fs.mkdirSync(timestampDir, { recursive: true });
   }
 
-  // Handle command line output argument like the template
-  const outputFile = process.argv[2] && process.argv[2].startsWith('--output=') 
-    ? path.resolve(process.argv[2].split('=')[1])
-    : path.join(projectRoot, 'report.json');
+  // Save to timestamped directory (Aquila looks here)
+  const reportFile = path.join(timestampDir, 'report.json');
+  fs.writeFileSync(reportFile, JSON.stringify(report, null, 2));
 
-  // Save to the specified output file (usually root report.json)
-  fs.writeFileSync(outputFile, JSON.stringify(report, null, 2));
-  
-  // Also save to timestamped directory for history
-  const historyFile = path.join(timestampDir, 'report.json');
-  fs.writeFileSync(historyFile, JSON.stringify(report, null, 2));
-
-  console.log(`\n✅ Report saved to: ${outputFile}`);
-  console.log(`✅ History report saved to: ${historyFile}`);
+  console.log(`\n✅ Report saved to: ${reportFile}`);
 
   process.exit(overallSuccess ? 0 : 1);
 }
