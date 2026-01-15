@@ -1,0 +1,9 @@
+{
+    "instance_id": "5480b7",
+    "problem_statement": "The document management platform must be upgraded to support enterprise legal workflows where users upload many files at once. The current single-file upload design creates productivity bottlenecks and cannot handle the required concurrency, security, and performance demands. Several architectural flaws prevent scalability: a coarse-grained mutex blocks parallel processing, MIME detection fails under concurrent access, timestamp-based filenames cause collisions, validation lacks atomic guarantees, and form parsing breaks with multiple files. Refactoring the system to address these issues is essential to achieve reliable multi-file uploads, strong security, and backward compatibility for existing clients.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main",
+    "environment_setup": "Dockerfile"
+  }
+  
