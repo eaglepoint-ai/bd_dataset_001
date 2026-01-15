@@ -101,3 +101,29 @@ This project demonstrates the transformation of a blocking, stateful async pipel
 | `repository_after/`  | Completed implementation |
 | `tests/`             | Test suite               |
 | `evaluation/`        | Evaluation scripts       |
+
+## Docker Commands
+
+1. **Before Test Command (Legacy):**
+   ```bash
+   docker run --rm async-pipeline python repository_before/async_processing_pipeline.py
+   ```
+
+2. **After Test Command (Refactored):**
+   ```bash
+   docker run --rm async-pipeline python repository_after/refactored.py
+   ```
+
+3. **Test & Report Command (Evaluation):**
+   ```bash
+   docker run --rm async-pipeline python evaluation/evaluation.py --trials 3 --items 5 --buffer 3
+   ```
+   > To save reports to your host, add a volume mount for the `reports` folder:
+   > - On Windows:
+   >   ```bash
+   >   docker run --rm -v "C:/absolute/path/to/evaluation/reports:/app/evaluation/reports" async-pipeline python evaluation/evaluation.py --trials 3 --items 5 --buffer 3
+   >   ```
+   > - On Linux/macOS:
+   >   ```bash
+   >   docker run --rm -v $(pwd)/evaluation/reports:/app/evaluation/reports async-pipeline python evaluation/evaluation.py --trials 3 --items 5 --buffer 3
+   >   ```
