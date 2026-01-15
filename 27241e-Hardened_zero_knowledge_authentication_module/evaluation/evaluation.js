@@ -95,7 +95,7 @@ function runEvaluation() {
     after: after || null,
     comparison,
     success: comparison.passed_gate,
-    error
+    error,
   };
 }
 
@@ -106,12 +106,12 @@ function main() {
 
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10); // YYYY-MM-DD
-  const timeStr = now.toISOString().slice(11, 19).replace(/:/g, '-'); // HH-MM-SS
+  const timeStr = now.toISOString().slice(11, 19).replace(/:/g, "-"); // HH-MM-SS
   const dirName = `${dateStr}/${timeStr}`;
   const reportDir = path.join(REPORTS_DIR, dirName);
   fs.mkdirSync(reportDir, { recursive: true });
 
-  const reportPath = path.join(reportDir, 'report.json');
+  const reportPath = path.join(reportDir, "report.json");
 
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   console.log(`Report written to ${reportPath}`);
