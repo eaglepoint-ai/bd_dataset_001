@@ -1,0 +1,15 @@
+## Evaluation reports (generated)
+evaluation/reports/
+evaluation/reports/**/report.json
+
+## Python artifacts / local env
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
+
+## Node artifacts
+node_modules/
+
+## OS / editor
+.DS_Store

@@ -1,6 +1,6 @@
 {
     "instance_id": "605d32",
-    "problem_statement": "",
+    "problem_statement": "The task is to build a personal blog website that dynamically generates all content from Markdown files, eliminating hardcoded HTML. The site should feature a landing page displaying the blogger’s information from a dedicated Markdown file and automatically list and render individual blog posts stored in a structured /blogs directory, each with metadata like title, date, and tags. The system must convert Markdown to HTML for display, support a single-page application experience, and ensure that all content—including posts and site info—is fully driven by Markdown files, providing a lightweight, maintainable, and content-focused blogging platform.",
     "base_commit": "repository_before",
     "test_patch": "tests/",
     "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/605d32-Markdown-Blog-single-page-web-application",

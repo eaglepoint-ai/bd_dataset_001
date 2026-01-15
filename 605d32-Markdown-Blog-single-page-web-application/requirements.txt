@@ -1,1 +1,4 @@
-# Add your Python dependencies here
+pytest>=7.4.0
+selenium>=4.15.0
+webdriver-manager>=4.0.0
+requests>=2.31.0

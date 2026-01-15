@@ -1,0 +1,13 @@
+{
+  "name": "markdown-blog-spa",
+  "version": "1.0.0",
+  "description": "Markdown-driven personal blog SPA",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && esbuild src/app.ts --bundle --format=esm --platform=browser --target=es2020 --outfile=dist/app.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -2,5 +2,14 @@ services:
   app:
     build: .
     command: pytest -q tests
-    volumes:
-      - .:/app
+    working_dir: /app
+    # Do NOT mount the host workspace:
+    # mounting would hide the image-built TypeScript output in repository_after/dist,
+    # causing SPA runtime/Selenium tests to fail.
+
+  web:
+    build: .
+    working_dir: /app/repository_after
+    command: python3 server.py
+    ports:
+      - "8000:8000"
