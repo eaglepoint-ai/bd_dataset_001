@@ -14,15 +14,15 @@ class TestRunner {
 
   async run(name: string, testFn: () => void | Promise<void>) {
     this.total++;
-    process.stdout.write(`running '${name}' ... `);
+      process.stdout.write(`running '${name}' ... `);
     try {
       await testFn();
       this.passed++;
-      console.log('PASS');
+      console.log(`[PASS] ${name}`);
       this.results.push({ name, status: 'PASS' });
     } catch (error: any) {
       this.failed++;
-      console.log('FAIL');
+      console.log(`[FAIL] ${name}`);
       console.log(`  └─ ${error.message}`);
       this.results.push({ name, status: 'FAIL', error: error.message });
     }
