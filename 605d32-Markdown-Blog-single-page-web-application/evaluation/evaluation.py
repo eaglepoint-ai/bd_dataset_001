@@ -242,6 +242,20 @@ def write_artifacts(
     )
     (artifacts_dir / "report_content").write_text(report_md)
 
+def write_artifacts_multi(
+    artifacts_dirs: list[Path],
+    report: Dict[str, Any],
+    before_results: Dict[str, Any],
+    after_results: Dict[str, Any],
+) -> None:
+    """Write the same artifacts to multiple directories (best-effort)."""
+    for d in artifacts_dirs:
+        try:
+            write_artifacts(d, report, before_results, after_results)
+        except Exception as e:
+            # Don't fail the whole evaluation if an optional artifact location is unwritable.
+            print(f"WARNING: failed writing artifacts to {d}: {type(e).__name__}: {e}")
+
 def main():
     """Main evaluation function."""
     import os
@@ -323,8 +337,17 @@ def main():
         before_results = before_results or {"success": False, "return_code": -1, "summary": {}, "output": ""}
         after_results = after_results or {"success": False, "return_code": -1, "summary": {}, "output": ""}
     finally:
-        # Harness artifacts at `evaluation/reports/`.
-        write_artifacts(reports_root, report, before_results, after_results)
+        # Harness artifacts:
+        # - Some runners collect from `evaluation/reports/`
+        # - Others collect from the timestamped directory
+        artifact_dirs = [reports_root]
+        try:
+            ts_dir = timestamped_output_path.parent
+            if ts_dir != reports_root:
+                artifact_dirs.append(ts_dir)
+        except Exception:
+            pass
+        write_artifacts_multi(artifact_dirs, report, before_results, after_results)
     
     # Print summary
     print(f"\n{'=' * 60}")
