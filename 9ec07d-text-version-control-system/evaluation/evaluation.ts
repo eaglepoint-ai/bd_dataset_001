@@ -162,7 +162,13 @@ async function main() {
   const now = new Date();
   const dateStr = now.toISOString().split("T")[0];
   const timeStr = now.toTimeString().split(" ")[0].replace(/:/g, "-");
-  const outputDir = path.join(projectRoot, "evaluation", dateStr, timeStr);
+  const outputDir = path.join(
+    projectRoot,
+    "evaluation",
+    "reports",
+    dateStr,
+    timeStr
+  );
   const outputFile = path.join(outputDir, "report.json");
 
   console.log(`\n📄 Output: ${outputFile}\n`);
