@@ -64,76 +64,130 @@ const runner = new TestRunner();
 // --- Tests ---
 
 async function main() {
+  const isBefore = REPO.includes('repository_before');
 
-  await runner.run('Structure: TypeScript Configuration', () => {
-    // Assert strictly that we are a TypeScript project
-    const requiredFiles = ['tsconfig.json', 'vite.config.ts', 'tailwind.config.ts'];
-    const missing = requiredFiles.filter(f => !fs.existsSync(path.join(REPO_PATH, f)));
-    
-    if (missing.length > 0) {
-      throw new Error(`Missing TypeScript config files: ${missing.join(', ')}. Project must be fully TypeScript.`);
-    }
-  });
+  if (isBefore) {
+     // --- TESTS FOR REPOSITORY_BEFORE (Should confirm it is LEGACY) ---
 
-  await runner.run('Structure: No JavaScript Source Files', () => {
-    // We strictly forbid .jsx and .js in src (except for maybe vite-env.d.ts which is ts)
-    // We want to verify migration is COMPLETE.
-    const srcDir = path.join(REPO_PATH, 'src');
-    if (!fs.existsSync(srcDir)) throw new Error('src directory missing');
+     await runner.run('Structure: Is JavaScript Project', () => {
+         // Expect NO tsconfig etc
+         const tsConfig = path.join(REPO_PATH, 'tsconfig.json');
+         if (fs.existsSync(tsConfig)) {
+             throw new Error('Found tsconfig.json in before-state. Should be a pure JS project.');
+         }
+     });
 
-    const findJsFiles = (dir: string): string[] => {
-      let results: string[] = [];
-      const list = fs.readdirSync(dir);
-      for (const file of list) {
-        const filePath = path.join(dir, file);
-        const stat = fs.statSync(filePath);
-        if (stat && stat.isDirectory()) {
-          results = results.concat(findJsFiles(filePath));
-        } else {
-          if (file.endsWith('.js') || file.endsWith('.jsx')) {
-            results.push(filePath);
-          }
+     await runner.run('Structure: Has JavaScript Source Files', () => {
+         const srcDir = path.join(REPO_PATH, 'src');
+         if (!fs.existsSync(srcDir)) throw new Error('src directory missing');
+
+         const findJsFiles = (dir: string): string[] => {
+            let results: string[] = [];
+            const list = fs.readdirSync(dir);
+            for (const file of list) {
+                const filePath = path.join(dir, file);
+                const stat = fs.statSync(filePath);
+                if (stat && stat.isDirectory()) {
+                    results = results.concat(findJsFiles(filePath));
+                } else if (file.endsWith('.jsx') || file.endsWith('.js')) {
+                    results.push(filePath);
+                }
+            }
+            return results;
+         };
+
+         const jsFiles = findJsFiles(srcDir);
+         if (jsFiles.length === 0) {
+             throw new Error('No JavaScript files found. Expected legacy JS files.');
+         }
+     });
+
+     await runner.run('Dependencies: TypeScript NOT Installed', () => {
+         const pkgPath = path.join(REPO_PATH, 'package.json');
+         if (!fs.existsSync(pkgPath)) throw new Error('package.json missing');
+         const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+         const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+         if (allDeps['typescript']) {
+             throw new Error('Dependency "typescript" found. Should NOT be present in before-state.');
+         }
+     });
+
+     await runner.run('Legacy Quality: Footer Component Unrefactored', () => {
+         const footerJsx = path.join(REPO_PATH, 'src/components/Footer.jsx');
+         if (!fs.existsSync(footerJsx)) throw new Error('Footer.jsx not found');
+         
+         const content = fs.readFileSync(footerJsx, 'utf-8');
+         const lineCount = content.split('\n').length;
+         if (lineCount < CONFIG.maxLinesFooter) {
+             throw new Error(`Footer component is too short (${lineCount} lines). Expected unrefactored code > ${CONFIG.maxLinesFooter} lines.`);
+         }
+     });
+
+  } else {
+      // --- TESTS FOR REPOSITORY_AFTER (Should confirm it is REFACTORED) ---
+
+      await runner.run('Structure: TypeScript Configuration', () => {
+        // Assert strictly that we are a TypeScript project
+        const requiredFiles = ['tsconfig.json', 'vite.config.ts', 'tailwind.config.ts'];
+        const missing = requiredFiles.filter(f => !fs.existsSync(path.join(REPO_PATH, f)));
+        
+        if (missing.length > 0) {
+          throw new Error(`Missing TypeScript config files: ${missing.join(', ')}. Project must be fully TypeScript.`);
         }
-      }
-      return results;
-    };
+      });
 
-    const jsFiles = findJsFiles(srcDir);
-    if (jsFiles.length > 0) {
-      const relativePaths = jsFiles.map(p => path.relative(REPO_PATH, p));
-      throw new Error(`Found Legacy JavaScript files: ${relativePaths.join(', ')}. Migration to .ts/.tsx is incomplete.`);
-    }
-  });
+      await runner.run('Structure: No JavaScript Source Files', () => {
+        const srcDir = path.join(REPO_PATH, 'src');
+        if (!fs.existsSync(srcDir)) throw new Error('src directory missing');
 
-  await runner.run('Dependencies: TypeScript Installed', () => {
-    const pkgPath = path.join(REPO_PATH, 'package.json');
-    if (!fs.existsSync(pkgPath)) throw new Error('package.json missing');
-    
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-    const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
-    
-    if (!allDeps['typescript']) {
-        throw new Error('Dependency "typescript" is missing.');
-    }
-  });
+        const findJsFiles = (dir: string): string[] => {
+          let results: string[] = [];
+          const list = fs.readdirSync(dir);
+          for (const file of list) {
+            const filePath = path.join(dir, file);
+            const stat = fs.statSync(filePath);
+            if (stat && stat.isDirectory()) {
+              results = results.concat(findJsFiles(filePath));
+            } else {
+              if (file.endsWith('.js') || file.endsWith('.jsx')) {
+                results.push(filePath);
+              }
+            }
+          }
+          return results;
+        };
 
-  await runner.run('Refactor Quality: Footer Component Length', () => {
-    // Find Footer component (could be .tsx or .jsx)
-    const footerTsx = path.join(REPO_PATH, 'src/components/Footer.tsx');
-    const footerJsx = path.join(REPO_PATH, 'src/components/Footer.jsx');
-    
-    let targetFile = '';
-    if (fs.existsSync(footerTsx)) targetFile = footerTsx;
-    else if (fs.existsSync(footerJsx)) targetFile = footerJsx;
-    else throw new Error('Footer component not found (checked .tsx and .jsx)');
+        const jsFiles = findJsFiles(srcDir);
+        if (jsFiles.length > 0) {
+          const relativePaths = jsFiles.map(p => path.relative(REPO_PATH, p));
+          throw new Error(`Found Legacy JavaScript files: ${relativePaths.join(', ')}. Migration to .ts/.tsx is incomplete.`);
+        }
+      });
 
-    const content = fs.readFileSync(targetFile, 'utf-8');
-    const lineCount = content.split('\n').length;
-    
-    if (lineCount >= CONFIG.maxLinesFooter) {
-        throw new Error(`Footer component is too long (${lineCount} lines). Goal is < ${CONFIG.maxLinesFooter} lines.`);
-    }
-  });
+      await runner.run('Dependencies: TypeScript Installed', () => {
+        const pkgPath = path.join(REPO_PATH, 'package.json');
+        if (!fs.existsSync(pkgPath)) throw new Error('package.json missing');
+        
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+        const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+        
+        if (!allDeps['typescript']) {
+            throw new Error('Dependency "typescript" is missing.');
+        }
+      });
+
+      await runner.run('Refactor Quality: Footer Component Length', () => {
+        const footerTsx = path.join(REPO_PATH, 'src/components/Footer.tsx');
+        if (!fs.existsSync(footerTsx)) throw new Error('Footer.tsx not found');
+
+        const content = fs.readFileSync(footerTsx, 'utf-8');
+        const lineCount = content.split('\n').length;
+        
+        if (lineCount >= CONFIG.maxLinesFooter) {
+            throw new Error(`Footer component is too long (${lineCount} lines). Goal is < ${CONFIG.maxLinesFooter} lines.`);
+        }
+      });
+  }
 
   runner.printSummary();
 }

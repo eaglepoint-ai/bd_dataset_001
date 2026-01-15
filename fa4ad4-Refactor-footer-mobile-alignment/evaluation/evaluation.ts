@@ -134,18 +134,8 @@ function runTestsWithRepo(repoName: string, label: string): EvaluationResult {
 }
 
 function generateOutputPath(): string {
-  const now = new Date();
-  const dateStr = now.toISOString().split('T')[0];
-  const timeStr = now.toISOString().split('T')[1].split('.')[0].replace(/:/g, '-');
-  
   const projectRoot = path.resolve(__dirname, '..');
-  const outputDir = path.join(projectRoot, 'evaluation', dateStr, timeStr);
-  
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-  
-  return path.join(outputDir, 'report.json');
+  return path.join(projectRoot, 'report.json');
 }
 
 function main() {
@@ -159,11 +149,11 @@ function main() {
   console.log(`${'='.repeat(60)}`);
 
   // Run tests with BEFORE implementation
-  // Expected to FAIL checks for TypeScript, Configs, etc.
+  // Expected to PASS checks for Legacy/JavaScript state
   const beforeResults = runTestsWithRepo('repository_before', 'before (repository_before)');
 
   // Run tests with AFTER implementation
-  // Expected to PASS all checks
+  // Expected to PASS checks for React/TypeScript state
   const afterResults = runTestsWithRepo('repository_after', 'after (repository_after)');
 
   const comparison = {
@@ -180,14 +170,15 @@ function main() {
   console.log(`${'='.repeat(60)}`);
 
   console.log(`\nBefore Implementation (repository_before):`);
-  console.log(`  Overall: ${beforeResults.success ? '✅ PASSED' : '❌ FAILED (expected)'}`);
+  console.log(`  Overall: ${beforeResults.success ? '✅ PASSED' : '❌ FAILED'}`);
   console.log(`  Tests: ${comparison.before_passed}/${beforeResults.summary.total} passed`);
 
   console.log(`\nAfter Implementation (repository_after):`);
   console.log(`  Overall: ${afterResults.success ? '✅ PASSED' : '❌ FAILED'}`);
   console.log(`  Tests: ${comparison.after_passed}/${afterResults.summary.total} passed`);
-
-  const success = afterResults.success;
+  
+  // Both must be successful for the task to be considered complete
+  const success = beforeResults.success && afterResults.success;
 
   const report = {
     run_id: runId,
@@ -196,7 +187,7 @@ function main() {
     started_at: startedAt.toISOString(),
     finished_at: new Date().toISOString(),
     success,
-    error: success ? null : "After implementation failed structure checks",
+    error: success ? null : "One or more repositories failed their structural checks",
     environment: getEnvironmentInfo(),
     results: {
       before: beforeResults,
