@@ -38,6 +38,7 @@ How the implementation works (summary)
 
 Commands
 --------
+
 Docker (recommended for reproducible environment)
 
 Build the image:
@@ -59,25 +60,3 @@ Run evaluation script to produce a JSON report:
 ```bash
 docker compose run --rm -e PYTHONPATH=/app/repository_after app python evaluation/evaluation.py
 ```
-
-Notes
------
-- There is no `repository_before` application code in this task — the focus
-  is the optimized implementation in `repository_after`.
-- The Docker image installs `pytest` via `requirements.txt` to support
-  running tests inside containers.
-- The test runner prints measured execution time and prime count; the
-  evaluation script captures these into a JSON report under `evaluation/`.
-
-Contact / Next steps
---------------------
-If you want, I can:
-
-- Add a small benchmark harness that runs multiple iterations and reports
-  median/p95 timings.
-- Add a `Makefile` with convenient targets (`make build`, `make test`, `make eval`).
-- Commit the changes and add a short changelog entry.
-
----
-
-End of README.
