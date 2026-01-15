@@ -5,7 +5,7 @@ from .color_handler import ColorHandler
 
 CHAR_SETS = {
     'simple': " .:-=+*#%@"[::-1], # Darkest to lightest usually, or flip for black BG
-    'detailed': "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. "[::-1],
+    'detailed': "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. "[::-1],
     'block': "█▓▒░ ",
 }
 
