@@ -1,0 +1,8 @@
+{
+    "instance_id": "1e3b39",
+    "problem_statement": "The Telegram Image Scraper script interacts with multiple external systems—including the Telegram API, the local filesystem, environment variables, and asynchronous network operations—which makes it difficult to validate manually and prone to unexpected failures. Without automated tests, changes to the code could introduce regressions, incorrect filtering logic, broken file handling, or unhandled error conditions that may go unnoticed until runtime. Relying on manual testing would require real API credentials, live network access, and actual file downloads, making testing slow, unreliable, and unsafe. Implementing unit tests with proper mocking is therefore necessary to verify correct behavior in a controlled environment, simulate edge cases and failures, ensure future modifications do not break existing functionality, and improve the overall reliability and maintainability of the script.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/1e3b39-Telegram_Image_Scraper",
+    "environment_setup": "Dockerfile"
+}  
