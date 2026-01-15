@@ -38,19 +38,6 @@ How the implementation works (summary)
 
 Commands
 --------
-
-Local (no Docker)
-
-Run the project's custom test runner (recommended because it collects performance metrics):
-```bash
-python3 tests/test_after.py
-```
-
-Run pytest directly (will attempt to discover tests):
-```bash
-pytest -q
-```
-
 Docker (recommended for reproducible environment)
 
 Build the image:
