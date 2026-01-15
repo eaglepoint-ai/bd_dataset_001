@@ -1,0 +1,8 @@
+{
+    "instance_id": "fd66d6",
+		"problem_statement": "Promo code validation is currently handled on the subscription selection page, which introduces unnecessary frontend complexity and duplicates functionality already provided by Stripe. This approach increases maintenance overhead, risks inconsistent validation behavior, and prevents leveraging Stripe Checkout’s built-in promo code handling and error messaging. To improve reliability and simplify the checkout flow, promo code validation must be removed from the subscription page and migrated entirely to the Stripe Checkout experience, ensuring that all promo code application and validation occurs securely and consistently within Stripe.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/fd66d6-Promo_Code_Validation_Refactor",
+    "environment_setup": "Dockerfile"
+}
