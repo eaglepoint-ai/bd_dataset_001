@@ -1,4 +1,21 @@
 services:
-  run_before:
+  test:
     build: .
-    command: sh -c "npm install && npx tsc --noEmit && echo 'Build successful. Run npm test to execute tests.'"
+    volumes:
+      - .:/workspace
+    working_dir: /workspace/repository_before
+    command: sh -c "npm install && npx jest ../repository_after/chatService.test.ts --roots .. --verbose --no-stack-trace"
+
+  metatest:
+    build: .
+    volumes:
+      - .:/workspace
+    working_dir: /workspace/repository_before
+    command: sh -c "npm install && npx jest ../tests/meta.test.ts --roots .. --verbose"
+
+  evaluation:
+    build: .
+    volumes:
+      - .:/workspace
+    working_dir: /workspace/repository_before
+    command: sh -c "npm install && npx --yes tsx ../evaluation/evaluation.ts"
