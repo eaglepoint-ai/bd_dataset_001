@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  test-before:
+    build: .
+    command: python -m pytest tests/test_rolling_median.py -v
+    environment:
+      TARGET_REPO: repository_before
+    volumes:
+      - ./repository_before:/app/repository_before
+      - ./tests:/app/tests
+    working_dir: /app
+
+  test-after:
+    build: .
+    command: python -m pytest tests/test_rolling_median.py -v
+    environment:
+      TARGET_REPO: repository_after
+    volumes:
+      - ./repository_after:/app/repository_after
+      - ./tests:/app/tests
+    working_dir: /app
+
+  evaluation:
+    build: .
+    command: python evaluation/evaluation.py
+    depends_on:
+      - test-before
+      - test-after
+    volumes:
+      - ./repository_before:/app/repository_before
+      - ./repository_after:/app/repository_after
+      - ./tests:/app/tests
+      - ./evaluation:/app/evaluation
+    working_dir: /app
