@@ -116,4 +116,3 @@ mod tests {
         assert_eq!(top[0].1, 3);
     }
 }
-

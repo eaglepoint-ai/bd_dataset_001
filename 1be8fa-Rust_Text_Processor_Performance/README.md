@@ -1,25 +1,56 @@
-# Rust Text Processor Performance Optimization
+# Performance Optimization: Rust Text Processor
 
-## Problem Statement
-A text processing library written in Rust for analyzing document word frequencies has severe performance issues causing timeouts when processing large files. The library processes text, counts word occurrences, filters stop words, and returns top frequent words. Benchmarks show it's 10x slower than expected due to unnecessary memory allocations, inefficient data structures, and suboptimal Rust patterns.
+This dataset task contains a production-style Rust library with intentional performance bottlenecks. The objective is to optimize the implementation while preserving and improving its behavioral correctness.
 
-## Prompt
-Optimize the Rust text processing library that has multiple performance issues including unnecessary cloning, inefficient data structure choices, missing Entry API usage, no capacity pre-allocation, and suboptimal iterator patterns. The optimized code should maintain the same functionality while significantly reducing memory allocations and improving lookup performance.
+## Folder Layout
+- `repository_before/`: Original unoptimized implementation.
+- `repository_after/`: Optimized implementation.
+- `tests/`: Shared behavioral and performance-proxy tests.
+- `evaluation/`: Rust-based evaluator and generated reports.
+
+## Run with Docker
+
+### Build Image
+```bash
+docker compose build
+```
+
+### Run Tests (Before – Expected logic failure)
+```bash
+docker compose run --rm --build before
+```
+**Expected behavior:**
+- Functional tests: ❌ FAIL (Fails punctuation-aware stop-word filtering)
+- Basic counts: ✅ PASS
+
+### Run Tests (After – Expected all pass)
+```bash
+docker compose run --rm --build after
+```
+**Expected behavior:**
+- Functional tests: ✅ PASS
+- Performance proxies (pre-allocation, etc.): ✅ PASS
+
+### Run Evaluation (Compares both implementations)
+```bash
+docker compose up --build evaluate
+```
+**This will:**
+- Run tests for both `before` and `after` implementations.
+- Compare results and calculate relative speedup.
+- Generate a report at `evaluation/reports/latest.json`.
 
 ## Requirements
-1. Replace `Vec<String>` for stop_words with `HashSet<String>` for O(1) lookup instead of O(n) linear search
-2. Remove unnecessary `.clone()` calls in `process_text` by using references where ownership isn't needed
-3. Use HashMap's Entry API (`entry().or_insert()`) instead of `contains_key` + `get_mut` + `insert` pattern
-4. Pre-allocate Vec capacity using `with_capacity()` when the size is known
-5. Avoid cloning entire HashMap in `get_top_words` - iterate by reference and clone only the top N items needed
-6. Reduce String allocations in `clean_word` by using `filter()` and `collect()` or pre-allocated capacity
-7. If you are not familiar with Rust, use an AI assistant to help implement the optimizations in repository_after based on the requirements above
+1. **Optimize Lookups**: Replace `Vec<String>` for stop words with `HashSet<String>` for O(1) lookups.
+2. **Reduce Allocations**: Remove unnecessary `.clone()` calls and use references.
+3. **Use Entry API**: Use `HashMap::entry()` instead of `contains_key` + `get_mut`.
+4. **Pre-allocate Capacity**: Use `with_capacity()` when the result size is known.
+5. **Logic Correction**: Ensure text is cleaned and normalized *before* stop-word filtering.
 
-## Category
-Performance Optimization
-
-## Commands
+## Local Execution (Rust 1.80+)
+Execute tests directly from the repository directories:
 ```bash
-docker-compose run --rm run_before
+cd repository_after
+cargo test --test lib_test
 ```
 
