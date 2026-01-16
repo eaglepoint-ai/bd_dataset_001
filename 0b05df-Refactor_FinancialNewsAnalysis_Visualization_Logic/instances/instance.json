@@ -1,0 +1,29 @@
+{
+    "instance_id": "0b05df",
+    "problem_statement": "The FinancialNewsAnalysis class has grown organically and now contains tightly coupled, repetitive plotting logic within the visualize_stat_measures method, making the code difficult to maintain, extend, and reason about. The current implementation violates the DRY principle, mixes data preparation with visualization concerns, and relies on implicit matplotlib state, which increases the risk of bugs and inconsistent behavior as new visualizations are added. Refactoring is needed to improve readability, enforce clear abstraction boundaries, promote reusable plotting components, and ensure the visualization layer can scale cleanly without altering the public API or existing behavior.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/0b05df-Refactor_FinancialNewsAnalysis_Visualization_Logic",
+    "environment_setup": "Dockerfile",
+    "FAIL_TO_PASS": [
+        "tests/test_financial_news_analysis.py::test_helper_methods_exist",
+        "tests/test_financial_news_analysis.py::test_create_figure_returns_fig_and_ax",
+        "tests/test_financial_news_analysis.py::test_dry_principle_plot_histogram_reused",
+        "tests/test_financial_news_analysis.py::test_no_duplicated_figure_creation",
+        "tests/test_financial_news_analysis.py::test_helper_accepts_explicit_data",
+        "tests/test_financial_news_analysis.py::test_no_duplicated_show_calls",
+        "tests/test_financial_news_analysis.py::test_configure_axis_reused",
+        "tests/test_financial_news_analysis.py::test_show_plot_reused"
+    ],
+    "PASS_TO_PASS": [
+        "tests/test_financial_news_analysis.py::test_public_api_exists",
+        "tests/test_financial_news_analysis.py::test_descriptive_statistics_returns_tuple",
+        "tests/test_financial_news_analysis.py::test_data_loaded_correctly",
+        "tests/test_financial_news_analysis.py::test_headline_length_calculated",
+        "tests/test_financial_news_analysis.py::test_descriptive_statistics_headline_stats_structure",
+        "tests/test_financial_news_analysis.py::test_descriptive_statistics_publisher_counts",
+        "tests/test_financial_news_analysis.py::test_descriptive_statistics_date_counts",
+        "tests/test_financial_news_analysis.py::test_class_accepts_file_path"
+    ]
+}
+  
