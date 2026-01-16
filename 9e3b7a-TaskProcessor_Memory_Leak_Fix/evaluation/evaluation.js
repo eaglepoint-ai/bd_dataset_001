@@ -168,9 +168,14 @@ function main() {
     }
   };
 
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19).replace('T', '_');
+  const reportDir = path.join(projectRoot, 'evaluation', timestamp);
+  if (!fs.existsSync(reportDir)) fs.mkdirSync(reportDir, { recursive: true });
+  const defaultOutputPath = path.join(reportDir, 'report.json');
+
   const outputPath = process.argv[2] && process.argv[2].startsWith('--output=') 
     ? process.argv[2].split('=')[1]
-    : path.join(projectRoot, 'report.json');
+    : defaultOutputPath;
 
   fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
   console.log(`\n✅ Report saved to: ${outputPath}`);
