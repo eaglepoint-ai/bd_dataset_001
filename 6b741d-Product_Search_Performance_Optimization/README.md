@@ -21,7 +21,8 @@ docker compose build
 
 ### Run tests (before – expected to FAIL performance)
 ```bash
-docker compose run --rm before
+docker-compose run --rm run_before
+
 ```
 **Expected behavior:**
 - Correctness tests: ✅ PASS
@@ -29,7 +30,7 @@ docker compose run --rm before
 
 ### Run tests (after – expected to PASS all)
 ```bash
-docker compose run --rm after
+docker-compose run --rm run_after
 ```
 **Expected behavior:**
 - Correctness tests: ✅ PASS
@@ -37,7 +38,7 @@ docker compose run --rm after
 
 ### Run evaluation (compares both implementations)
 ```bash
-docker compose run --rm evaluation
+docker-compose run --rm evaluation
 ```
 This will:
 - Run tests for both before and after implementations
@@ -80,4 +81,5 @@ git diff --no-index repository_before repository_after > patches/task.patch
 - Optimize ProductSearch to handle 100,000+ products and 1,000 queries/sec with sub-100ms response.
 - Maintain exact public API and result equivalence.
 - See `instances/instance.json` for requirements and test expectations.
+Reports are generated in evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
 

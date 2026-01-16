@@ -1,6 +1,21 @@
---- repository_before/productSearch.js	2026-01-14 15:21:20.194120689 +0300
-+++ repository_after/productSearch.js	2026-01-14 17:05:36.460776924 +0300
+diff --git a/repository_before/index.js b/repository_after/index.js
+index 1608fdc..27c3a03 100644
+--- a/repository_before/index.js
++++ b/repository_after/index.js
+@@ -1,4 +1,3 @@
+ const ProductSearch = require('./productSearch');
+ 
+ module.exports = ProductSearch;
+-
+diff --git a/repository_before/productSearch.js b/repository_after/productSearch.js
+index d5da8aa..a2f6265 100644
+--- a/repository_before/productSearch.js
++++ b/repository_after/productSearch.js
 @@ -1,83 +1,163 @@
+-class ProductSearch {
+-  constructor() {
+-    this.products = [];
+-  }
 +class MinHeap {
 +    constructor(maxSize) {
 +        this.heap = [];
@@ -16,7 +31,11 @@
 +            this._siftDown(0);
 +        }
 +    }
-+
+ 
+-  addProduct(product) {
+-    this.products.push(product);
+-    return this;
+-  }
 +    getSorted() {
 +        return this.heap.sort((a, b) => {
 +            if (b.rating === a.rating) {
@@ -25,7 +44,10 @@
 +            return b.rating - a.rating;
 +        });
 +    }
-+
+ 
+-  addProducts(products) {
+-    for (const product of products) {
+-      this.products.push(product);
 +    _compare(a, b) {
 +        if (a.rating !== b.rating) {
 +            return a.rating - b.rating;
@@ -33,8 +55,13 @@
 +        // Tie-breaker: Preserve items with "better" (smaller) ID if ratings are equal.
 +        // We want to evict the "worst" item.
 +        return b.id.localeCompare(a.id);
-+    }
-+
+     }
+-    return this;
+-  }
+ 
+-  search(query, options = {}) {
+-    const { category, minPrice, maxPrice, limit = 20 } = options;
+-    let results = this.products;
 +    _siftUp(index) {
 +        let parent = Math.floor((index - 1) / 2);
 +        while (index > 0 && this._compare(this.heap[index], this.heap[parent]) < 0) {
@@ -43,7 +70,13 @@
 +            parent = Math.floor((index - 1) / 2);
 +        }
 +    }
-+
+ 
+-    if (query) {
+-      const lowerQuery = query.toLowerCase();
+-      results = results.filter(product => 
+-        product.name.toLowerCase().includes(lowerQuery) ||
+-        product.description.toLowerCase().includes(lowerQuery)
+-      );
 +    _siftDown(index) {
 +        let minIndex = index;
 +        const left = 2 * index + 1;
@@ -60,58 +93,40 @@
 +            [this.heap[index], this.heap[minIndex]] = [this.heap[minIndex], this.heap[index]];
 +            this._siftDown(minIndex);
 +        }
-+    }
+     }
 +}
-+
- class ProductSearch {
--  constructor() {
--    this.products = [];
--  }
+ 
+-    if (category) {
+-      results = results.filter(product => product.category === category);
++class ProductSearch {
 +    constructor() {
 +        this.products = [];
 +        this.categoryMap = new Map();
 +        this.idMap = new Map();
-+    }
+     }
  
--  addProduct(product) {
--    this.products.push(product);
--    return this;
--  }
+-    if (minPrice !== undefined) {
+-      results = results.filter(product => product.price >= minPrice);
 +    addProduct(product) {
 +        product._nameLower = product.name.toLowerCase();
 +        product._descLower = product.description.toLowerCase();
- 
--  addProducts(products) {
--    for (const product of products) {
--      this.products.push(product);
--    }
--    return this;
--  }
++
 +        this.products.push(product);
 +        // Only set idMap if this is the first occurrence of the ID (strict equivalence)
 +        if (!this.idMap.has(product.id)) {
 +            this.idMap.set(product.id, product);
 +        }
- 
--  search(query, options = {}) {
--    const { category, minPrice, maxPrice, limit = 20 } = options;
--    let results = this.products;
++
 +        if (!this.categoryMap.has(product.category)) {
 +            this.categoryMap.set(product.category, []);
 +        }
 +        this.categoryMap.get(product.category).push(product);
- 
--    if (query) {
--      const lowerQuery = query.toLowerCase();
--      results = results.filter(product => 
--        product.name.toLowerCase().includes(lowerQuery) ||
--        product.description.toLowerCase().includes(lowerQuery)
--      );
++
 +        return this;
      }
  
--    if (category) {
--      results = results.filter(product => product.category === category);
+-    if (maxPrice !== undefined) {
+-      results = results.filter(product => product.price <= maxPrice);
 +    addProducts(products) {
 +        for (const product of products) {
 +            this.addProduct(product);
@@ -119,29 +134,34 @@
 +        return this;
      }
  
--    if (minPrice !== undefined) {
--      results = results.filter(product => product.price >= minPrice);
--    }
+-    results = results.sort((a, b) => b.rating - a.rating);
 +    search(query, options = {}) {
 +        const { category, minPrice, maxPrice, limit = 20 } = options;
 +        const heap = new MinHeap(limit);
- 
--    if (maxPrice !== undefined) {
--      results = results.filter(product => product.price <= maxPrice);
--    }
++
 +        let candidates = this.products;
 +        if (category) {
 +            candidates = this.categoryMap.get(category);
 +            if (!candidates) return [];
 +        }
-+
+ 
+-    return results.slice(0, limit);
+-  }
 +        const lowerQuery = query ? query.toLowerCase() : null;
-+
+ 
+-  searchByCategory(category, limit = 20) {
+-    let results = this.products.filter(product => product.category === category);
+-    results = results.sort((a, b) => b.rating - a.rating);
+-    return results.slice(0, limit);
+-  }
 +        for (const product of candidates) {
 +            if (minPrice !== undefined && product.price < minPrice) continue;
 +            if (maxPrice !== undefined && product.price > maxPrice) continue;
  
--    results = results.sort((a, b) => b.rating - a.rating);
+-  getTopRated(limit = 20) {
+-    const sorted = this.products.sort((a, b) => b.rating - a.rating);
+-    return sorted.slice(0, limit);
+-  }
 +            if (lowerQuery) {
 +                if (!product._nameLower.includes(lowerQuery) &&
 +                    !product._descLower.includes(lowerQuery)) {
@@ -149,36 +169,11 @@
 +                }
 +            }
  
--    return results.slice(0, limit);
--  }
-+            heap.push(product);
-+        }
- 
--  searchByCategory(category, limit = 20) {
--    let results = this.products.filter(product => product.category === category);
--    results = results.sort((a, b) => b.rating - a.rating);
--    return results.slice(0, limit);
--  }
-+        return heap.getSorted();
-+    }
- 
--  getTopRated(limit = 20) {
--    const sorted = this.products.sort((a, b) => b.rating - a.rating);
--    return sorted.slice(0, limit);
--  }
-+    searchByCategory(category, limit = 20) {
-+        const products = this.categoryMap.get(category);
-+        if (!products) return [];
- 
 -  getProductById(id) {
 -    return this.products.find(product => product.id === id);
 -  }
-+        const heap = new MinHeap(limit);
-+        for (const product of products) {
 +            heap.push(product);
 +        }
-+        return heap.getSorted();
-+    }
  
 -  getCategories() {
 -    const categories = [];
@@ -186,11 +181,6 @@
 -      if (!categories.includes(product.category)) {
 -        categories.push(product.category);
 -      }
-+    getTopRated(limit = 20) {
-+        const heap = new MinHeap(limit);
-+        for (const product of this.products) {
-+            heap.push(product);
-+        }
 +        return heap.getSorted();
      }
 -    return categories;
@@ -199,6 +189,29 @@
 -  getProductCount() {
 -    return this.products.length;
 -  }
++    searchByCategory(category, limit = 20) {
++        const products = this.categoryMap.get(category);
++        if (!products) return [];
+ 
+-  clear() {
+-    this.products = [];
+-    return this;
+-  }
++        const heap = new MinHeap(limit);
++        for (const product of products) {
++            heap.push(product);
++        }
++        return heap.getSorted();
++    }
++
++    getTopRated(limit = 20) {
++        const heap = new MinHeap(limit);
++        for (const product of this.products) {
++            heap.push(product);
++        }
++        return heap.getSorted();
++    }
++
 +    getProductById(id) {
 +        return this.idMap.get(id);
 +    }
@@ -206,11 +219,7 @@
 +    getCategories() {
 +        return Array.from(this.categoryMap.keys());
 +    }
- 
--  clear() {
--    this.products = [];
--    return this;
--  }
++
 +    getProductCount() {
 +        return this.products.length;
 +    }
