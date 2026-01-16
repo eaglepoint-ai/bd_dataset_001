@@ -1,0 +1,9 @@
+{
+  "instance_id": "4ff123",
+  "problem_statement": "Build a webhook delivery service in Node.js that guarantees event delivery to registered endpoints with automatic retry on failure, exponential backoff, dead letter queue, event ordering per endpoint, and graceful shutdown.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "",
+  "environment_setup": "Dockerfile"
+}
+

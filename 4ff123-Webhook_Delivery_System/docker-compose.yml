@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  webhook-delivery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./repository_before:/app
+    command: npm test
+
