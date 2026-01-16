@@ -118,9 +118,14 @@ def generate_report(before_results, after_results, report_path):
     after_passed = after_results.get("summary", {}).get("passed", 0)
     after_total = after_results.get("summary", {}).get("total", 0)
     
+    # Determine success: after tests should all pass
+    all_after_passed = after_passed == after_total and after_total > 0
+    
     # Create report data
     report = {
         "timestamp": datetime.now().isoformat(),
+        "success": all_after_passed,
+        "error": None if all_after_passed else "Some tests failed or evaluation incomplete",
         "before_version": {
             "name": "repository_before",
             "tests_passed": before_passed,
@@ -298,7 +303,8 @@ def main():
     
     print("\n" + "="*80)
     
-    return 0
+    # Return 0 only if after tests all passed
+    return 0 if report.get('success', False) else 1
 
 if __name__ == "__main__":
     sys.exit(main())
