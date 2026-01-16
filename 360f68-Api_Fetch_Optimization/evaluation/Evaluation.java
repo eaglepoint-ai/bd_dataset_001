@@ -13,29 +13,49 @@ public class Evaluation {
         long startTime = System.currentTimeMillis();
         String runId = UUID.randomUUID().toString();
         Instant startedAt = Instant.now();
+        TestResult beforeResult = null;
+        TestResult afterResult = null;
         
         try {
             System.out.println("[eval] Starting evaluation...");
             
             // Run tests for repository_before
             System.out.println("[eval] Running tests for repository_before...");
-            TestResult beforeResult = runTests("repository_before");
+            try {
+                beforeResult = runTests("repository_before");
+            } catch (Exception e) {
+                System.err.println("[eval] Error running repository_before tests: " + e.getMessage());
+                e.printStackTrace();
+                beforeResult = new TestResult(false, "ERROR: " + e.getMessage(), new HashMap<>());
+            }
             
             // Run tests for repository_after
             System.out.println("[eval] Running tests for repository_after...");
-            TestResult afterResult = runTests("repository_after");
+            try {
+                afterResult = runTests("repository_after");
+            } catch (Exception e) {
+                System.err.println("[eval] Error running repository_after tests: " + e.getMessage());
+                e.printStackTrace();
+                afterResult = new TestResult(false, "ERROR: " + e.getMessage(), new HashMap<>());
+            }
             
-            // Generate report
+            // Always generate report, even if tests failed
             System.out.println("[eval] Generating report...");
-            generateReport(runId, startedAt, beforeResult, afterResult);
+            if (beforeResult != null && afterResult != null) {
+                generateReport(runId, startedAt, beforeResult, afterResult);
+            } else {
+                // Fallback: generate error report if we couldn't get results
+                throw new Exception("Failed to get test results for both repositories");
+            }
             
             long duration = System.currentTimeMillis() - startTime;
             System.out.println("[eval] Evaluation completed in " + duration + "ms");
+            System.out.println("[eval] Report generated at: evaluation/report.json");
             
             System.exit(afterResult.passed ? 0 : 1);
             
         } catch (Exception e) {
-            System.err.println("[eval] Error: " + e.getMessage());
+            System.err.println("[eval] Fatal Error: " + e.getMessage());
             e.printStackTrace();
             generateErrorReport(runId, startedAt, e);
             System.exit(1);
@@ -44,8 +64,30 @@ public class Evaluation {
     
     private static TestResult runTests(String repository) throws Exception {
         String testOutput = compileAndRunTests(repository);
-        boolean passed = testOutput.contains("BUILD SUCCESS") || 
-                        (testOutput.contains("Tests run:") && !testOutput.contains("Failures:"));
+        
+        // Parse JUnit 5 ConsoleLauncher output
+        // Look for test summary: "tests successful" vs "tests failed"
+        boolean passed = false;
+        if (testOutput.contains("COMPILATION FAILED")) {
+            passed = false;
+        } else {
+            // JUnit 5 output format: "[ X tests successful ]" or "[ X tests failed ]"
+            // Also check for "containers successful" and "containers failed"
+            boolean hasFailures = testOutput.contains("tests failed") || 
+                                 testOutput.contains("containers failed") ||
+                                 testOutput.contains("Failures:") ||
+                                 testOutput.contains("aborted");
+            boolean hasSuccess = testOutput.contains("tests successful") || 
+                               testOutput.contains("containers successful");
+            
+            // If we see test results, check if all passed
+            if (hasSuccess || hasFailures) {
+                passed = hasSuccess && !hasFailures;
+            } else {
+                // Fallback: if no explicit failure indicators and compilation succeeded, assume passed
+                passed = !testOutput.contains("error:") && !testOutput.contains("Exception");
+            }
+        }
         
         // Parse test results if available
         Map<String, Object> testDetails = new HashMap<>();
