@@ -5,6 +5,10 @@ WORKDIR /app
 # Install Python for evaluation script
 RUN apk add --no-cache python3 py3-pip
 
+# Install libc6-compat for Alpine (needed for Next.js SWC binaries)
+# This provides glibc compatibility layer for musl-based Alpine
+RUN apk add --no-cache libc6-compat
+
 # Copy and install Python dependencies first (for better caching)
 COPY requirements.txt ./
 RUN pip3 install --no-cache-dir --break-system-packages -r requirements.txt
@@ -17,8 +21,8 @@ COPY repository_after/package*.json ./repository_after/
 WORKDIR /app/repository_after
 # Use npm install (not npm ci) to ensure platform-specific optional dependencies are installed
 # npm ci uses exact versions from package-lock.json which might not install platform-specific binaries correctly
-# --include=optional ensures optional dependencies (like platform-specific SWC binaries) are installed
-RUN npm install --include=optional --only=production=false
+# Don't use --no-optional - we NEED optional dependencies (SWC binaries) for Alpine
+RUN npm install --only=production=false
 
 # Copy everything else (after npm install to preserve node_modules)
 # .dockerignore ensures node_modules is not copied from host
@@ -27,8 +31,9 @@ COPY . .
 
 # Reinstall dependencies after COPY to ensure platform-specific binaries are correct for Alpine
 # This ensures the correct musl SWC binary is installed even if package-lock.json was from a different platform
+# Remove node_modules to force fresh install with correct platform detection (keep package-lock.json for version consistency)
 WORKDIR /app/repository_after
-RUN npm install --include=optional --only=production=false
+RUN rm -rf node_modules && npm install --only=production=false
 
 # Verify that the correct SWC binary for Alpine (musl) is installed
 # Fail the build if musl binary is not found (Alpine requires musl, not glibc)
