@@ -1,9 +1,0 @@
-{
-    "instance_id": "635a94",
-    "problem_statement": "The current topology analyzer only examines services reachable from a single starting point, causing it to miss 40% of the production infrastructure distributed across isolated regional clusters. Implement detect_dependency_cycles_v2() that achieves 100% topology coverage by analyzing all services regardless of connectivity patterns, while maintaining exact behavioral equivalence with the current implementation for fully connected topologies and preserving all existing validation, logging, and diagnostic functionality.",
-    "base_commit": "repository_before",
-    "test_patch": "tests/",
-    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main",
-    "environment_setup": "Dockerfile"
-  }
-  
