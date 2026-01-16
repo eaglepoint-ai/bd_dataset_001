@@ -26,10 +26,10 @@ function generateRunId() {
 function getGitInfo() {
   const gitInfo = { git_commit: 'unknown', git_branch: 'unknown' };
   try {
-    gitInfo.git_commit = execSync('git rev-parse HEAD', { encoding: 'utf-8', timeout: 5000 }).trim().slice(0, 8);
+    gitInfo.git_commit = execSync('git rev-parse HEAD 2>/dev/null', { encoding: 'utf-8', timeout: 5000 }).trim().slice(0, 8);
   } catch (e) {}
   try {
-    gitInfo.git_branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8', timeout: 5000 }).trim();
+    gitInfo.git_branch = execSync('git rev-parse --abbrev-ref HEAD 2>/dev/null', { encoding: 'utf-8', timeout: 5000 }).trim();
   } catch (e) {}
   return gitInfo;
 }
@@ -76,8 +76,6 @@ function runJestTests(repoPath, testsDir, label) {
   console.log(`\n${'='.repeat(60)}`);
   console.log(`RUNNING TESTS: ${label.toUpperCase()}`);
   console.log('='.repeat(60));
-  console.log(`Repository: ${repoPath}`);
-  console.log(`Tests directory: ${testsDir}`);
 
   const projectRoot = path.dirname(testsDir);
   const testFile = path.join(testsDir, 'cartService.test.js');
@@ -97,7 +95,6 @@ function runJestTests(repoPath, testsDir, label) {
       timeout: 120000,
     });
     stdout = result;
-    console.log(stdout);
   } catch (err) {
     exitCode = err.status || 1;
     stdout = err.stdout || '';
@@ -106,8 +103,6 @@ function runJestTests(repoPath, testsDir, label) {
     if (err.output) {
       stdout = err.output.filter(Boolean).join('\n');
     }
-    console.log(stdout);
-    console.log(stderr);
   }
 
   // Parse from both stdout and stderr (Jest outputs to stderr on failures)
@@ -118,12 +113,13 @@ function runJestTests(repoPath, testsDir, label) {
   const skipped = tests.filter(t => t.outcome === 'skipped').length;
   const total = tests.length;
 
-  console.log(`\nResults: ${passed} passed, ${failed} failed, ${skipped} skipped (total: ${total})`);
-
+  // Show only test results (no verbose errors)
   for (const test of tests) {
-    const icon = { passed: 'PASS', failed: 'FAIL', skipped: 'SKIP' }[test.outcome] || '?';
-    console.log(`  [${icon}] ${test.name}`);
+    const icon = test.outcome === 'passed' ? '✓' : '✕';
+    console.log(`${icon} ${test.name}`);
   }
+
+  console.log(`\nTests: ${failed > 0 ? `${failed} failed, ` : ''}${passed} passed, ${total} total`);
 
   return {
     success: exitCode === 0,

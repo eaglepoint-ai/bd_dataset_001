@@ -25,25 +25,7 @@ RUN node -e "const{MongoMemoryServer}=require('mongodb-memory-server');MongoMemo
 RUN echo 'module.exports={testTimeout:30000,forceExit:true,detectOpenHandles:true}' > jest.config.js
 
 # Create minimal test reporter script
-RUN cat > /app/run-tests.sh << 'SCRIPT'
-#!/bin/bash
-REPO=${TEST_REPO:-repository_after}
-echo ""
-echo "Testing: $REPO"
-echo "========================================"
-
-# Run jest and capture output
-OUTPUT=$(npx jest tests/cartService.test.js --forceExit --no-coverage 2>&1)
-
-# Extract and display test results (one line per test)
-echo "$OUTPUT" | grep -E "✓|✕|○" | sed 's/^[[:space:]]*//'
-
-echo "========================================"
-# Extract summary line
-echo "$OUTPUT" | grep -E "^Tests:" | head -1
-echo ""
-SCRIPT
-RUN chmod +x /app/run-tests.sh
+RUN printf '#!/bin/bash\nREPO=${TEST_REPO:-repository_after}\necho ""\necho "Testing: $REPO"\necho "========================================"\nOUTPUT=$(npx jest tests/cartService.test.js --forceExit --no-coverage 2>&1)\necho "$OUTPUT" | grep -E "✓|✕|○" | sed "s/^[[:space:]]*//"\necho "========================================"\necho "$OUTPUT" | grep -E "^Tests:" | head -1\necho ""\n' > /app/run-tests.sh && chmod +x /app/run-tests.sh
 
 # ============================================
 # TEST-BEFORE: Run tests against repository_before
