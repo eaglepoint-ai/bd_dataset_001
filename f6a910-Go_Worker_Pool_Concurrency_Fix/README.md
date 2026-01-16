@@ -12,7 +12,7 @@ docker-compose up --build run_repository_before_tests
 # Run evaluation script
 
 ```bash
-docker compose run --rm app npm run evaluate
+docker-compose run evaluation
 ```
 
 # Fix Concurrent Worker Pool in Go

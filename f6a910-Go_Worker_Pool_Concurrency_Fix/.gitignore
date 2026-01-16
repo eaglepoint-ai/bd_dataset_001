@@ -18,3 +18,5 @@ go.work
 test_results.txt
 coverage.out
 
+evaluation/reports/
+

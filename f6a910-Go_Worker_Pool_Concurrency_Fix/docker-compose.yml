@@ -10,3 +10,8 @@ services:
   run_repository_after_tests:
     build: .
     command: sh -c "cp /app/tests/worker_pool_test.go /app/repository_after/ && cd /app/repository_after && go test -v -race ."
+  evaluation:
+    build: .
+    command: go run evaluation/evaluation.go
+    volumes:
+      - ./evaluation/reports:/app/evaluation/reports
