@@ -1,0 +1,8 @@
+{
+    "instance_id": "bbec02",
+    "problem_statement": "The current console implementation is functional but suffers from major design and security limitations. It relies on unsafe practices such as eval(), fragile string manipulation for command parsing, and direct access to private storage attributes, making it vulnerable to errors and misuse. The parsing logic is brittle and difficult to maintain, failing easily with minor input variations. Control flow inconsistencies and weak type handling reduce reliability and predictability. The code structure is tightly coupled, hard to extend, and lacks proper validation mechanisms. These issues make the console unsafe, error-prone, and difficult to maintain or enhance, necessitating a structured refactor to improve security, robustness, and maintainability.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/bbec02-Console_Interpreter",
+    "environment_setup": "Dockerfile"
+}  
