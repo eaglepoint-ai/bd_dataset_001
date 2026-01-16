@@ -1,0 +1,226 @@
+diff -ruN --exclude=target --exclude=Cargo.lock repository_before/bookstore_backend/Cargo.toml repository_after/bookstore_backend/Cargo.toml
+--- repository_before/bookstore_backend/Cargo.toml	1970-01-01 01:00:00.000000000 +0100
++++ repository_after/bookstore_backend/Cargo.toml	2026-01-16 22:31:36.000000000 +0300
+@@ -1,6 +1,15 @@
+ [package]
+ name = "bookstore_backend"
+ version = "0.1.0"
+ edition = "2021"
+ 
+-[dependencies]
++[dependencies]
++actix-web = "4"
++actix-rt = "2"
++serde = { version = "1", features = ["derive"] }
++serde_json = "1"
++uuid = { version = "1", features = ["v4", "serde"] }
++thiserror = "1"
++derive_more = "0.99"
+diff -ruN --exclude=target --exclude=Cargo.lock repository_before/bookstore_backend/src/main.rs repository_after/bookstore_backend/src/main.rs
+--- repository_before/bookstore_backend/src/main.rs	1970-01-01 01:00:00.000000000 +0100
++++ repository_after/bookstore_backend/src/main.rs	2026-01-16 22:31:36.000000000 +0300
+@@ -1,13 +1,291 @@
+-fn main() {
+-    println!("Hello, world!");
+-}
++use actix_web::{web, App, HttpResponse, HttpServer, Responder, ResponseError};
++use serde::{Deserialize, Serialize};
++use std::sync::{Arc, Mutex};
++use std::collections::HashMap;
++use uuid::Uuid;
++use derive_more::Display;
++
++#[derive(Debug, Display, Serialize)]
++pub enum ApiError {
++    #[display(fmt = "Bad Request: {}", message)]
++    BadRequest { message: String },
++    #[display(fmt = "Not Found: {}", message)]
++    NotFound { message: String },
++}
++
++impl ResponseError for ApiError {
++    fn error_response(&self) -> HttpResponse {
++        match self {
++            ApiError::BadRequest { message } => HttpResponse::BadRequest().json(serde_json::json!({"error": message})),
++            ApiError::NotFound { message } => HttpResponse::NotFound().json(serde_json::json!({"error": message})),
++        }
++    }
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize)]
++pub struct Book {
++    pub id: Uuid,
++    pub title: String,
++    pub author: String,
++    pub price: f64,
++    pub stock: u32,
++}
++
++#[derive(Debug, Deserialize)]
++pub struct CreateBook {
++    pub title: String,
++    pub author: String,
++    pub price: f64,
++    pub stock: u32,
++}
++
++#[derive(Debug, Deserialize)]
++pub struct UpdateBook {
++    pub title: Option<serde_json::Value>,
++    pub id: Option<serde_json::Value>,
++    pub author: Option<String>,
++    pub price: Option<f64>,
++    pub stock: Option<u32>,
++}
++
++pub type BookStore = Arc<Mutex<HashMap<Uuid, Book>>>;
++
++pub struct AppState {
++    pub books: BookStore,
++}
++
++fn validate_create_book(book: &CreateBook) -> Result<(), String> {
++    if book.title.trim().is_empty() {
++        return Err("Title cannot be empty".to_string());
++    }
++    if book.author.trim().is_empty() {
++        return Err("Author cannot be empty".to_string());
++    }
++    if book.price <= 0.0 {
++        return Err("Price must be greater than 0".to_string());
++    }
++    Ok(())
++}
++
++fn validate_update_book(book: &UpdateBook) -> Result<(), String> {
++    if book.title.is_some() {
++        return Err("Title cannot be modified".to_string());
++    }
++    if book.id.is_some() {
++        return Err("ID cannot be modified".to_string());
++    }
++    if let Some(author) = &book.author {
++        if author.trim().is_empty() {
++            return Err("Author cannot be empty".to_string());
++        }
++    }
++    if let Some(price) = book.price {
++        if price <= 0.0 {
++            return Err("Price must be greater than 0".to_string());
++        }
++    }
++    Ok(())
++}
++
++async fn create_book(
++    data: web::Data<AppState>,
++    payload: web::Json<CreateBook>,
++) -> Result<HttpResponse, ApiError> {
++    if let Err(e) = validate_create_book(&payload) {
++        return Err(ApiError::BadRequest { message: e });
++    }
++
++    let mut books = data.books.lock().unwrap();
++    
++    let book = Book {
++        id: Uuid::new_v4(),
++        title: payload.title.trim().to_string(),
++        author: payload.author.trim().to_string(),
++        price: payload.price,
++        stock: payload.stock,
++    };
++
++    books.insert(book.id, book.clone());
++    Ok(HttpResponse::Created().json(book))
++}
++
++async fn get_books(data: web::Data<AppState>) -> impl Responder {
++    let books = data.books.lock().unwrap();
++    let list: Vec<Book> = books.values().cloned().collect();
++    HttpResponse::Ok().json(list)
++}
++
++async fn get_book(
++    data: web::Data<AppState>,
++    id: web::Path<Uuid>,
++) -> Result<HttpResponse, ApiError> {
++    let books = data.books.lock().unwrap();
++    if let Some(book) = books.get(&id.into_inner()) {
++        Ok(HttpResponse::Ok().json(book))
++    } else {
++        Err(ApiError::NotFound { message: "Book not found".to_string() })
++    }
++}
++
++async fn update_book(
++    data: web::Data<AppState>,
++    id: web::Path<Uuid>,
++    payload: web::Json<UpdateBook>,
++) -> Result<HttpResponse, ApiError> {
++    if let Err(e) = validate_update_book(&payload) {
++        return Err(ApiError::BadRequest { message: e });
++    }
++
++    let mut books = data.books.lock().unwrap();
++    let book_id = id.into_inner();
++
++    if let Some(book) = books.get_mut(&book_id) {
++        if let Some(author) = &payload.author {
++            book.author = author.trim().to_string();
++        }
++        if let Some(price) = payload.price {
++            book.price = price;
++        }
++        if let Some(stock) = payload.stock {
++            book.stock = stock;
++        }
++        Ok(HttpResponse::Ok().json(book))
++    } else {
++        Err(ApiError::NotFound { message: "Book not found".to_string() })
++    }
++}
++
++async fn delete_book(
++    data: web::Data<AppState>,
++    id: web::Path<Uuid>,
++) -> Result<HttpResponse, ApiError> {
++    let mut books = data.books.lock().unwrap();
++    if books.remove(&id.into_inner()).is_some() {
++        Ok(HttpResponse::NoContent().finish())
++    } else {
++        Err(ApiError::NotFound { message: "Book not found".to_string() })
++    }
++}
++
++fn create_app_state() -> web::Data<AppState> {
++    web::Data::new(AppState {
++        books: Arc::new(Mutex::new(HashMap::new())),
++    })
++}
++
++fn configure_app(cfg: &mut web::ServiceConfig) {
++    cfg.service(
++        web::scope("/books")
++            .route("", web::post().to(create_book))
++            .route("", web::get().to(get_books))
++            .route("/{id}", web::get().to(get_book))
++            .route("/{id}", web::patch().to(update_book))
++            .route("/{id}", web::delete().to(delete_book))
++    );
++}
++
++#[actix_web::main]
++async fn main() -> std::io::Result<()> {
++    let state = create_app_state();
++
++    println!("Starting Bookstore API server at http://127.0.0.1:8080");
++
++    HttpServer::new(move || {
++        App::new()
++            .app_data(state.clone())
++            .configure(configure_app)
++    })
++    .bind(("127.0.0.1", 8080))?
++    .run()
++    .await
++}

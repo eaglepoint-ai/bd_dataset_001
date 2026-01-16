@@ -1,61 +1,144 @@
-## Prompt
-You're a Senior Backend Engineer on a platform team. The current bookstore service is a proof-of-concept that is blocking frontend development. It only partially supports read/buy operations, has no CRUD functionality, and uses titles as identifiers, causing lookup failures and data collisions. Your task is to refactor the backend into a complete CRUD service in Rust using Actix Web with proper validation, error handling, and concurrency safety.
+# Bookstore CRUD Service Implementation
+
+## Overview
+
+This project demonstrates refactoring a proof-of-concept bookstore backend into a complete CRUD service using Rust and Actix Web 4.x. The implementation replaces inefficient Vec-based storage with a thread-safe `HashMap<Uuid, Book>` for O(1) lookups.
 
 ## Problem Statement
-The existing bookstore backend is incomplete and inefficient. Books are identified solely by title, making updates impossible and leading to collisions, while `Vec` storage causes O(n) lookups with no indexing. There are no endpoints for creating, updating, or deleting books, error handling uses plain strings instead of proper HTTP status codes, and input validation is missing, allowing negative prices or empty fields.  
 
-The objective is to refactor the backend into a full CRUD service using Rust and Actix Web, replacing the `Vec` with a thread-safe in-memory `HashMap` keyed by UUIDs to enable O(1) lookups. All endpoints must implement validation, proper HTTP status codes via a custom error type, and safe concurrent access. The service should perform efficiently under load and pass comprehensive tests demonstrating functional CRUD operations.  
-> Existing code can be reused as a starting point—refactoring should focus on replacing `Vec` storage with `HashMap`, adding UUIDs, proper validation, and implementing all missing CRUD operations.
+The original bookstore backend had critical issues:
+- Books identified by title strings → collisions and impossible updates
+- Vec storage with O(n) lookups → poor performance
+- Missing CREATE, UPDATE, DELETE endpoints
+- String error responses instead of proper HTTP status codes
+- No input validation (accepted negative prices, empty fields)
 
-## Requirements
+## Solution
 
-### CRUD Endpoints
+A complete CRUD service with:
+- **UUID-based identification** for unique book IDs
+- **HashMap storage** with `Arc<Mutex<>>` for thread-safe O(1) lookups
+- **Full CRUD operations** (POST, GET, PATCH, DELETE)
+- **Custom error type** implementing `ResponseError` for proper JSON errors
+- **Input validation** (non-empty title/author, price > 0, stock >= 0)
+- **Immutable field protection** (title and id cannot be modified via PATCH)
 
-1. **CREATE** `POST /books`  
-   - Input: `title`, `author`, `price`, `stock`  
-   - Validation: `title` and `author` non-empty, `price > 0`, `stock >= 0`  
-   - Response: `201 Created` with book JSON  
-   - Error: `400 Bad Request` with JSON error  
+## Docker Commands
 
-2. **READ ALL** `GET /books`  
-   - Response: list of all books (empty array if none)  
+### Build the Docker image
+```bash
+docker build -t bookstore-eval .
+```
 
-3. **READ ONE** `GET /books/{id}`  
-   - Response: book JSON  
-   - Error: `404 Not Found`  
+### Run tests on repository_after
+```bash
+docker run --rm bookstore-eval bash -c "cd repository_after/bookstore_backend && cargo build --release && cargo test --release"
+```
 
-4. **UPDATE** `PATCH /books/{id}`  
-   - Partial updates: `author`, `price`, `stock`  
-   - Cannot update `title` or `id` → `400 Bad Request`  
-   - Validation: `author` non-empty, `price > 0`, `stock >= 0`  
-   - Response: `200 OK` with updated book  
-   - Error: `404 Not Found`  
+### Run evaluation (compares before vs after)
+```bash
+docker run --rm bookstore-eval python evaluation/evaluation.py
+```
 
-5. **DELETE** `DELETE /books/{id}`  
-   - Response: `204 No Content`  
-   - Error: `404 Not Found`  
+### Using Docker Compose
+```bash
+# Build
+docker-compose build
 
-### Constraints
-- Rust + Actix Web 4.x only  
-- In-memory storage: `Arc<Mutex<HashMap<Uuid, Book>>>`  
-- Custom error type implementing `ResponseError`  
-- Thread-safe for concurrent requests  
-- Performance Targets:  
-  - Single CRUD operation: <5ms  
-  - List 10,000 books: <100ms  
-  - 100 concurrent requests without timeouts  
+# Run tests on after
+docker-compose run --rm test-after
 
-### Success Criteria
-- All CRUD operations work correctly with validation  
-- `HashMap` provides O(1) lookups  
-- Concurrent requests do not corrupt data  
-- Proper HTTP status codes and JSON error responses  
-- Tests demonstrate failure in the old implementation and success after refactoring  
+# Run evaluation
+docker-compose run --rm evaluation
+```
 
-## Tech Stack
-- **Language:** Rust 2021 edition  
-- **Web Framework:** Actix Web 4.x  
-- **Data Storage:** In-memory `Arc<Mutex<HashMap<Uuid, Book>>>`  
-- **UUID Generation:** `uuid` crate v4  
-- **Serialization:** `serde`  
-- **Testing:** Rust built-in tests with `cargo test` 
+## API Endpoints
+
+### CREATE - `POST /books`
+```json
+{
+  "title": "The Rust Programming Language",
+  "author": "Steve Klabnik",
+  "price": 55.99,
+  "stock": 100
+}
+```
+- **Success**: `201 Created` with book JSON (includes generated UUID)
+- **Error**: `400 Bad Request` with JSON error message
+
+### READ ALL - `GET /books`
+- **Success**: `200 OK` with array of books (empty array if none)
+
+### READ ONE - `GET /books/{id}`
+- **Success**: `200 OK` with book JSON
+- **Error**: `404 Not Found`
+
+### UPDATE - `PATCH /books/{id}`
+```json
+{
+  "price": 49.99,
+  "stock": 50
+}
+```
+- Partial updates: `author`, `price`, `stock` only
+- Cannot update `title` or `id` → `400 Bad Request`
+- **Success**: `200 OK` with updated book
+- **Error**: `404 Not Found` or `400 Bad Request`
+
+### DELETE - `DELETE /books/{id}`
+- **Success**: `204 No Content`
+- **Error**: `404 Not Found`
+
+## Validation Rules
+
+| Field  | Rule |
+|--------|------|
+| title  | Non-empty (whitespace trimmed) |
+| author | Non-empty (whitespace trimmed) |
+| price  | Must be > 0 |
+| stock  | Must be >= 0 |
+
+## Technical Constraints
+
+- **Language**: Rust 2021 edition
+- **Framework**: Actix Web 4.x
+- **Storage**: In-memory `Arc<Mutex<HashMap<Uuid, Book>>>`
+- **UUID**: v4 generation via `uuid` crate
+- **Serialization**: `serde` + `serde_json`
+
+## Performance Targets
+
+- Single CRUD operation: <5ms
+- List 10,000 books: <100ms
+- 100 concurrent requests: no timeouts or data corruption
+
+## Project Structure
+
+```
+├── repository_before/      # Empty/broken state (before fix)
+├── repository_after/       # Complete implementation (after fix)
+│   └── bookstore_backend/
+│       ├── Cargo.toml
+│       └── src/
+│           └── main.rs     # Full CRUD implementation
+├── tests/
+│   └── test_bookstore.py   # Python integration tests
+├── evaluation/
+│   └── evaluation.py       # Comparison script
+├── instances/
+│   └── instance.json       # Task metadata
+├── trajectory/
+│   └── trajectory.md       # Implementation reasoning
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
+```
+
+## Success Criteria
+
+- ✅ HashMap provides O(1) ID lookups
+- ✅ All validation rules enforced with specific error messages
+- ✅ Concurrent requests don't corrupt data or panic
+- ✅ Custom error type returns proper JSON + status codes
+- ✅ Title field rejected on PATCH with clear error
+- ✅ Tests demonstrate FAIL_TO_PASS pattern

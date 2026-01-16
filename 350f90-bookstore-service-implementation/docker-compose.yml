@@ -1,6 +1,19 @@
 services:
-  app:
+  evaluation:
     build: .
-    command: pytest -q tests
+    command: python3 evaluation/evaluation.py
     volumes:
       - .:/app
+      # Anonymous volume for target dir to prevent host sync slowness and mismatch
+      - /app/repository_after/bookstore_backend/target
+    environment:
+      - REPO_PATH=repository_after
+
+  test-after:
+    build: .
+    command: >
+      bash -c "export REPO_PATH=repository_after &&
+               python3 -m pytest tests/test_bookstore.py -v"
+    volumes:
+      - .:/app
+      - /app/repository_after/bookstore_backend/target
