@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: snippets
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./repository_after/backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:password@db:5432/snippets
+      CORS_ORIGINS: "*"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./repository_after/frontend/personalsnippetmanager/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  # Service specifically for running tests (requires large Playwright pull)
+  test-runner:
+    build:
+      context: .
+      dockerfile: ./tests/Dockerfile
+    command: [ "pytest", "tests", "-v" ]
+    environment:
+      FRONTEND_URL: http://frontend:80
+      DATABASE_URL: "sqlite:///:memory:"
+    volumes:
+      - ./tests:/app/tests
+    depends_on:
+      - frontend
+      - backend
+
+  # Service specifically for running evaluation (requires large Playwright pull)
+  eval-runner:
+    build:
+      context: .
+      dockerfile: ./tests/Dockerfile
+    command: [ "python", "evaluation/evaluation.py" ]
+    environment:
+      FRONTEND_URL: http://frontend:80
+      DATABASE_URL: "sqlite:///:memory:"
+    volumes:
+      - ./evaluation/reports:/app/evaluation/reports
+      - ./tests:/app/tests
+      - ./evaluation:/app/evaluation
+    depends_on:
+      - frontend
+      - backend
+
+  # Ultra-fast service (Backend tests only, uses the backend image, NO large download)
+  fast-check:
+    build:
+      context: .
+      dockerfile: ./repository_after/backend/Dockerfile
+    command: [ "pytest", "tests/backendTest.py", "-v" ]
+    environment:
+      DATABASE_URL: "sqlite:///:memory:"
+    volumes:
+      - ./tests:/app/tests
