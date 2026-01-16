@@ -1,0 +1,60 @@
+{
+  "run_id": "7483dd80",
+  "started_at": "2026-01-16T07:13:06.712Z",
+  "finished_at": "2026-01-16T07:13:06.713Z",
+  "duration_seconds": 0,
+  "success": true,
+  "error": null,
+  "environment": {
+    "node_version": "v20.20.0",
+    "platform": "linux",
+    "os": "Linux",
+    "os_release": "6.6.87.2-microsoft-standard-WSL2",
+    "architecture": "x64",
+    "hostname": "d9e0939209bf",
+    "git_commit": "unknown",
+    "git_branch": "unknown"
+  },
+  "results": {
+    "before": {
+      "success": false,
+      "exit_code": 1,
+      "tests": [],
+      "summary": {
+        "total": 7,
+        "passed": 1,
+        "failed": 6,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "",
+      "stderr": "pect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\n    Expected: \u001b[32mtrue\u001b[39m\n    Received: \u001b[31mfalse\u001b[39m\n\u001b[2m\u001b[22m\n\u001b[2m      194 |             await act(async () => { jest.advanceTimersByTime(350); });\u001b[22m\n\u001b[2m      195 |\u001b[22m\n\u001b[2m    > 196 |             expect(result.current.isLoading).toBe(true);\u001b[22m\n\u001b[2m          |                                              ^\u001b[22m\n\u001b[2m      197 |\u001b[22m\n\u001b[2m      198 |             await act(async () => {\u001b[22m\n\u001b[2m      199 |                 resolvePromise!({ results: [] });\u001b[22m\n\u001b[2m\u001b[22m\n\u001b[2m      \u001b[2mat Object.<anonymous> (\u001b[22m\u001b[2m\u001b[0m\u001b[36museSearch.before.test.ts\u001b[39m\u001b[0m\u001b[2m:196:46)\u001b[22m\u001b[2m\u001b[22m\n\n\u001b[1mTest Suites: \u001b[22m\u001b[1m\u001b[31m1 failed\u001b[39m\u001b[22m, 1 total\n\u001b[1mTests:       \u001b[22m\u001b[1m\u001b[31m6 failed\u001b[39m\u001b[22m, \u001b[1m\u001b[32m1 passed\u001b[39m\u001b[22m, 7 total\n\u001b[1mSnapshots:   \u001b[22m0 total\n\u001b[1mTime:\u001b[22m        1.809 s\n\u001b[2mRan all test suites\u001b[22m\u001b[2m matching \u001b[22m/useSearch.before.test.ts/i\u001b[2m.\u001b[22m\n"
+    },
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [],
+      "summary": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "",
+      "stderr": "g\n      \u001b[32m✓\u001b[39m \u001b[2mshould debounce API calls - only one call after typing stops (19 ms)\u001b[22m\n    Correct Search Term\n      \u001b[32m✓\u001b[39m \u001b[2mshould send the actual typed query, not stale value (3 ms)\u001b[22m\n    Race Condition Handling\n      \u001b[32m✓\u001b[39m \u001b[2mshould only show results from the latest request (5 ms)\u001b[22m\n    Subsequent Queries\n      \u001b[32m✓\u001b[39m \u001b[2mshould update results on multiple consecutive queries (4 ms)\u001b[22m\n    Empty Query Handling\n      \u001b[32m✓\u001b[39m \u001b[2mshould clear results for empty query without API call (3 ms)\u001b[22m\n    Loading State\n      \u001b[32m✓\u001b[39m \u001b[2mshould accurately reflect loading state (3 ms)\u001b[22m\n    Cleanup\n      \u001b[32m✓\u001b[39m \u001b[2mshould not cause warnings when unmounting during search (6 ms)\u001b[22m\n\n\u001b[1mTest Suites: \u001b[22m\u001b[1m\u001b[32m1 passed\u001b[39m\u001b[22m, 1 total\n\u001b[1mTests:       \u001b[22m\u001b[1m\u001b[32m7 passed\u001b[39m\u001b[22m, 7 total\n\u001b[1mSnapshots:   \u001b[22m0 total\n\u001b[1mTime:\u001b[22m        1.219 s\n\u001b[2mRan all test suites\u001b[22m\u001b[2m matching \u001b[22m/useSearch.after.test.ts/i\u001b[2m.\u001b[22m\n"
+    },
+    "comparison": {
+      "before_tests_passed": false,
+      "after_tests_passed": true,
+      "before_total": 7,
+      "before_passed": 1,
+      "before_failed": 6,
+      "before_skipped": 0,
+      "after_total": 7,
+      "after_passed": 7,
+      "after_failed": 0,
+      "after_skipped": 0
+    }
+  }
+}
