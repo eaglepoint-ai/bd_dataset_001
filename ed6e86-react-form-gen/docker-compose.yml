@@ -1,6 +1,9 @@
 services:
   app:
     build: .
-    command: pytest -q tests
     volumes:
       - .:/app
+      - /app/repository_after/node_modules
+    environment:
+      - NODE_ENV=development
+    working_dir: /app
