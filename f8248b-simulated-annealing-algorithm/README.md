@@ -1,92 +1,70 @@
-# project template
+# Simulated Annealing for Function Optimization
 
-Starter scaffold for bd dataset task.
+A Python implementation of the Simulated Annealing algorithm to approximate the global optimum of the Rastrigin function.
+
+## Problem Statement
+
+A Python implementation of the simulated annealing algorithm must be developed to approximate the global optimum of a user-defined objective function by mimicking the metallurgical annealing process. The core components require methods to generate a neighboring solution from the current state, calculate an acceptance probability for worse solutions using the Metropolis criterion based on a gradually decreasing temperature, and execute a cooling schedule that reduces the temperature over iterations.
+
+## Requirements
+
+1. **Objective Function**: Defined as the Rastrigin function, a non-convex function with many local minima.
+2. **Neighbor Generation**: Generates random perturbations of the current state.
+3. **Acceptance Probability**: Uses `P = exp(-(E_new - E_old) / T)` for worse solutions.
+4. **Cooling Schedule**: Exponential cooling `T = T * cooling_rate`.
+5. **Optimization Loop**: Iterates until stopping conditions are met, tracking the best solution.
 
 ## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
 
----
+- `repository_after/simulation.py`: Complete implementation of the algorithm.
+- `tests/test_simulation.py`: comprehensive unit tests.
+- `evaluation/evaluation.py`: Verification script to check convergence and correctness.
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+## Running the Project
 
-### Setup Steps
+### Using Docker
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
+To ensure a consistent environment, use the provided Docker configuration.
 
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
+**1. Build the Image**
+Ensures all dependencies (including the newly added pytest) are installed.
 
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+```bash
+docker compose build
 ```
 
-### Report Schema
+**2. Run Unit Tests**
+This will execute the pytest suite within the container.
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+```bash
+docker compose run --rm app pytest tests/test_simulation.py -v
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+**3. Run Evaluation**
+This will run the algorithm validation script, which verifies convergence over multiple runs and generates a report.
 
----
+```bash
+docker compose run --rm app python evaluation/evaluation.py
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+### Running Locally
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+If you prefer to run locally, ensure you have Python 3.11+ installed.
+
+**1. Install Dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+**2. Run Tests**
+
+```bash
+pytest tests/test_simulation.py -v
+```
+
+**3. Run Evaluation**
+
+```bash
+python evaluation/evaluation.py
+```

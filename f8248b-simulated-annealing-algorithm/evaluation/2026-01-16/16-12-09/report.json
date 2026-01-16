@@ -1,0 +1,267 @@
+{
+  "run_id": "da6205c8",
+  "started_at": "2026-01-16T16:12:08.617177",
+  "finished_at": "2026-01-16T16:12:09.305179",
+  "duration_seconds": 0.688002,
+  "success": true,
+  "error": null,
+  "environment": {
+    "python_version": "3.11.14",
+    "platform": "Linux-6.17.12-300.fc43.x86_64-x86_64-with-glibc2.41",
+    "os": "Linux",
+    "os_release": "6.17.12-300.fc43.x86_64",
+    "architecture": "x86_64",
+    "hostname": "4afe585a3a7e",
+    "git_commit": "unknown",
+    "git_branch": "unknown"
+  },
+  "results": {
+    "unit_tests": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "tests/test_simulation.py::TestObjectiveFunction::test_global_minimum_at_origin",
+          "name": "test_global_minimum_at_origin",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestObjectiveFunction::test_global_minimum_higher_dimensions",
+          "name": "test_global_minimum_higher_dimensions",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestObjectiveFunction::test_positive_at_non_origin",
+          "name": "test_positive_at_non_origin",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestObjectiveFunction::test_symmetric_around_origin",
+          "name": "test_symmetric_around_origin",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestObjectiveFunction::test_known_value",
+          "name": "test_known_value",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestGetNeighbor::test_neighbor_is_different",
+          "name": "test_neighbor_is_different",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestGetNeighbor::test_neighbor_within_bounds",
+          "name": "test_neighbor_within_bounds",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestGetNeighbor::test_neighbor_clipped_at_upper_bound",
+          "name": "test_neighbor_clipped_at_upper_bound",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestGetNeighbor::test_neighbor_clipped_at_lower_bound",
+          "name": "test_neighbor_clipped_at_lower_bound",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestGetNeighbor::test_step_size_affects_perturbation",
+          "name": "test_step_size_affects_perturbation",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestGetNeighbor::test_preserves_dimensionality",
+          "name": "test_preserves_dimensionality",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestAcceptanceProbability::test_better_solution_always_accepted",
+          "name": "test_better_solution_always_accepted",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestAcceptanceProbability::test_same_energy_returns_one",
+          "name": "test_same_energy_returns_one",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestAcceptanceProbability::test_worse_solution_probability_less_than_one",
+          "name": "test_worse_solution_probability_less_than_one",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestAcceptanceProbability::test_higher_temperature_higher_probability",
+          "name": "test_higher_temperature_higher_probability",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestAcceptanceProbability::test_larger_energy_difference_lower_probability",
+          "name": "test_larger_energy_difference_lower_probability",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestAcceptanceProbability::test_very_low_temperature_rejects_worse",
+          "name": "test_very_low_temperature_rejects_worse",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestAcceptanceProbability::test_known_probability_value",
+          "name": "test_known_probability_value",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestSimulatedAnnealing::test_returns_tuple",
+          "name": "test_returns_tuple",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestSimulatedAnnealing::test_returns_correct_types",
+          "name": "test_returns_correct_types",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestSimulatedAnnealing::test_best_state_within_bounds",
+          "name": "test_best_state_within_bounds",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestSimulatedAnnealing::test_best_energy_matches_function_evaluation",
+          "name": "test_best_energy_matches_function_evaluation",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestSimulatedAnnealing::test_more_iterations_better_result",
+          "name": "test_more_iterations_better_result",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestSimulatedAnnealing::test_finds_reasonable_solution_for_rastrigin",
+          "name": "test_finds_reasonable_solution_for_rastrigin",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestSimulatedAnnealing::test_early_stopping_on_low_temperature",
+          "name": "test_early_stopping_on_low_temperature",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestSimulatedAnnealing::test_custom_objective_function",
+          "name": "test_custom_objective_function",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestSimulatedAnnealing::test_reproducibility_with_seed",
+          "name": "test_reproducibility_with_seed",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestCoolingSchedule::test_exponential_cooling",
+          "name": "test_exponential_cooling",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestCoolingSchedule::test_cooling_rate_effect",
+          "name": "test_cooling_rate_effect",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestEdgeCases::test_minimal_iterations",
+          "name": "test_minimal_iterations",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestEdgeCases::test_narrow_bounds",
+          "name": "test_narrow_bounds",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestEdgeCases::test_high_initial_temperature",
+          "name": "test_high_initial_temperature",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_simulation.py::TestEdgeCases::test_very_slow_cooling",
+          "name": "test_very_slow_cooling",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 33,
+        "passed": 33,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "]\ntests/test_simulation.py::TestObjectiveFunction::test_positive_at_non_origin PASSED [  9%]\ntests/test_simulation.py::TestObjectiveFunction::test_symmetric_around_origin PASSED [ 12%]\ntests/test_simulation.py::TestObjectiveFunction::test_known_value PASSED [ 15%]\ntests/test_simulation.py::TestGetNeighbor::test_neighbor_is_different PASSED [ 18%]\ntests/test_simulation.py::TestGetNeighbor::test_neighbor_within_bounds PASSED [ 21%]\ntests/test_simulation.py::TestGetNeighbor::test_neighbor_clipped_at_upper_bound PASSED [ 24%]\ntests/test_simulation.py::TestGetNeighbor::test_neighbor_clipped_at_lower_bound PASSED [ 27%]\ntests/test_simulation.py::TestGetNeighbor::test_step_size_affects_perturbation PASSED [ 30%]\ntests/test_simulation.py::TestGetNeighbor::test_preserves_dimensionality PASSED [ 33%]\ntests/test_simulation.py::TestAcceptanceProbability::test_better_solution_always_accepted PASSED [ 36%]\ntests/test_simulation.py::TestAcceptanceProbability::test_same_energy_returns_one PASSED [ 39%]\ntests/test_simulation.py::TestAcceptanceProbability::test_worse_solution_probability_less_than_one PASSED [ 42%]\ntests/test_simulation.py::TestAcceptanceProbability::test_higher_temperature_higher_probability PASSED [ 45%]\ntests/test_simulation.py::TestAcceptanceProbability::test_larger_energy_difference_lower_probability PASSED [ 48%]\ntests/test_simulation.py::TestAcceptanceProbability::test_very_low_temperature_rejects_worse PASSED [ 51%]\ntests/test_simulation.py::TestAcceptanceProbability::test_known_probability_value PASSED [ 54%]\ntests/test_simulation.py::TestSimulatedAnnealing::test_returns_tuple PASSED [ 57%]\ntests/test_simulation.py::TestSimulatedAnnealing::test_returns_correct_types PASSED [ 60%]\ntests/test_simulation.py::TestSimulatedAnnealing::test_best_state_within_bounds PASSED [ 63%]\ntests/test_simulation.py::TestSimulatedAnnealing::test_best_energy_matches_function_evaluation PASSED [ 66%]\ntests/test_simulation.py::TestSimulatedAnnealing::test_more_iterations_better_result PASSED [ 69%]\ntests/test_simulation.py::TestSimulatedAnnealing::test_finds_reasonable_solution_for_rastrigin PASSED [ 72%]\ntests/test_simulation.py::TestSimulatedAnnealing::test_early_stopping_on_low_temperature PASSED [ 75%]\ntests/test_simulation.py::TestSimulatedAnnealing::test_custom_objective_function PASSED [ 78%]\ntests/test_simulation.py::TestSimulatedAnnealing::test_reproducibility_with_seed PASSED [ 81%]\ntests/test_simulation.py::TestCoolingSchedule::test_exponential_cooling PASSED [ 84%]\ntests/test_simulation.py::TestCoolingSchedule::test_cooling_rate_effect PASSED [ 87%]\ntests/test_simulation.py::TestEdgeCases::test_minimal_iterations PASSED  [ 90%]\ntests/test_simulation.py::TestEdgeCases::test_narrow_bounds PASSED       [ 93%]\ntests/test_simulation.py::TestEdgeCases::test_high_initial_temperature PASSED [ 96%]\ntests/test_simulation.py::TestEdgeCases::test_very_slow_cooling PASSED   [100%]\n\n============================== 33 passed in 0.21s ==============================\n",
+      "stderr": ""
+    },
+    "algorithm_validation": {
+      "success": true,
+      "runs": [
+        {
+          "run": 1,
+          "best_state": [
+            -2.0081047827669374,
+            2.90025549281556
+          ],
+          "best_energy": 14.35733485062551,
+          "converged_near_optimum": true
+        },
+        {
+          "run": 2,
+          "best_state": [
+            -2.0415295471427104,
+            0.9681673849171772
+          ],
+          "best_energy": 5.64306097548906,
+          "converged_near_optimum": true
+        },
+        {
+          "run": 3,
+          "best_state": [
+            -2.040641480397383,
+            1.951031027141029
+          ],
+          "best_energy": 8.764626303003585,
+          "converged_near_optimum": true
+        },
+        {
+          "run": 4,
+          "best_state": [
+            -0.9963442561852636,
+            -0.002767943804746764
+          ],
+          "best_energy": 0.9968597454975914,
+          "converged_near_optimum": true
+        },
+        {
+          "run": 5,
+          "best_state": [
+            0.010262697713021351,
+            -0.9637936158807325
+          ],
+          "best_energy": 1.2074338694318811,
+          "converged_near_optimum": true
+        }
+      ],
+      "statistics": {
+        "convergence_rate": 1.0,
+        "mean_energy": 6.193863148809525,
+        "min_energy": 0.9968597454975914,
+        "max_energy": 14.35733485062551,
+        "std_energy": 5.0085486478163945
+      }
+    },
+    "summary": {
+      "unit_tests_passed": true,
+      "validation_passed": true,
+      "overall_passed": true,
+      "total_tests": 33,
+      "tests_passed": 33,
+      "tests_failed": 0,
+      "convergence_rate": 1.0
+    },
+    "evaluation_passed": true
+  }
+}
