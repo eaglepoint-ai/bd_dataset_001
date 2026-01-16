@@ -1,15 +1,4 @@
 #!/usr/bin/env python3
-"""
-Evaluation runner for Mechanical Refactor (calc_score).
-
-This evaluation script:
-- Runs pytest tests on the tests/ folder for both before and after implementations
-- Collects individual test results with pass/fail status
-- Generates structured reports with environment metadata
-
-Run with:
-    docker compose run --rm app python evaluation/evaluation.py [options]
-"""
 import os
 import sys
 import json
@@ -293,7 +282,7 @@ def generate_output_path():
     time_str = now.strftime("%H-%M-%S")
     
     project_root = Path(__file__).parent.parent
-    output_dir = project_root / "evaluation" / date_str / time_str
+    output_dir = project_root / "evaluation" / "reports" / date_str / time_str
     output_dir.mkdir(parents=True, exist_ok=True)
     
     return output_dir / "report.json"
