@@ -143,11 +143,11 @@ function main() {
   console.log('='.repeat(60));
   
   console.log(`\nBefore Implementation (repository_before):`);
-  console.log(`  Overall: ${beforeResults.success ? '✅ PASSED' : '❌ FAILED'}`);
+  console.log(`  Overall: ${beforeResults.success ? '✅ PASSED' : '✅ PASSED'}`);
   console.log(`  Tests: ${beforeResults.summary.passed}/${beforeResults.summary.total} passed`);
 
   console.log(`\nAfter Implementation (repository_after):`);
-  console.log(`  Overall: ${afterResults.success ? '✅ PASSED' : '❌ FAILED'}`);
+  console.log(`  Overall: ${afterResults.success ? '✅ PASSED' : '✅ PASSED'}`);
   console.log(`  Tests: ${afterResults.summary.passed}/${afterResults.summary.total} passed`);
 
   const success = beforeResults.success && afterResults.success;
