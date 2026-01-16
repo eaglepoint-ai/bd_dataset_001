@@ -7,7 +7,7 @@ import uuid
 import platform
 import subprocess
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone, timezone
 
 ROOT = Path(__file__).resolve().parent.parent
 REPORTS = ROOT / "evaluation" / "reports"
@@ -179,7 +179,7 @@ def evaluate(repo_name: str):
 def run_evaluation():
     """Main evaluation function"""
     run_id = str(uuid.uuid4())
-    start = datetime.utcnow()
+    start = datetime.now(timezone.utc)
     
     try:
         before = evaluate("repository_before")
@@ -190,12 +190,12 @@ def run_evaluation():
             "improvement_summary": "After implementation passed all tests and type checks" if after["tests"]["passed"] else "After implementation failed tests"
         }
         
-        end = datetime.utcnow()
+        end = datetime.now(timezone.utc)
         
         return {
             "run_id": run_id,
-            "started_at": start.isoformat() + "Z",
-            "finished_at": end.isoformat() + "Z",
+            "started_at": start.isoformat(),
+            "finished_at": end.isoformat(),
             "duration_seconds": (end - start).total_seconds(),
             "environment": environment_info(),
             "before": before,
@@ -205,11 +205,11 @@ def run_evaluation():
             "error": None
         }
     except Exception as e:
-        end = datetime.utcnow()
+        end = datetime.now(timezone.utc)
         return {
             "run_id": run_id,
-            "started_at": start.isoformat() + "Z",
-            "finished_at": end.isoformat() + "Z",
+            "started_at": start.isoformat(),
+            "finished_at": end.isoformat(),
             "duration_seconds": (end - start).total_seconds(),
             "environment": environment_info(),
             "before": {"tests": {"passed": False, "return_code": 1, "output": ""}, "metrics": {}},
@@ -221,88 +221,66 @@ def run_evaluation():
 
 def main():
     """Main entry point"""
-    report = None
-    exit_code = 1
+    started_at = datetime.now(timezone.utc)
+    run_id = str(uuid.uuid4())
     
     try:
         REPORTS.mkdir(parents=True, exist_ok=True)
         report = run_evaluation()
         
-        timestamp = datetime.utcnow().strftime("%Y-%m-%d/%H-%M-%S")
+        finished_at = datetime.now(timezone.utc)
+        duration = (finished_at - started_at).total_seconds()
+        
+        # Update timestamps in report
+        report["started_at"] = started_at.isoformat()
+        report["finished_at"] = finished_at.isoformat()
+        report["duration_seconds"] = duration
+        
+        # Generate output path (matching working example pattern)
+        timestamp = finished_at.strftime("%Y-%m-%d/%H-%M-%S")
         report_dir = REPORTS / timestamp
         report_dir.mkdir(parents=True, exist_ok=True)
         
         report_path = report_dir / "report.json"
         report_json = json.dumps(report, indent=2)
-        report_path.write_text(report_json)
         
+        # Write to standard location
+        with open(report_path, "w") as f:
+            f.write(report_json)
+        
+        # Also write to latest.json
         latest_path = REPORTS / "latest.json"
-        latest_path.write_text(report_json)
+        with open(latest_path, "w") as f:
+            f.write(report_json)
         
-        # Write to root for evaluation systems that look there
+        # Write to root as report.json (CodeBuild might look here)
         root_report = ROOT / "report.json"
-        root_report.write_text(report_json)
+        with open(root_report, "w") as f:
+            f.write(report_json)
         
-        # Create report_content artifact (required by evaluation system)
-        # Try multiple locations where evaluation systems might look
-        report_content_paths = [
-            ROOT / "report_content",
-            ROOT / "report_content.json",
-            ROOT / "artifacts" / "report_content",
-            REPORTS / "report_content",
-            Path("/tmp") / "report_content",
-            Path("/tmp") / "report.json"
-        ]
-        for path in report_content_paths:
-            try:
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(report_json)
-            except Exception:
-                pass  # Continue if we can't write to a location
-        
-        # Create log_summary artifact (required by evaluation system)
-        log_summary = {
-            "status": "success" if report["success"] else "failed",
-            "tests_passed": report["after"]["tests"]["passed"],
-            "tests_failed": not report["after"]["tests"]["passed"],
-            "duration_seconds": report["duration_seconds"],
-            "summary": report["comparison"]["improvement_summary"],
-            "before_tests_passed": report["before"]["tests"]["passed"],
-            "after_tests_passed": report["after"]["tests"]["passed"]
-        }
-        log_summary_json = json.dumps(log_summary, indent=2)
-        log_summary_paths = [
-            ROOT / "log_summary",
-            ROOT / "log_summary.json",
-            ROOT / "artifacts" / "log_summary",
-            REPORTS / "log_summary",
-            Path("/tmp") / "log_summary"
-        ]
-        for path in log_summary_paths:
-            try:
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text(log_summary_json)
-            except Exception:
-                pass  # Continue if we can't write to a location
-        
-        # Print report to stdout for CI/CD systems to capture (CRITICAL)
-        # CodeBuild systems often parse stdout for the report
+        # Print report to stdout (CodeBuild captures this)
         print(report_json)
         
-        # Also print to stderr for logging (non-critical info)
-        print(f"Report written to {report_path}", file=sys.stderr)
-        print(f"Latest report: {latest_path}", file=sys.stderr)
-        print(f"Root report: {root_report}", file=sys.stderr)
+        # Print info to stderr
+        print(f"\n✅ Report saved to: {report_path}", file=sys.stderr)
+        print(f"✅ Latest report: {latest_path}", file=sys.stderr)
+        print(f"✅ Root report: {root_report}", file=sys.stderr)
+        print(f"Run ID: {run_id}", file=sys.stderr)
+        print(f"Duration: {duration:.2f}s", file=sys.stderr)
+        print(f"Success: {'✅ YES' if report['success'] else '❌ NO'}", file=sys.stderr)
         
-        exit_code = 0 if report["success"] else 1
+        return 0 if report["success"] else 1
         
     except Exception as e:
-        # Even if evaluation fails, try to write error report
+        import traceback
+        finished_at = datetime.now(timezone.utc)
+        duration = (finished_at - started_at).total_seconds()
+        
         error_report = {
-            "run_id": str(uuid.uuid4()),
-            "started_at": datetime.utcnow().isoformat() + "Z",
-            "finished_at": datetime.utcnow().isoformat() + "Z",
-            "duration_seconds": 0,
+            "run_id": run_id,
+            "started_at": started_at.isoformat(),
+            "finished_at": finished_at.isoformat(),
+            "duration_seconds": duration,
             "environment": environment_info(),
             "before": {"tests": {"passed": False, "return_code": 1, "output": ""}, "metrics": {}},
             "after": {"tests": {"passed": False, "return_code": 1, "output": ""}, "metrics": {}},
@@ -312,19 +290,21 @@ def main():
         }
         error_json = json.dumps(error_report, indent=2)
         
-        # Write error report to all locations
+        # Write error report
         try:
-            (ROOT / "report.json").write_text(error_json)
-            (ROOT / "report_content").write_text(error_json)
-            (Path("/tmp") / "report.json").write_text(error_json)
+            error_path = REPORTS / "latest.json"
+            with open(error_path, "w") as f:
+                f.write(error_json)
+            root_error = ROOT / "report.json"
+            with open(root_error, "w") as f:
+                f.write(error_json)
             print(error_json)  # Print to stdout
         except Exception:
             pass
         
-        print(f"Fatal error: {str(e)}", file=sys.stderr)
-        exit_code = 1
-    
-    return exit_code
+        print(f"\n❌ ERROR: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        return 1
 
 if __name__ == "__main__":
     sys.exit(main())
