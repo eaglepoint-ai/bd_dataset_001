@@ -54,10 +54,45 @@ The TradeAnalyzer exists in repository_before/src/lib.rs and contains the issues
 
 ---
 
+Repository Layout
+
+- **`repository_before/`**: baseline implementation (expected to **fail** evaluation / constraints)
+- **`repository_after/`**: fixed implementation (expected to **pass** evaluation / constraints)
+- **`evaluation/`**: evaluation runner that tests before vs after and writes JSON reports
+
+---
+
 Commands
 
-Run with Docker (all in one):
-docker run --rm $(docker build -q .)
+## Docker (evaluation: before must fail, after must pass)
+
+From this directory:
+
+```bash
+docker build -t fix-trade-analyzer-eval .
+docker run --rm -v "$PWD/evaluation/reports:/app/evaluation/reports" fix-trade-analyzer-eval
+```
+
+- **Expected result**: container exits **0**
+  - `repository_before` fails (compile/runtime) **by design**
+  - `repository_after` passes all enforced checks
+- **Reports**:
+  - `evaluation/reports/latest.json`
+  - `evaluation/reports/<YYYY-MM-DD>/<HH-MM-SS>/report.json`
+
+## docker-compose (your machine uses docker-compose v1)
+
+If `docker compose ...` fails, use `docker-compose ...`:
+
+```bash
+docker-compose run --rm test-before
+docker-compose run --rm test-after
+docker-compose run --rm evaluation
+```
+
+Notes:
+- `test-before` exits **0** because it runs the evaluator in “before” mode and expects failure.
+- `test-after` exits **0** only when the fixed implementation passes.
 
 ---
 
