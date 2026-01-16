@@ -1,0 +1,8 @@
+{
+    "instance_id": "7045ae",
+    "problem_statement": "The current FilesController implementation contains multiple functional and design issues that affect reliability and correctness. The code mixes ES modules and CommonJS syntax, leading to potential runtime errors. Parent-child file relationships are handled inconsistently, with parentId stored as different types and queried incorrectly in getIndex, preventing proper folder listing. Thumbnail jobs are added for folders instead of images, and file system operations use blocking synchronous calls. In getFile, authentication handling can crash on invalid tokens, ownership checks are incorrect, fs.exists is used improperly, and thumbnail logic always returns the original file. Input validation is incomplete, ObjectId conversions are unsafe, and responses return raw MongoDB objects instead of properly formatted API data. These issues must be fixed to ensure correct, secure, and consistent behavior.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/7045ae_File_Manager_Service",
+    "environment_setup": "Dockerfile"
+}  
