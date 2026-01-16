@@ -6,7 +6,7 @@ WORKDIR /app
 
 COPY . ./
 
-RUN if [ -f "go.mod" ]; 'then go mod download; fi'
+RUN if [ -f "go.mod" ]; then go mod download; fi
 
 CMD ["echo", "Ready for implementation - create go.mod, main.go and build"]
 
