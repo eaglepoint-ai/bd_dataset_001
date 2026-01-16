@@ -1,4 +1,0 @@
-services:
-  run_before:
-    build: .
-    command: go run -race ./repository_before/

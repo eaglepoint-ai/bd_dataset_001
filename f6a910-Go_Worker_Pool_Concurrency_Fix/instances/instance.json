@@ -1,8 +1,0 @@
-{
-  "instance_id": "f6a910",
-  "problem_statement": "Fix the buggy WorkerPool implementation to eliminate all concurrency bugs including race conditions on results map, context cancellation handling, graceful shutdown, and proper synchronization. Must pass go test -race with zero warnings, handle edge cases (0 workers, multiple Stop calls, Submit after Stop), and maintain the same public API.",
-  "base_commit": "repository_before",
-  "test_patch": "tests/",
-  "github_url": "",
-  "environment_setup": "Dockerfile"
-}

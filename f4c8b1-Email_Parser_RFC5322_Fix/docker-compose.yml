@@ -1,9 +1,0 @@
-services:
-  app:
-    build: .
-    command: pytest -v tests/
-    volumes:
-      - .:/app
-    working_dir: /app
-
-
