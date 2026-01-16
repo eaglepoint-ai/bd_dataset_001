@@ -24,7 +24,7 @@ export class ConversationService {
               select: { messages: true },
             },
           },
-          orderBy: { updatedAt: "desc" },
+          orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
           skip,
           take: limit,
         }),
@@ -87,7 +87,11 @@ export class ConversationService {
       let title = data.title;
       if (!title) {
         const totalConversations = await prisma.conversation.count();
-        title = `Conversation ${totalConversations + 1}-${Date.now()}-${Math.floor(Math.random() * 1000)}`; // Unique suffix
+        // Use crypto for better uniqueness
+        const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID().split('-')[0]
+          : `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+        title = `Conversation ${totalConversations + 1}-${uniqueId}`;
       }
 
       const conversation = await prisma.conversation.create({

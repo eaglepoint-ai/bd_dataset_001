@@ -21,7 +21,6 @@ docker compose build
 ```bash
 docker compose run --rm app npx jest tests/ --testPathIgnorePatterns=repository_after
 ```
-*Note: Depending on the bug, tests might fail or pass unexpectedly. The goal is to reference `repository_before` behavior.*
 
 ### Run tests (after – expected all pass)
 ```bash
@@ -40,7 +39,7 @@ docker compose run --rm app npm run eval
 This will:
 - Run tests against the implementation
 - Run evaluation scripts defined in `evaluation/evaluation.ts`
-- Generate a report at `evaluation/report.json` (or similar path configured in the script)
+- Generate a report at `evaluation/report.json`
 
 #### Run evaluation with custom output file
 ```bash
