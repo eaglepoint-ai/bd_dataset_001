@@ -190,9 +190,8 @@ function main() {
     }
   };
 
-  const outputPath = process.argv[2] && process.argv[2].startsWith('--output=') 
-    ? process.argv[2].split('=')[1]
-    : path.join(projectRoot, 'report.json');
+  // Use timestamped directory (Aquila expects this)
+  const outputPath = generateOutputPath();
 
   fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
   console.log(`\n✅ Report saved to: ${outputPath}`);
