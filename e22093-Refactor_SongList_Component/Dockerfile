@@ -1,21 +1,18 @@
 FROM node:18-alpine
 
-WORKDIR /app
+WORKDIR /workspace
 
-# Copy repository_after
-COPY repository_after/package*.json ./
-RUN npm install
+# Copy entire project structure
+COPY . .
 
-COPY repository_after/ ./
+# Install dependencies in repository_after
+RUN cd repository_after && npm install
 
-# Copy evaluation script
-COPY evaluation/ /evaluation/
-
-# Build the Next.js app
-RUN npm run build
+# Make shell scripts executable
+RUN chmod +x run_tests.sh build.sh runner.sh
 
 # Expose port
 EXPOSE 3000
 
 # Default command runs the app
-CMD ["npm", "start"]
+CMD ["sh", "-c", "cd repository_after && npm start"]

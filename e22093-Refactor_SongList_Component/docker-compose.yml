@@ -8,16 +8,16 @@ services:
     environment:
       - NODE_ENV=production
     volumes:
-      - ./evaluation:/evaluation
+      - ./evaluation:/workspace/evaluation
 
   songlist-test:
     build: .
-    command: npm test
+    command: sh run_tests.sh
     volumes:
-      - ./evaluation:/evaluation
+      - ./evaluation:/workspace/evaluation
 
   songlist-evaluate:
     build: .
-    command: node /evaluation/evaluation.js
+    command: node evaluation/evaluation.js
     volumes:
-      - ./evaluation:/evaluation
+      - ./evaluation:/workspace/evaluation
