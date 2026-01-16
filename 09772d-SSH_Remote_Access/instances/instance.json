@@ -1,0 +1,8 @@
+{
+    "instance_id": "09772d",
+    "problem_statement": "In many IT and DevOps environments, administrators and automation tools must connect to remote servers frequently and reliably. Manually typing SSH commands is inefficient, error-prone, and does not scale when managing multiple systems. Secure access should be performed using SSH key authentication instead of passwords to improve security and allow automated workflows. A reusable Bash script is needed to simplify this process by establishing non-interactive SSH connections using a predefined private key. The script must validate user input and handle connection failures gracefully so that system administrators and automated processes can connect to remote hosts quickly, securely, and consistently without manual intervention.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/09772d-SSH_Remote_Access",
+    "environment_setup": "Dockerfile"
+}  
