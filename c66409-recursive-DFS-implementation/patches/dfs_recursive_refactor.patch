@@ -1,0 +1,185 @@
+diff --git a/repository_before/__pycache__/__init__.cpython-311.pyc b/repository_after/__pycache__/__init__.cpython-311.pyc
+index f615d5f..6aa087c 100644
+Binary files a/repository_before/__pycache__/__init__.cpython-311.pyc and b/repository_after/__pycache__/__init__.cpython-311.pyc differ
+diff --git a/repository_before/__pycache__/dfs_recursive.cpython-311.pyc b/repository_after/__pycache__/dfs_recursive.cpython-311.pyc
+index e070e78..a05aa29 100644
+Binary files a/repository_before/__pycache__/dfs_recursive.cpython-311.pyc and b/repository_after/__pycache__/dfs_recursive.cpython-311.pyc differ
+diff --git a/repository_before/dfs_recursive.py b/repository_after/dfs_recursive.py
+index 41bd599..61e2f32 100644
+--- a/repository_before/dfs_recursive.py
++++ b/repository_after/dfs_recursive.py
+@@ -1,6 +1,4 @@
+ from typing import Set, Optional, Callable, Dict, List, Any
+-from datetime import datetime
+-import time
+ 
+ class Graph:
+     def __init__(self):
+@@ -17,100 +15,91 @@ class Graph:
+         self.graph[u].append(v)
+     
+     def _get_timestamp(self) -> float:
+-        """Monotonic timestamp generator for traversal ordering"""
+         self._timestamp_counter += 0.001
+         return self._timestamp_counter
+     
+     def dfs_recursive(
+         self,
+-        node: str,
++        start_node: str,
+         visited: Optional[Set[str]] = None,
+         parent: Optional[str] = None,
+         callback: Optional[Callable[[str, str, Optional[str], Dict[str, Any]], None]] = None,
+         recursion_depth: int = 0
+     ) -> Set[str]:
+-        """
+-        Advanced DFS with enterprise features:
+-        - Pre-order, in-order, and post-order callbacks with metadata
+-        - Parent tracking for path reconstruction
+-        - Edge classification (tree/back/forward/cross)
+-        - Discovery and finish timestamps
+-        - Recursion depth tracking for stack analysis
+-        - Metadata propagation through callback context
+-        """
+         if visited is None:
+             visited = set()
+         
+-        # Discovery phase: Pre-order processing
+-        discovery_ts = self._get_timestamp()
+-        self.discovery_time[node] = discovery_ts
+-        
+-        if callback:
+-            context = {
+-                'phase': 'discovery',
+-                'depth': recursion_depth,
+-                'discovery_time': discovery_ts,
+-                'visited_count': len(visited)
+-            }
+-            callback('pre', node, parent, context)
+-        
+-        visited.add(node)
+-        self.visited_order.append(node)
+-        
+-        # Exploration phase: Process neighbors with edge classification
+-        if node in self.graph:
+-            neighbors = self.graph[node]
+-            for idx, neighbor in enumerate(neighbors):
+-                edge = (node, neighbor)
+-                
+-                if neighbor not in visited:
+-                    # Tree edge: First discovery
+-                    self.edge_classification[edge] = 'tree'
++        stack = [(start_node, parent, 0, 'discovery', None)]
++        while stack:
++            node, parent_node, depth, phase, neighbor_idx = stack.pop()
++            
++            if phase == 'discovery':
++                if node not in visited:
++                    discovery_ts = self._get_timestamp()
++                    self.discovery_time[node] = discovery_ts
+                     
+                     if callback:
+                         context = {
+-                            'phase': 'exploration',
+-                            'edge_type': 'tree',
+-                            'depth': recursion_depth,
+-                            'neighbor_index': idx,
+-                            'total_neighbors': len(neighbors)
++                            'phase': 'discovery',
++                            'depth': depth,
++                            'discovery_time': discovery_ts,
++                            'visited_count': len(visited)
+                         }
+-                        callback('in', node, neighbor, context)
+-                    
+-                    # Recursive descent
+-                    self.dfs_recursive(neighbor, visited, node, callback, recursion_depth + 1)
++                        callback('pre', node, parent_node, context)
+                     
+-                elif neighbor in visited and neighbor != parent:
+-                    # Back edge: Cycle detected
+-                    if self.discovery_time[neighbor] < self.discovery_time[node]:
+-                        self.edge_classification[edge] = 'back'
+-                        
+-                        if callback:
+-                            context = {
+-                                'phase': 'cycle_detection',
+-                                'edge_type': 'back',
+-                                'cycle_root': neighbor,
+-                                'depth': recursion_depth,
+-                                'discovery_time_diff': self.discovery_time[node] - self.discovery_time[neighbor]
+-                            }
+-                            callback('cycle', node, neighbor, context)
++                    visited.add(node)
++                    self.visited_order.append(node)
+                 
+-                elif neighbor == parent:
+-                    # Parent edge: Skip (undirected graph handling)
+-                    self.edge_classification[edge] = 'parent'
+-        
+-        # Completion phase: Post-order processing
+-        finish_ts = self._get_timestamp()
+-        self.finish_time[node] = finish_ts
+-        
+-        if callback:
+-            context = {
+-                'phase': 'completion',
+-                'depth': recursion_depth,
+-                'discovery_time': discovery_ts,
+-                'finish_time': finish_ts,
+-                'processing_duration': finish_ts - discovery_ts
+-            }
+-            callback('post', node, parent, context)
++                # Push completion phase onto stack
++                stack.append((node, parent_node, depth, 'completion', None))
++                
++                # Push neighbors for exploration (last neighbor first for correct order)
++                if node in self.graph:
++                    neighbors = self.graph[node]
++                    for idx in reversed(range(len(neighbors))):
++                        neighbor = neighbors[idx]
++                        edge = (node, neighbor)
++                        
++                        if neighbor not in visited:
++                            self.edge_classification[edge] = 'tree'
++                            if callback:
++                                context = {
++                                    'phase': 'exploration',
++                                    'edge_type': 'tree',
++                                    'depth': depth,
++                                    'neighbor_index': idx,
++                                    'total_neighbors': len(neighbors)
++                                }
++                                callback('in', node, neighbor, context)
++                            stack.append((neighbor, node, depth + 1, 'discovery', None))
++                        
++                        elif neighbor in visited and neighbor != parent_node:
++                            if self.discovery_time[neighbor] < self.discovery_time[node]:
++                                self.edge_classification[edge] = 'back'
++                                if callback:
++                                    context = {
++                                        'phase': 'cycle_detection',
++                                        'edge_type': 'back',
++                                        'cycle_root': neighbor,
++                                        'depth': depth,
++                                        'discovery_time_diff': self.discovery_time[node] - self.discovery_time[neighbor]
++                                    }
++                                    callback('cycle', node, neighbor, context)
++                        
++                        elif neighbor == parent_node:
++                            self.edge_classification[edge] = 'parent'
++            
++            elif phase == 'completion':
++                finish_ts = self._get_timestamp()
++                self.finish_time[node] = finish_ts
++                if callback:
++                    context = {
++                        'phase': 'completion',
++                        'depth': depth,
++                        'discovery_time': self.discovery_time[node],
++                        'finish_time': finish_ts,
++                        'processing_duration': finish_ts - self.discovery_time[node]
++                    }
++                    callback('post', node, parent_node, context)
+         
+         return visited

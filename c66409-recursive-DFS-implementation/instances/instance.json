@@ -1,0 +1,9 @@
+{
+    "instance_id": "c66409",
+    "problem_statement": "Refactor a legacy recursive DFS used in a large-scale fraud detection system into an explicit stack-based iterative implementation. The new method must preserve exact behavioral equivalence, including traversal order, callbacks, timestamps, and edge classification. Recursion is strictly forbidden, and an explicit stack is required. Any deviation breaks compliance and audit requirements.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main",
+    "environment_setup": "Dockerfile"
+  }
+  
