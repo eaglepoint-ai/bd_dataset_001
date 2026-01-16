@@ -24,6 +24,9 @@ class MetaTestCase(unittest.TestCase):
         before_tests = self.get_test_methods('repository_before/tests/test_webhook.py')
         after_tests = self.get_test_methods('repository_after/tests/test_webhook.py')
         
+        print(f"\nTests found in repository_before: {sorted(list(before_tests))}")
+        print(f"Tests found in repository_after:  {sorted(list(after_tests))}")
+
         # We expect at least the same tests to verify functionality is preserved
         missing_tests = before_tests - after_tests
         
@@ -42,6 +45,8 @@ class MetaTestCase(unittest.TestCase):
         # So it's good to know.
         if extra_tests:
             print(f"Note: New tests found in refactored suite: {extra_tests}")
+        else:
+            print("No extra tests added.")
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)

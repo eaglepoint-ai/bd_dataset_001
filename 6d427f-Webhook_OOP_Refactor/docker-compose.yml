@@ -20,3 +20,9 @@ services:
     command: python evaluation/evaluation.py
     volumes:
       - .:/app
+
+  meta_test:
+    build: .
+    command: python tests/meta_test.py
+    volumes:
+      - .:/app
