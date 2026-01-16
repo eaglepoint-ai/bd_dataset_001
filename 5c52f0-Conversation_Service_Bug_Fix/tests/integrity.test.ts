@@ -17,8 +17,8 @@ describe("Data Integrity Logic", () => {
         await prisma.$disconnect();
     });
 
-    // --- Task 6 & 13: Delete Integrity ---
-    it("REQ-6-13: should successfully delete a conversation with messages", async () => {
+    // --- Delete Integrity ---
+    it("Should successfully delete a conversation with messages", async () => {
         const c = await prisma.conversation.create({ data: { title: "To Delete" } });
         await prisma.message.create({
             data: { conversationId: c.id, content: "Blocker" }

@@ -17,8 +17,8 @@ describe("Pagination Logic", () => {
         await prisma.$disconnect();
     });
 
-    // --- Task 1 & 8: Pagination Logic ---
-    it("REQ-1-8: should return the first items on page 1 and not skip them", async () => {
+    // --- Pagination Logic ---
+    it("Should return the first items on page 1 and not skip them", async () => {
         const titles = Array.from({ length: 20 }, (_, i) => `Title ${i + 1}`);
         for (const title of titles) {
             await prisma.conversation.create({ data: { title } });
@@ -38,8 +38,8 @@ describe("Pagination Logic", () => {
         expect(p1FirstId).toBe(newestId);
     });
 
-    // --- Task 5 & 12: hasNext Calculation ---
-    it("REQ-5-12: should correctly calculate hasNext at the boundaries", async () => {
+    // --- hasNext Calculation ---
+    it("Should correctly calculate hasNext at the boundaries", async () => {
         for (let i = 0; i < 10; i++) {
             await prisma.conversation.create({ data: { title: `Boundary ${i}` } });
         }
@@ -48,8 +48,8 @@ describe("Pagination Logic", () => {
         expect(result.pagination.hasNext).toBe(false);
     });
 
-    // --- Task 7: API Compatibility ---
-    it("REQ-7: should maintain specific response format", async () => {
+    // --- API Compatibility ---
+    it("Should maintain specific response format", async () => {
         await prisma.conversation.create({ data: { title: "Format" } });
         const res = await service.getAllConversations(1, 1);
 

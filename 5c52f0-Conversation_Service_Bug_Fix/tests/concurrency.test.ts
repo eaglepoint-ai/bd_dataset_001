@@ -17,8 +17,8 @@ describe("Concurrency Logic", () => {
         await prisma.$disconnect();
     });
 
-    // --- Task 4 & 11: Title Race Condition ---
-    it("REQ-4-11: should generate unique titles for concurrent creations", async () => {
+    // --- Title Race Condition ---
+    it("Should generate unique titles for concurrent creations", async () => {
         await prisma.conversation.deleteMany();
 
         const concurrent = 5;

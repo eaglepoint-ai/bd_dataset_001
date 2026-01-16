@@ -17,8 +17,8 @@ describe("Performance Logic", () => {
         await prisma.$disconnect();
     });
 
-    // --- Task 2 & 9: Parallel Queries ---
-    it("REQ-2-9: should execute findMany and count in parallel", async () => {
+    // --- Parallel Queries ---
+    it("Should execute findMany and count in parallel", async () => {
         const originalFindMany = prisma.conversation.findMany;
         const originalCount = prisma.conversation.count;
 

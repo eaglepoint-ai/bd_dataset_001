@@ -17,8 +17,8 @@ describe("Memory Optimization Logic", () => {
         await prisma.$disconnect();
     });
 
-    // --- Task 3 & 10: Messages Limit ---
-    it("REQ-3-10: should limit messages in getConversationById", async () => {
+    // --- Messages Limit ---
+    it("Should limit messages in getConversationById", async () => {
         const c = await prisma.conversation.create({ data: { title: "Huge" } });
 
         await prisma.message.createMany({

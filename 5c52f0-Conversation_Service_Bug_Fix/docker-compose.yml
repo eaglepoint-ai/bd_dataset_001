@@ -8,9 +8,10 @@ services:
       - ./evaluation:/app/evaluation
       - ./patches:/app/patches
       - ./jest.config.js:/app/jest.config.js
+      - ./jest.setup.js:/app/jest.setup.js
       - ./tsconfig.json:/app/tsconfig.json
       - /app/node_modules
       - /app/repository_before/node_modules
       - /app/repository_after/node_modules
     environment:
-      - DATABASE_URL="file:./dev.db"
+      - DATABASE_URL=file:/dev/shm/test.db

@@ -19,13 +19,15 @@ docker compose build
 
 ### Run tests (before – expected failures)
 ```bash
-docker compose run --rm app npx jest tests/ --testPathIgnorePatterns=repository_after
+docker compose run --rm app npx jest --runInBand
 ```
+> **Note:** Tests default to `repository_before` (buggy version) which should fail.
 
 ### Run tests (after – expected all pass)
 ```bash
-docker compose run --rm app npx jest
+docker compose run --rm -e TARGET_REPO=repository_after app npx jest --runInBand
 ```
+> **Note:** You must set `TARGET_REPO=repository_after` to test the fixed version. The `--runInBand` flag ensures tests run sequentially for database stability.
 
 **Expected behavior:**
 - Functional tests: ✅ PASS
