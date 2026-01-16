@@ -1,0 +1,21 @@
+services:
+  run_before:
+    build: .
+    command: python test_before.py
+    volumes:
+      - .:/app:z
+    working_dir: /app/tests
+
+  run_after:
+    build: .
+    command: python test_after.py
+    volumes:
+      - .:/app:z
+    working_dir: /app/tests
+
+  evaluation:
+    build: .
+    command: python evaluation.py
+    volumes:
+      - .:/app:z
+    working_dir: /app/evaluation

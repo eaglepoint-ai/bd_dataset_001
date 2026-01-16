@@ -1,0 +1,186 @@
+--- repository_before/algorithm.py	2026-01-16 00:50:56.295559148 +0300
++++ repository_after/algorithm.py	2026-01-16 01:55:08.588090446 +0300
+@@ -1,73 +1,111 @@
+-def merge_intervals(intervals):
+-   if not intervals:
+-       return []
+-   sorted_intervals = sorted(intervals, key=lambda x: x[0])
+-   merged = [sorted_intervals[0]]
+-   for current in sorted_intervals[1:]:
+-       last = merged[-1]
+-       if current[0] <= last[1]:
+-           merged[-1] = (last[0], max(last[1], current[1]))
+-       else:
+-           merged.append(current)
+-   return merged
+-
+-def compute_union_area(rectangles):
+-   if not rectangles:
+-       return 0.0
+-   events = []
+-   for x1, y1, x2, y2 in rectangles:
+-       if x1 >= x2 or y1 >= y2:
+-           continue
+-       events.append((x1, 0, y1, y2))
+-       events.append((x2, 1, y1, y2))
+-   events.sort(key=lambda x: (x[0], x[1]))
+-   total_area = 0.0
+-   previous_x = None
+-   active_intervals = []
+-   for event in events:
+-       current_x, event_type, y1, y2 = event
+-       if previous_x is not None and current_x > previous_x:
+-           merged = merge_intervals(active_intervals)
+-           union_length = sum(y2_ - y1_ for y1_, y2_ in merged)
+-           total_area += union_length * (current_x - previous_x)
+-       if event_type == 0:
+-           active_intervals.append((y1, y2))
+-       else:
+-           try:
+-               active_intervals.remove((y1, y2))
+-           except ValueError:
+-               pass
+-       previous_x = current_x
+-   return total_area
+-
+-def compute_area_below(k, squares):
+-   rectangles = []
+-   for x, y, l in squares:
+-       y_bottom = y
+-       y_top = y + l
+-       current_y_top = min(k, y_top)
+-       if current_y_top <= y_bottom:
+-           continue
+-       rect = (x, y_bottom, x + l, current_y_top)
+-       rectangles.append(rect)
+-   return compute_union_area(rectangles)
+-   
++import collections
++
++class SegmentTreeNode:
++    def __init__(self, y_low, y_high):
++        self.y_low = y_low
++        self.y_high = y_high
++        self.full_height = y_high - y_low
++        self.count = 0
++        self.left = None
++        self.right = None
++
++    def update_range(self, q_low, q_high, val):
++        """Updates the coverage count for a specific Y-range."""
++        if q_low <= self.y_low and self.y_high <= q_high:
++            self.count += val
++            return
++        
++        if self.left and q_low < self.left.y_high:
++            self.left.update_range(q_low, q_high, val)
++        if self.right and q_high > self.right.y_low:
++            self.right.update_range(q_low, q_high, val)
++    
++    def get_active_length(self):
++        """Returns current active length in this Y-range"""
++        if self.count > 0:
++            return self.full_height
++        elif self.left:
++            return self.left.get_active_length() + self.right.get_active_length()
++        return 0.0
++
++def build_tree(y_coords):
++    """Builds a segment tree from compressed Y-coordinates."""
++    if len(y_coords) < 2:
++        return None
++    if len(y_coords) == 2:
++        return SegmentTreeNode(y_coords[0], y_coords[1])
++    
++    mid_idx = len(y_coords) // 2
++    node = SegmentTreeNode(y_coords[0], y_coords[-1])
++    node.left = build_tree(y_coords[:mid_idx+1])
++    node.right = build_tree(y_coords[mid_idx:])
++    return node
++
+ def find_horizontal_line(squares):
+-   if not squares:
+-       return 0.0
+-   total_rectangles = [(x, y, x + l, y + l) for x, y, l in squares]
+-   total_area = compute_union_area(total_rectangles)
+-   if total_area < 1e-9:
+-       return 0.0
+-   target = total_area / 2.0
+-   y_min = min(y for x, y, l in squares)
+-   y_max = max(y + l for x, y, l in squares)
+-   max_iterations = 100
+-   for _ in range(max_iterations):
+-       mid = (y_min + y_max) / 2
+-       ab = compute_area_below(mid, squares)
+-       if ab < target:
+-           y_min = mid
+-       else:
+-           y_max = mid
+-   return y_max
++    if not squares:
++        return 0.0
++
++    # Coordinate Compression
++    y_set = set()
++    events = []
++    for x, y, l in squares:
++        y_set.add(y)
++        y_set.add(y + l)
++        events.append((x, 1, y, y + l))
++        events.append((x + l, -1, y, y + l))
++    
++    sorted_y = sorted(list(y_set))
++    events.sort()
++
++    # Build Segment Tree
++    root = build_tree(sorted_y)
++    
++    # First pass: compute total area
++    prev_x = events[0][0]
++    total_area = 0.0
++    
++    for x, event_type, y1, y2 in events:
++        dx = x - prev_x
++        if dx > 0:
++            total_area += dx * root.get_active_length()
++        root.update_range(y1, y2, event_type)
++        prev_x = x
++
++    if total_area < 1e-12:
++        return sorted_y[0]
++    
++    target = total_area / 2.0
++    
++    # Second pass: find split line
++    root2 = build_tree(sorted_y)
++    prev_x = events[0][0]
++    cumulative = 0.0
++    
++    for x, event_type, y1, y2 in events:
++        dx = x - prev_x
++        if dx > 0:
++            active_length = root2.get_active_length()
++            area_slice = dx * active_length
++            
++            if cumulative + area_slice >= target:
++                # Split is in this x-range
++                remaining = target - cumulative
++                y_offset = remaining / active_length if active_length > 0 else 0
++                
++                # Find exact y coordinate
++                def find_y_at_offset(node, offset):
++                    if not node.left:
++                        return node.y_low + offset
++                    left_len = node.left.get_active_length()
++                    if offset <= left_len:
++                        return find_y_at_offset(node.left, offset)
++                    return find_y_at_offset(node.right, offset - left_len)
++                
++                return find_y_at_offset(root2, y_offset)
++            
++            cumulative += area_slice
++        
++        root2.update_range(y1, y2, event_type)
++        prev_x = x
++    
++    return sorted_y[-1]

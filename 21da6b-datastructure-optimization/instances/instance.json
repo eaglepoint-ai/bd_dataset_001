@@ -1,0 +1,22 @@
+{
+    "instance_id": "21da6b",
+    "problem_statement": "",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/21da6b-datastructure-optimization",
+    "environment_setup": "Dockerfile",
+    "FAIL_TO_PASS": [
+    "tests/test_geometry.py::test_exact_mathematical_precision",
+    "tests/test_geometry.py::test_worst_case_performance_100k_squares",
+    "tests/test_geometry.py::test_single_pass_complexity_verification"
+  ],
+  "PASS_TO_PASS": [
+    "tests/test_geometry.py::test_basic_union_area_calculation",
+    "tests/test_geometry.py::test_overlapping_squares_convergence",
+    "tests/test_geometry.py::test_empty_input_handling",
+    "tests/test_geometry.py::test_single_square_horizontal_split"
+  ]
+}
+  
+
+  
