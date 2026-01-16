@@ -221,71 +221,110 @@ def run_evaluation():
 
 def main():
     """Main entry point"""
-    REPORTS.mkdir(parents=True, exist_ok=True)
+    report = None
+    exit_code = 1
     
-    report = run_evaluation()
+    try:
+        REPORTS.mkdir(parents=True, exist_ok=True)
+        report = run_evaluation()
+        
+        timestamp = datetime.utcnow().strftime("%Y-%m-%d/%H-%M-%S")
+        report_dir = REPORTS / timestamp
+        report_dir.mkdir(parents=True, exist_ok=True)
+        
+        report_path = report_dir / "report.json"
+        report_json = json.dumps(report, indent=2)
+        report_path.write_text(report_json)
+        
+        latest_path = REPORTS / "latest.json"
+        latest_path.write_text(report_json)
+        
+        # Write to root for evaluation systems that look there
+        root_report = ROOT / "report.json"
+        root_report.write_text(report_json)
+        
+        # Create report_content artifact (required by evaluation system)
+        # Try multiple locations where evaluation systems might look
+        report_content_paths = [
+            ROOT / "report_content",
+            ROOT / "report_content.json",
+            ROOT / "artifacts" / "report_content",
+            REPORTS / "report_content",
+            Path("/tmp") / "report_content",
+            Path("/tmp") / "report.json"
+        ]
+        for path in report_content_paths:
+            try:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(report_json)
+            except Exception:
+                pass  # Continue if we can't write to a location
+        
+        # Create log_summary artifact (required by evaluation system)
+        log_summary = {
+            "status": "success" if report["success"] else "failed",
+            "tests_passed": report["after"]["tests"]["passed"],
+            "tests_failed": not report["after"]["tests"]["passed"],
+            "duration_seconds": report["duration_seconds"],
+            "summary": report["comparison"]["improvement_summary"],
+            "before_tests_passed": report["before"]["tests"]["passed"],
+            "after_tests_passed": report["after"]["tests"]["passed"]
+        }
+        log_summary_json = json.dumps(log_summary, indent=2)
+        log_summary_paths = [
+            ROOT / "log_summary",
+            ROOT / "log_summary.json",
+            ROOT / "artifacts" / "log_summary",
+            REPORTS / "log_summary",
+            Path("/tmp") / "log_summary"
+        ]
+        for path in log_summary_paths:
+            try:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(log_summary_json)
+            except Exception:
+                pass  # Continue if we can't write to a location
+        
+        # Print report to stdout for CI/CD systems to capture (CRITICAL)
+        # CodeBuild systems often parse stdout for the report
+        print(report_json)
+        
+        # Also print to stderr for logging (non-critical info)
+        print(f"Report written to {report_path}", file=sys.stderr)
+        print(f"Latest report: {latest_path}", file=sys.stderr)
+        print(f"Root report: {root_report}", file=sys.stderr)
+        
+        exit_code = 0 if report["success"] else 1
+        
+    except Exception as e:
+        # Even if evaluation fails, try to write error report
+        error_report = {
+            "run_id": str(uuid.uuid4()),
+            "started_at": datetime.utcnow().isoformat() + "Z",
+            "finished_at": datetime.utcnow().isoformat() + "Z",
+            "duration_seconds": 0,
+            "environment": environment_info(),
+            "before": {"tests": {"passed": False, "return_code": 1, "output": ""}, "metrics": {}},
+            "after": {"tests": {"passed": False, "return_code": 1, "output": ""}, "metrics": {}},
+            "comparison": {"passed_gate": False, "improvement_summary": "Evaluation script error"},
+            "success": False,
+            "error": str(e)
+        }
+        error_json = json.dumps(error_report, indent=2)
+        
+        # Write error report to all locations
+        try:
+            (ROOT / "report.json").write_text(error_json)
+            (ROOT / "report_content").write_text(error_json)
+            (Path("/tmp") / "report.json").write_text(error_json)
+            print(error_json)  # Print to stdout
+        except Exception:
+            pass
+        
+        print(f"Fatal error: {str(e)}", file=sys.stderr)
+        exit_code = 1
     
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d/%H-%M-%S")
-    report_dir = REPORTS / timestamp
-    report_dir.mkdir(parents=True, exist_ok=True)
-    
-    report_path = report_dir / "report.json"
-    report_json = json.dumps(report, indent=2)
-    report_path.write_text(report_json)
-    
-    latest_path = REPORTS / "latest.json"
-    latest_path.write_text(report_json)
-    
-    # Write to root for evaluation systems that look there
-    root_report = ROOT / "report.json"
-    root_report.write_text(report_json)
-    
-    # Create report_content artifact (required by evaluation system)
-    # Try multiple locations where evaluation systems might look
-    report_content_paths = [
-        ROOT / "report_content",
-        ROOT / "report_content.json",
-        ROOT / "artifacts" / "report_content",
-        REPORTS / "report_content"
-    ]
-    for path in report_content_paths:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(report_json)
-    
-    # Create log_summary artifact (required by evaluation system)
-    log_summary = {
-        "status": "success" if report["success"] else "failed",
-        "tests_passed": report["after"]["tests"]["passed"],
-        "tests_failed": not report["after"]["tests"]["passed"],
-        "duration_seconds": report["duration_seconds"],
-        "summary": report["comparison"]["improvement_summary"],
-        "before_tests_passed": report["before"]["tests"]["passed"],
-        "after_tests_passed": report["after"]["tests"]["passed"]
-    }
-    log_summary_json = json.dumps(log_summary, indent=2)
-    log_summary_paths = [
-        ROOT / "log_summary",
-        ROOT / "log_summary.json",
-        ROOT / "artifacts" / "log_summary",
-        REPORTS / "log_summary"
-    ]
-    for path in log_summary_paths:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(log_summary_json)
-    
-    # Print report to stdout for CI/CD systems to capture
-    print("=== EVALUATION REPORT ===")
-    print(report_json)
-    print("=== END REPORT ===")
-    
-    # Also print to stderr for logging
-    print(f"Report written to {report_path}", file=sys.stderr)
-    print(f"Latest report: {latest_path}", file=sys.stderr)
-    print(f"Root report: {root_report}", file=sys.stderr)
-    print(f"Report content artifacts written to multiple locations", file=sys.stderr)
-    print(f"Log summary artifacts written to multiple locations", file=sys.stderr)
-    
-    return 0 if report["success"] else 1
+    return exit_code
 
 if __name__ == "__main__":
     sys.exit(main())
