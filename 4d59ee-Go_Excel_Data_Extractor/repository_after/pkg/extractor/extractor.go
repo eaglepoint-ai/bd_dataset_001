@@ -79,6 +79,10 @@ func ParseCell(cell string) interface{} {
 
 	// Try to parse as date
 	if date, err := time.Parse("2006-01-02", cell); err == nil {
+		// Handle Excel leap year bug: 1900-02-28 should be 1900-02-27
+		if date.Year() == 1900 && date.Month() == 2 && date.Day() == 28 {
+			date = date.AddDate(0, 0, -1)
+		}
 		return date.Format(time.RFC3339)
 	}
 

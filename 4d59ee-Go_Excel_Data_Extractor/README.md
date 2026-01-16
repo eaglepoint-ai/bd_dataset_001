@@ -59,24 +59,34 @@ go run ./repository_after/main.go <file.xlsx> <sheet_name>
 
 ### Local Development
 
-#### Running Tests
+#### before command
 ```bash
 go test ./tests/... -v
 ```
 
-#### Running Evaluation
+#### after command
+```bash
+go test ./tests/... -v
+```
+
+#### evaluation command
 ```bash
 go run evaluation/evaluation.go
 ```
 
 ### Using Docker
 
-#### Running Tests
+#### before command
 ```bash
 docker compose run --rm app go test ./tests/... -v
 ```
 
-#### Running Evaluation
+#### after command
+```bash
+docker compose run --rm app go test ./tests/... -v
+```
+
+#### evaluation command
 ```bash
 docker compose run --rm app go run ./evaluation/evaluation.go
 ```
