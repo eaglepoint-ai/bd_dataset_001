@@ -1,8 +1,8 @@
 services:
-  # Run tests on the BEFORE version
+  # Run tests on the BEFORE version (minimal output - just pass/fail)
   test-before:
     build: .
-    command: pytest -v tests
+    command: pytest -v --tb=no tests
     environment:
       - PYTHONPATH=/app/repository_before
       - PYTHONUNBUFFERED=1
