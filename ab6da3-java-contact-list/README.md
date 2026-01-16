@@ -1,92 +1,61 @@
-# project template
+# Java Trie-Based Contacts Manager (Prefix Counting)
 
-Starter scaffold for bd dataset task.
+## Problem Statement
+The baseline Java trie contacts manager:
+- Crashes at runtime due to uninitialized trie root and uninitialized `HashMap` child nodes.
+- Returns incorrect prefix counts because it does not propagate counts along the trie on insert.
+- Has incorrect input parsing and uses incorrect string comparison for commands.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+The fixed implementation must:
+- Use a `HashMap<Character, TrieNode>` for children.
+- Maintain an efficient per-node prefix counter.
+- Preserve external behavior (stdin commands, stdout answers).
+- Be deterministic and exception-free.
 
----
+## Repository Layout
+- `repository_before/`: baseline (expected to fail tests)
+- `repository_after/`: fixed implementation (expected to pass tests)
+- `tests/`: pytest-based functional tests that compile + run `Contacts.java`
+- `evaluation/`: evaluation script that runs before/after and writes JSON report
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+## Commands (Docker)
+Run tests against baseline (expected to fail):
 
-### Setup Steps
-
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+```bash
+docker-compose run --rm test-before
 ```
 
-### Report Schema
+Run tests against fixed implementation (expected to pass):
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+```bash
+docker-compose run --rm test-after
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+Run evaluation (runs both, generates report under `evaluation/reports/...`):
 
----
+```bash
+docker-compose run --rm evaluation
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+## Commands (Local, no Docker)
+You need:
+- Python 3.11+
+- Java (JDK 17+) to compile/run `Contacts.java`
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+Run tests against baseline:
+
+```bash
+TEST_REPO_PATH=repository_before pytest -q tests
+```
+
+Run tests against fixed implementation:
+
+```bash
+TEST_REPO_PATH=repository_after pytest -q tests
+```
+
+Run evaluation:
+
+```bash
+python evaluation/evaluation.py
+```
