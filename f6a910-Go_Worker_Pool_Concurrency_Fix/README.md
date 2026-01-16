@@ -1,3 +1,20 @@
+
+## 🐳 Quick Start (Docker)
+
+
+# run tests (quick validation)
+
+```bash
+docker-compose up --build run_repository_after_tests
+docker-compose up --build run_repository_before_tests
+```
+
+# Run evaluation script
+
+```bash
+docker compose run --rm app npm run evaluate
+```
+
 # Fix Concurrent Worker Pool in Go
 
 ## Problem Statement
