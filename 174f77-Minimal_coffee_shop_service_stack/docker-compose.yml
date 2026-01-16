@@ -60,7 +60,7 @@ services:
       retries: 3
 
   # Service to run Go tests in the tests/ folder
-  test:
+  test-before:
     build:
       context: .
       dockerfile: Dockerfile
