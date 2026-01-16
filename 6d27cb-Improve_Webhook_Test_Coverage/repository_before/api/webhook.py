@@ -37,16 +37,20 @@ def webhook():
             return jsonify({'error': 'Invalid JSON payload'}), 400
 
         signature = request.headers.get('YAYA-SIGNATURE')
-        if not signature:
+        # Bug: Empty string signature not caught (should be treated as missing)
+        if signature is None:
             return jsonify({'error': 'Missing signature header'}), 400
 
         timestamp = request_data.get('timestamp')
-        if timestamp is None:
+        # Bug: None timestamp not explicitly checked (fails on None values)
+        if 'timestamp' not in request_data:
             return jsonify({'error': 'Missing timestamp in payload'}), 400
 
         # Check for replay attacks
+        # Bug: No try-except around fromtimestamp(), crashes on invalid types
         time_difference = datetime.datetime.utcnow() - \
             datetime.datetime.fromtimestamp(timestamp)
+        # Bug: Should reject >= 5 minutes, but only rejects > 5 minutes (boundary case not caught)
         if time_difference > datetime.timedelta(minutes=5):
             return jsonify({'status': 'Replay attack detected'}), 400
 
