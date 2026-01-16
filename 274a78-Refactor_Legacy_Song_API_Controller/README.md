@@ -1,92 +1,110 @@
-# project template
+# Refactor Legacy Song API Controller
 
-Starter scaffold for bd dataset task.
+## Commands
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+### Build the Docker image
+```bash
+docker compose build
+```
+
+### Test repository_before (no report)
+```bash
+docker compose run --rm test-before
+```
+
+### Test repository_after (no report)
+```bash
+docker compose run --rm test-after
+```
+
+### Generate evaluation report
+```bash
+docker compose run --rm evaluate
+```
 
 ---
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+## Problem Statement
 
-### Setup Steps
+Refactor an existing Node.js Express controller (`SongController`) that handles CRUD operations and statistics for songs in a MongoDB database. The legacy code has several issues:
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
+- **Inconsistent responses:** Some endpoints return `"Recorded Successfully!"`, others return raw arrays
+- **Duplicated logic:** Validation checks and error handling are repeated
+- **Mixed responsibilities:** Controllers directly call Mongoose models; no separation of concerns
+- **REST inconsistencies:** Some endpoints don't follow REST standards (e.g., returning body with HTTP 204)
+- **Limited functionality:** No pagination support; unsafe partial updates
 
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
+## Requirements
 
-3. **Update `.gitignore`** to reflect your language and library setup
+The refactoring must address these criteria:
 
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
+1. Create a dedicated service layer for database operations
+2. Remove all direct Mongoose calls from controllers
+3. Standardize all responses to `{ message, data }` format
+4. Implement consistent error handling
+5. Validate MongoDB ObjectIds wherever IDs are used
+6. Support safe partial updates in `updateSong`
+7. Return 404 when a resource is not found (update/delete)
+8. Enforce schema validation during updates
+9. Follow REST conventions in delete operations
+10. Avoid sending response bodies with HTTP 204
+11. Add pagination in `getSongs`
+12. Include pagination metadata
+13. Return zero values in `getTotal` if DB is empty
+14. Remove duplicated validation/response logic
+15. Use consistent camelCase naming
+16. Do not introduce new dependencies
 
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
+## Project Structure
 
 ```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+.
+├── repository_before/          # Legacy implementation
+│   └── SongController.js
+├── repository_after/           # Refactored implementation
+│   ├── SongController.js
+│   └── SongService.js
+├── tests/                      # Structural validation tests
+│   ├── refactoring.test.js
+│   └── test.js
+├── evaluation/                 # Evaluation scripts and reports
+│   ├── evaluation.js
+│   └── YYYY-MM-DD/            # Generated reports by date/time
+│       └── HH-MM-SS/
+│           └── report.json
+├── Dockerfile
+├── docker-compose.yml
+└── package.json
 ```
 
-### Report Schema
+## Expected Results
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+- **repository_before**: Should FAIL structural tests (has issues like no service layer, inconsistent responses, etc.)
+- **repository_after**: Should PASS all structural tests (properly refactored with service layer, standardized responses, etc.)
+
+## Report Output
+
+Reports are automatically generated when running evaluation:
+```
+evaluation/YYYY-MM-DD/HH-MM-SS/report.json
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+Each report includes:
+- Run ID and timestamps
+- Environment information (Node version, OS, git info)
+- Results for both before and after implementations
+- Individual test results with pass/fail status
+- Summary statistics and comparison
 
----
+## Key Improvements in repository_after
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
-
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+1. **Service Layer**: `SongService.js` handles all database operations
+2. **Standardized Responses**: All endpoints return `{ message, data }`
+3. **Pagination**: `getSongs` supports `?page=1&limit=10` query parameters
+4. **Safe Updates**: `updateSong` filters undefined values and validates schema
+5. **404 Handling**: Returns proper 404 when resources not found
+6. **REST Compliance**: `deleteSong` returns 204 with no body
+7. **Consistent Naming**: `NumberofAlbum` → `numberOfAlbums`
+8. **Validation Helper**: Centralized `validateObjectId` function
+9. **Zero Values**: `getTotal` returns zeros for empty database
+10. **No New Dependencies**: Uses only existing Node.js, Express, Mongoose
