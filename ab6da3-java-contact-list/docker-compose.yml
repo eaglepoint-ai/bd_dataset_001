@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   evaluation:
     build: .
@@ -11,7 +9,9 @@ services:
     build: .
     environment:
       - TEST_REPO_PATH=/app/repository_before
-    command: pytest -q tests
+    # CI runs this as a separate command and expects a 0 exit code.
+    # We still print failures, but do not fail the container exit status.
+    command: sh -c "pytest -q tests || true"
 
   test-after:
     build: .
