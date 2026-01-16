@@ -137,10 +137,28 @@ public class Evaluation {
             Files.write(wrapperFile, wrapperCode.getBytes());
             compileCmd.add(wrapperFile.toString());
         } else {
-            compileCmd.add(repository + "/FetchOptimization.java");
+            // For repository_after, verify file exists and use absolute path
+            Path sourceFile = Paths.get(PROJECT_ROOT, repository, "FetchOptimization.java");
+            if (!Files.exists(sourceFile)) {
+                // Try alternative case (in case of case sensitivity issues)
+                Path altFile = Paths.get(PROJECT_ROOT, repository, "fetchOptimization.java");
+                if (Files.exists(altFile)) {
+                    compileCmd.add(altFile.toString());
+                } else {
+                    throw new FileNotFoundException("Source file not found: " + sourceFile + " or " + altFile + 
+                        ". Current directory: " + PROJECT_ROOT);
+                }
+            } else {
+                compileCmd.add(sourceFile.toString());
+            }
         }
         
-        compileCmd.add("tests/FetchOptimizationTest.java");
+        // Add test file with absolute path
+        Path testFile = Paths.get(PROJECT_ROOT, "tests", "FetchOptimizationTest.java");
+        if (!Files.exists(testFile)) {
+            throw new FileNotFoundException("Test file not found: " + testFile);
+        }
+        compileCmd.add(testFile.toString());
         
         Process compileProcess = new ProcessBuilder(compileCmd)
             .redirectErrorStream(true)
