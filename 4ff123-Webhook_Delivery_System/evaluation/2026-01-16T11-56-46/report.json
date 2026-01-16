@@ -1,0 +1,85 @@
+{
+  "run_id": "tcz8xkui",
+  "task_id": "4ff123",
+  "task_name": "Webhook Delivery System",
+  "started_at": "2026-01-16T11:56:46.748Z",
+  "finished_at": "2026-01-16T11:56:57.256Z",
+  "duration_seconds": 10.508,
+  "success": true,
+  "results": {
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "webhook.test.js::Requirement 1: Endpoint registration stores URL and secret key for HMAC signing",
+          "name": "Requirement 1: Endpoint registration stores URL and secret key for HMAC signing",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "webhook.test.js::Requirement 2: Event submission queues delivery to the registered endpoint",
+          "name": "Requirement 2: Event submission queues delivery to the registered endpoint",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "webhook.test.js::Requirement 3: HTTP POST delivery includes required headers",
+          "name": "Requirement 3: HTTP POST delivery includes required headers",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "webhook.test.js::Requirement 4: Retry failed deliveries with exponential backoff delays",
+          "name": "Requirement 4: Retry failed deliveries with exponential backoff delays",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "webhook.test.js::Requirement 5: Maximum 5 retry attempts per event",
+          "name": "Requirement 5: Maximum 5 retry attempts per event",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "webhook.test.js::Requirement 6: Move events to dead letter store after max attempts exceeded",
+          "name": "Requirement 6: Move events to dead letter store after max attempts exceeded",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "webhook.test.js::Requirement 7: Individual delivery timeout: 30 seconds",
+          "name": "Requirement 7: Individual delivery timeout: 30 seconds",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "webhook.test.js::Requirement 8: Preserve event ordering per endpoint",
+          "name": "Requirement 8: Preserve event ordering per endpoint",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "webhook.test.js::Requirement 9: Events to different endpoints may deliver in parallel",
+          "name": "Requirement 9: Events to different endpoints may deliver in parallel",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "webhook.test.js::Requirement 10: Handle graceful shutdown",
+          "name": "Requirement 10: Handle graceful shutdown",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 10,
+        "passed": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "\n> webhook-delivery-system@1.0.0 test\n> node ../scripts/test-summary.js\n\n\n Starting Tests for: repository_after\n Path: /app/repository_after\n\nrunning 'Requirement 1: Endpoint registration stores URL and secret key for HMAC signing' ... [PASS] Requirement 1: Endpoint registration stores URL and secret key for HMAC signing\nrunning 'Requirement 2: Event submission queues delivery to the registered endpoint' ... [PASS] Requirement 2: Event submission queues delivery to the registered endpoint\nrunning 'Requirement 3: HTTP POST delivery includes required headers' ... [PASS] Requirement 3: HTTP POST delivery includes required headers\nrunning 'Requirement 4: Retry failed deliveries with exponential backoff delays' ... [PASS] Requirement 4: Retry failed deliveries with exponential backoff delays\nrunning 'Requirement 5: Maximum 5 retry attempts per event' ... [PASS] Requirement 5: Maximum 5 retry attempts per event\nrunning 'Requirement 6: Move events to dead letter store after max attempts exceeded' ... [PASS] Requirement 6: Move events to dead letter store after max attempts exceeded\nrunning 'Requirement 7: Individual delivery timeout: 30 seconds' ... [PASS] Requirement 7: Individual delivery timeout: 30 seconds\nrunning 'Requirement 8: Preserve event ordering per endpoint' ... [PASS] Requirement 8: Preserve event ordering per endpoint\nrunning 'Requirement 9: Events to different endpoints may deliver in parallel' ... [PASS] Requirement 9: Events to different endpoints may deliver in parallel\nrunning 'Requirement 10: Handle graceful shutdown' ... [PASS] Requirement 10: Handle graceful shutdown\n\n==================================================\nTEST SUMMARY\n==================================================\n ✓ [1/10] Requirement 1: Endpoint registration stores URL and secret key for HMAC signing\n ✓ [2/10] Requirement 2: Event submission queues delivery to the registered endpoint\n ✓ [3/10] Requirement 3: HTTP POST delivery includes required headers\n ✓ [4/10] Requirement 4: Retry failed deliveries with exponential backoff delays\n ✓ [5/10] Requirement 5: Maximum 5 retry attempts per event\n ✓ [6/10] Requirement 6: Move events to dead letter store after max attempts exceeded\n ✓ [7/10] Requirement 7: Individual delivery timeout: 30 seconds\n ✓ [8/10] Requirement 8: Preserve event ordering per endpoint\n ✓ [9/10] Requirement 9: Events to different endpoints may deliver in parallel\n ✓ [10/10] Requirement 10: Handle graceful shutdown\n--------------------------------------------------\nTotal: 10 | Passed: 10 | Failed: 0\nSuccess Rate: 100.0%\n==================================================\n\n",
+      "stderr": ""
+    }
+  },
+  "comparison": {
+    "after_tests_passed": true,
+    "after_passed": 10,
+    "after_failed": 0
+  },
+  "metadata": {
+    "node_version": "v18.20.8",
+    "platform": "linux"
+  }
+}

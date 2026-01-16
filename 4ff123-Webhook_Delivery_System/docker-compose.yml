@@ -1,0 +1,21 @@
+services:
+  app-after:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - REPO=repository_after
+    volumes:
+      - .:/app
+    working_dir: /app/repository_after
+    command: npm test
+
+  evaluation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    working_dir: /app/repository_after
+    command: npm run evaluation
+
