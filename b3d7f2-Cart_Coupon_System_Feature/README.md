@@ -1,37 +1,61 @@
-# Cart Coupon System Feature
+# Advanced Cart Coupon System
+This dataset task contains a production-style Node.js/Mongoose `CartService` with missing coupon functionality. The objective is to implement a robust coupon system including validation, stacking logic, and automatic price recalculation.
 
-## Problem Statement
-The CartService needs coupon/promo code functionality. Customers want to apply discount codes at checkout. The system should support percentage and fixed discounts, expiration dates, minimum order requirements, merchant/category restrictions, per-user usage limits, and coupon stacking rules.
+## Folder layout
+- `repository_before/`: original implementation (missing coupon features)
+- `repository_after/`: implemented advanced coupon system
+- `tests/`: comprehensive requirement tests
+- `patches/`: diff between before/after (to be generated)
+- `evaluation/`: automated scoring and reporting framework
 
-## Category
-New Feature Development
+## Run with Docker
 
-## Prompt
-Add coupon/promo code functionality to the existing CartService.
-
-**Part 1 - Schema Design:**
-- Design a `Coupon` model with all required fields
-- Design a `UserCouponUsage` model to track per-user usage
-- Update the `Cart` model to support applied coupons and discount pricing
-
-**Part 2 - Service Implementation:**
-- Implement `validateCoupon(customerId, couponCode)` method
-- Implement `applyCoupon(customerId, couponCode)` method
-- Implement `removeCoupon(customerId, couponId)` method
-- Update existing cart methods to recalculate pricing when items change
-
-## Requirements
-1. Design Coupon schema with fields: code (unique), discountType (percentage/fixed), discountValue, minOrderAmount, maxDiscount, merchantId (optional), categoryIds (optional), perUserUsageLimit, validFrom, validUntil, validHoursStart/End (optional), isStackable, isActive
-2. Design UserCouponUsage schema with compound unique index on userId + couponId to track usage count per user
-3. Update Cart schema to include appliedCoupons array (max 2: one percentage + one fixed) and pricing fields (subtotal, discount, total)
-4. Implement validateCoupon that checks: coupon exists/active, date range valid, time-of-day valid (if specified), cart meets minOrderAmount, user hasn't exceeded usage limit, merchant matches (if restricted), cart has matching category items (if restricted)
-5. Implement applyCoupon that validates coupon, enforces stacking rules (max 1 percentage + 1 fixed, both must be stackable), calculates discount correctly (percentage first then fixed, cap at maxDiscount, cap at applicable subtotal), and increments usage count atomically
-6. Implement removeCoupon that removes specific coupon by ID and recalculates cart pricing
-7. Auto-remove invalid coupons when cart changes cause coupon to become invalid (e.g., subtotal drops below minOrderAmount)
-
-## Docker Commands
+### Build image
 ```bash
-# Install dependencies, build, and run
-docker-compose run --rm run_before
+docker compose build
 ```
 
+### Run tests (before – expected failures)
+```bash
+docker compose up --build --exit-code-from test-before test-before
+```
+**Expected behavior:**
+- Basic Cart functionality: ✅ PASS
+- Coupon Schema & Validation: ❌ FAIL (Models/Properties missing)
+- Coupon Scaling & Integration: ❌ FAIL (Logic missing)
+
+### Run tests (after – expected all pass)
+```bash
+docker compose up --build --exit-code-from test-after test-after
+```
+**Expected behavior:**
+- Schema Design & Indexing: ✅ PASS
+- Service Validation & Stacking: ✅ PASS
+- Cart Integration & Auto-removal: ✅ PASS
+
+### Run evaluation (compares both implementations)
+```bash
+docker compose up --build --exit-code-from evaluate evaluate
+```
+This will:
+1. Run tests for both before and after implementations using isolated Docker namespaces.
+2. Compare results and verify that the "after" repository passes all gates.
+3. Generate a report at `evaluation/reports/latest.json`.
+
+## Run locally
+
+### Install dependencies
+```bash
+npm install
+```
+
+### Run evaluation
+```bash
+node evaluation/evaluation.js
+```
+
+## Regenerate patch
+From repo root:
+```bash
+git diff --no-index repository_before repository_after > patches/task_001.patch
+```
