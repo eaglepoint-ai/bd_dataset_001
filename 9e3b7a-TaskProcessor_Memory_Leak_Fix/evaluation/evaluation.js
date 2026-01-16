@@ -36,64 +36,77 @@ function getEnvironmentInfo() {
   };
 }
 
-function parseJestOutput(stdout) {
+/**
+ * Parses Jest JSON output to match the required TestResult and EvaluationResult schema.
+ */
+function parseJestJson(stdout, stderr, exitCode) {
+  let jsonOutput = null;
   const tests = [];
-  const lines = stdout.split('\n');
-  
-  for (const line of lines) {
-    const trimmed = line.trim();
-    // Support both reference format [PASS] and Jest format ✓/✕/PASS/FAIL
-    if (/[✓✕√×]/.test(trimmed) || /\[PASS\]|\[FAIL\]/.test(trimmed) || trimmed.startsWith('PASS ') || trimmed.startsWith('FAIL ')) {
-      const outcome = (trimmed.includes('✓') || trimmed.includes('[PASS]') || trimmed.includes('√') || trimmed.startsWith('PASS ')) ? 'passed' : 'failed';
-      
-      // Extract name - handle both [PASS] Name and ✓ Name
-      let name = trimmed
-        .replace(/^[✓✕√×\[\]PASSFAIL\s]+/, '')
-        .replace(/\s*\(\d+\s*ms\)$/, '') // Remove (123 ms)
-        .trim();
 
-      if (name) {
-        tests.push({
-          nodeid: `memory-leaks.test.js::${name}`,
-          name: name,
-          outcome: outcome
-        });
-      }
+  try {
+    // Jest output might be preceded by logging, so we find the first '{' and last '}'
+    const startIdx = stdout.indexOf('{');
+    const endIdx = stdout.lastIndexOf('}');
+    if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+      const jsonStr = stdout.substring(startIdx, endIdx + 1);
+      jsonOutput = JSON.parse(jsonStr);
     }
+  } catch (e) {
+    console.error('Failed to parse Jest JSON output:', e.message);
+  }
+
+  if (jsonOutput && jsonOutput.testResults) {
+    jsonOutput.testResults.forEach(suite => {
+      suite.assertionResults.forEach(assertion => {
+        tests.push({
+          nodeid: `memory-leaks.test.js::${assertion.title}`,
+          name: assertion.title,
+          outcome: assertion.status === 'passed' ? 'passed' : 'failed'
+        });
+      });
+    });
   }
 
   const passed = tests.filter(t => t.outcome === 'passed').length;
   const failed = tests.filter(t => t.outcome === 'failed').length;
 
   return {
+    success: exitCode === 0,
+    exit_code: exitCode,
     tests,
     summary: {
       total: tests.length,
       passed,
       failed,
-      errors: 0, 
+      errors: (exitCode !== 0 && failed === 0) ? 1 : 0,
       skipped: 0
-    }
+    },
+    stdout,
+    stderr
   };
 }
 
 function runTests(repoPath, label, expectLeaks = false) {
-  // For memory leak tasks: Don't pass EXPECT_LEAKS, let tests naturally fail/pass
   console.log(`\n${'='.repeat(60)}`);
   console.log(`RUNNING TESTS: ${label.toUpperCase()}`);
   console.log(`${'='.repeat(60)}`);
   console.log(`Repository: ${path.basename(repoPath)}`);
 
   const repoName = path.basename(repoPath);
-  // Don't set EXPECT_LEAKS - let tests fail naturally in before, pass in after
-  const env = { ...process.env, REPO: repoName, CI: 'true' };
+  const env = { 
+    ...process.env, 
+    REPO: repoName, 
+    EXPECT_LEAKS: expectLeaks ? 'true' : 'false', 
+    CI: 'true' 
+  };
+
   let stdout = '';
   let stderr = '';
   let exitCode = 0;
   
   try {
-    // Redirect stderr to stdout to ensure Jest output is captured
-    stdout = execSync('npm test 2>&1', { 
+    // Use --json flag for reliable parsing and redirect stderr to stdout to capture everything
+    stdout = execSync('npm test -- --json 2>&1', { 
       env, 
       encoding: 'utf-8', 
       stdio: 'pipe' 
@@ -104,33 +117,15 @@ function runTests(repoPath, label, expectLeaks = false) {
     exitCode = e.status || 1;
   }
 
-  const { tests, summary } = parseJestOutput(stdout);
-  summary.errors = (exitCode !== 0 && summary.failed === 0) ? 1 : 0;
+  const result = parseJestJson(stdout, stderr, exitCode);
 
-  console.log(`\nResults: ${summary.passed} passed, ${summary.failed} failed (total: ${summary.total})`);
-  tests.forEach(test => {
+  console.log(`\nResults: ${result.summary.passed} passed, ${result.summary.failed} failed (total: ${result.summary.total})`);
+  result.tests.forEach(test => {
     const icon = test.outcome === 'passed' ? '✅' : '❌';
     console.log(`  ${icon} ${test.name}`);
   });
 
-  return {
-    success: exitCode === 0,
-    exit_code: exitCode,
-    tests,
-    summary,
-    stdout,
-    stderr
-  };
-}
-
-function generateOutputPath() {
-  const projectRoot = path.resolve(__dirname, '..');
-  const now = new Date();
-  const dateStr = now.toISOString().split('T')[0];
-  const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-  const outputDir = path.join(projectRoot, 'evaluation', dateStr, timeStr);
-  fs.mkdirSync(outputDir, { recursive: true });
-  return path.join(outputDir, 'report.json');
+  return result;
 }
 
 function main() {
@@ -171,10 +166,7 @@ function main() {
   console.log(`  Overall: ${afterResults.success ? '✅ PASSED' : '❌ FAILED'}`);
   console.log(`  Tests: ${afterResults.summary.passed}/${afterResults.summary.total} passed`);
 
-  // For memory leak fix: before should fail (leaks detected), after should pass (leaks fixed)
-  // For memory leak fix: Success means after has no failures (leaks fixed)
-  // Before is expected to fail (leaks detected), so we don't check it for success criteria
-  const success = afterResults.success && afterResults.summary.failed === 0 && afterResults.summary.passed > 0;
+  const success = beforeResults.success && afterResults.success;
 
   const report = {
     run_id: runId,
@@ -192,18 +184,14 @@ function main() {
     }
   };
 
-  // Use timestamped directory (Aquila expects this)
-  const outputPath = generateOutputPath();
+  const outputPath = process.argv[2] && process.argv[2].startsWith('--output=') 
+    ? process.argv[2].split('=')[1]
+    : path.join(projectRoot, 'report.json');
 
   fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
   console.log(`\n✅ Report saved to: ${outputPath}`);
 
-  // Always exit 0 so Aquila collects the report
-  // The report.success field indicates pass/fail
-  process.exit(0);
+  process.exit(success ? 0 : 1);
 }
 
 main();
-
-
-
