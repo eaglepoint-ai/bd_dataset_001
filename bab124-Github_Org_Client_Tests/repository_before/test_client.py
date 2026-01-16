@@ -64,33 +64,42 @@ class TestGithubOrgClient(unittest.TestCase):
         expected_result: Dict[str, Any] = {"org_key": "org_value"}
         self.assertEqual(result, expected_result)
 
-    def test_public_repos_url(self):
+    @patch('client.get_json')
+    def test_public_repos_method_exists(self, mock_get_json: MagicMock) -> None:
         """
-        Test the _public_repos_url property of GithubOrgClient.
-
-        This method verifies that the _public_repos_url property
-        returns the expected URL based on the mocked payload.
-
-        Returns:
-            None
-
-        Raises:
-            AssertionError: If the test fails.
+        Test that public_repos method exists and works.
+        This test will fail in repository_before as the method is not implemented.
         """
-        # Mock the org method to return a known payload
-        mock_payload = {"repos_url":
-                        "https://api.github.com/orgs/testorg/repos"}
-        with patch('client.GithubOrgClient.org', new_callable=PropertyMock(
-                return_value=mock_payload)):
-            # Create an instance of GithubOrgClient
-            client = GithubOrgClient("testorg")
+        mock_get_json.return_value = [{"name": "repo1"}]
+        client = GithubOrgClient("testorg")
+        # This will fail because public_repos doesn't work correctly in repository_before
+        result = client.public_repos()
+        self.assertEqual(result, ["repo1"])
 
-            # Access the _public_repos_url property
-            result = client._public_repos_url
+    def test_has_license_method_exists(self) -> None:
+        """
+        Test that has_license static method exists and works.
+        This test will fail in repository_before as the method is not implemented.
+        """
+        repo = {"license": {"key": "mit"}}
+        # This will fail because has_license doesn't exist or doesn't work in repository_before
+        result = GithubOrgClient.has_license(repo, "mit")
+        self.assertTrue(result)
 
-            # Assert that the result is the expected URL
-            expected_url = "https://api.github.com/orgs/testorg/repos"
-            self.assertEqual(result, expected_url)
+    @patch('client.get_json')
+    def test_public_repos_with_license_filter(self, mock_get_json: MagicMock) -> None:
+        """
+        Test that public_repos can filter by license.
+        This test will fail in repository_before as the functionality is not implemented.
+        """
+        mock_get_json.return_value = [
+            {"name": "repo1", "license": {"key": "mit"}},
+            {"name": "repo2", "license": {"key": "apache"}},
+        ]
+        client = GithubOrgClient("testorg")
+        # This will fail because license filtering doesn't work in repository_before
+        result = client.public_repos(license="mit")
+        self.assertEqual(result, ["repo1"])
 
 
 if __name__ == '__main__':

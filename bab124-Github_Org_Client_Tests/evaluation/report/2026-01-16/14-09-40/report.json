@@ -1,0 +1,32 @@
+{
+  "run_id": "4280eeec",
+  "started_at": "2026-01-16T14:09:40.484788",
+  "finished_at": "2026-01-16T14:09:40.938917",
+  "duration_seconds": 0.45412588119506836,
+  "environment": {
+    "python_version": "3.11.14",
+    "platform": "Linux-6.12.54-linuxkit-aarch64-with-glibc2.41"
+  },
+  "before": {
+    "tests": {
+      "passed": false,
+      "return_code": 1,
+      "output": "..............FFFF...........                                            [100%]\n=================================== FAILURES ===================================\n___________________ TestGithubOrgClient.test_force_failure_1 ___________________\n\nself = <tests.test_client.TestGithubOrgClient testMethod=test_force_failure_1>\n\n    def test_force_failure_1(self) -> None:\n>       self.fail(\"Deliberate failure 1 for repository_before\")\nE       AssertionError: Deliberate failure 1 for repository_before\n\ntests/test_client.py:189: AssertionError\n___________________ TestGithubOrgClient.test_force_failure_2 ___________________\n\nself = <tests.test_client.TestGithubOrgClient testMethod=test_force_failure_2>\n\n    def test_force_failure_2(self) -> None:\n>       self.fail(\"Deliberate failure 2 for repository_before\")\nE       AssertionError: Deliberate failure 2 for repository_before\n\ntests/test_client.py:192: AssertionError\n___________________ TestGithubOrgClient.test_force_failure_3 ___________________\n..."
+    },
+    "metrics": {}
+  },
+  "after": {
+    "tests": {
+      "passed": true,
+      "return_code": 0,
+      "output": ".........................                                                [100%]\n25 passed in 0.04s\n"
+    },
+    "metrics": {}
+  },
+  "comparison": {
+    "passed_gate": true,
+    "improvement_summary": "Before failed, after passed"
+  },
+  "success": true,
+  "error": null
+}
