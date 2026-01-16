@@ -4,8 +4,8 @@ WORKDIR /workspace
 
 RUN apk add --no-cache musl-dev
 
-COPY repository_before/ .
+COPY repository_after/ .
 
-RUN cargo check
+RUN cargo test --release
 
-CMD ["echo", "FIX Trade Analyzer syntax check passed"]
+CMD ["cargo", "test", "--release"]
