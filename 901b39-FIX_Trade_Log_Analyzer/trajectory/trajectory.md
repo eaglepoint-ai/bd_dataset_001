@@ -1,250 +1,153 @@
-### Ground Truth Trajectory — 901b39-FIX_Trade_Log_Analyzer
+### Trajectory (Thinking Process for FIX Trade Log Analyzer)
 
-This document is a **reasoning artifact** and **verification authority record**. It is intentionally explicit and constraint-driven.
-
----
-
-### PHASE 0 — Calibration Review (605d32-Markdown_Blog_single_page_web_application)
-
-#### What was available to review (and why that matters)
-The directory `/home/masri/Desktop/EaglePoint-v2/bd_dataset_001/605d32-Markdown_Blog_single_page_web_application/` contains:
-- Compiled pytest artifacts (`tests/__pycache__/*.pyc`) rather than source test files.
-- Cached directories (`.pytest_cache/`, `venv/`) and stored evaluation reports under `evaluation/reports/`.
-- **No readable application source code** (`.py/.ts/.js/.html` are absent in this snapshot).
-
-This is itself a critical calibration finding:
-- **Unreviewable evaluators create false confidence**: when the enforcement logic cannot be audited, "passing" may reflect environment quirks, skipped tests, or unrelated artifacts.
-- **Determinism is compromised**: evaluation reports reference `/app/tests/test_requirements.py` line numbers and Selenium driver behavior, but that code is not present here for ground truth verification.
-
-#### Reconstructed enforcement surface (from `.pyc` string extraction + reports)
-From `tests/__pycache__/test_requirements.cpython-311-pytest-9.0.2.pyc` and `tests/__pycache__/test_equivalence...pyc`, the evaluator primarily checks:
-
-- **Structure / presence checks**
-  - `src/` exists, contains `*.ts`, and **no `*.js`** in `src/`.
-  - `content/author.md` exists.
-  - `content/blogs/*.md` exists (at least 1).
-  - `dist/app.js` exists.
-
-- **"No hardcoded content" check**
-  - Reads `index.html` and searches for a small set of specific strings (examples embedded in the `.pyc`):
-    - `"Getting Started with TypeScript"`
-    - `"Building SPAs Without Frameworks"`
-    - `"Markdown as a Content Source"`
-  - This is a **string blacklist** and does not prove content is dynamically loaded.
-
-- **"No frameworks" check**
-  - Parses `package.json` `dependencies`/`devDependencies` and flags if it sees keywords like:
-    - `react`, `vue`, `angular`, `svelte`, `preact`, `ember`
-  - Also searches `index.html` for "framework indicators".
-  - This is **heuristic** and can be bypassed by:
-    - Using frameworks via CDN without listing in `package.json`
-    - Bundling/minifying where indicator strings do not appear
-    - Using a framework-like architecture without those keywords
-
-- **Selenium-based SPA behavior check**
-  - Starts a server via `python3 server.py` and loads `http://localhost:8000`.
-  - Clicks an element matching selectors:
-    - `a[data-route='post'], article a`
-  - Asserts that URL changes on navigation and that rendered page source includes `"blog-post"` and content.
-  - This is vulnerable to a "fake SPA":
-    - A static page with a hash link (e.g., `#post`) can change URL without real client-side routing.
-    - A server can return pre-rendered HTML that trivially matches selectors and text.
-
-- **Equivalence/contract tests**
-  - Ensure `repository_before/` and `repository_after/` are importable packages (`__init__.py`).
-  - Assert that `repository_before` is "baseline incomplete" (must not look like `repository_after`).
-  - This incentivizes *engineering to the harness*, not the problem statement.
-
-#### How flawed implementations pass weak evaluation
-Concrete bypass patterns suggested by the enforcement surface:
-- **"Dynamic content" is not actually proven**:
-  - Avoid blacklisted strings in `index.html`; inject them at runtime or serve them from a server route.
-- **SPA behavior can be simulated**:
-  - Use hash navigation + a static `#post` section.
-  - Use minimal DOM to satisfy selectors without implementing real routing/state management.
-- **Framework detection is keyword-based**:
-  - Use a framework without listing typical dependency names (CDN / vendor bundle) or avoid detectable strings.
-- **Evaluator flakiness can dominate outcome**:
-  - Stored reports show failures due to Selenium Chrome session creation and `ERR_CONNECTION_REFUSED`.
-  - Depending on environment stability, tests may fail for non-product reasons or get skipped.
-
-#### Lessons that directly shape FIX analyzer implementation
-Anti-patterns to avoid in the FIX analyzer task:
-- **Do not rely on surface checks** (e.g., “it parses some sample”): enforce correctness via targeted negative cases and properties.
-- **Make performance claims testable**: include executable enforcement (alloc counting, throughput tests).
-- **Avoid external, flaky dependencies for core correctness**: do not hinge on browser drivers, network availability, or timing luck.
-- **Deterministic memory behavior must be designed in, not observed**: bounded data structures and “no allocations after warmup” should be mechanically enforced.
+This is **Ground Truth**: it documents how correctness, determinism, and performance were enforced (not guessed).
 
 ---
 
-### PHASE 1 — Deep Review (repository_before/src/lib.rs)
+### 1. Calibration Audit First (605d32-Markdown_Blog_single_page_web_application)
+I reviewed the calibration repository **before** touching the FIX analyzer to calibrate evaluator weaknesses and to avoid “looks-correct” fixes.
 
-The starter `TradeAnalyzer` in `repository_before/src/lib.rs` violates nearly every hard requirement:
+Key findings (evaluator-level thinking):
+- The snapshot contains mostly **compiled tests** (`tests/__pycache__/*.pyc`) and cached artifacts, with **no readable app source**.
+- Evaluation reports show failures caused by **environment flakiness** (Selenium/Chrome failures, connection refused), not product logic.
+- Reconstructing enforcement from `.pyc` strings shows multiple **heuristic / presence-based checks** (file existence, small string blacklists, keyword-based “no frameworks”).
 
-#### Architectural bottlenecks
-- **Mutex on every hot structure**:
-  - `messages: Mutex<Vec<FixMessage>>`
-  - `stats: Mutex<HashMap<String, i64>>`
-  - `seen_order_ids: Mutex<Vec<String>>`
-  These create serialization points: ingestion and queries contend on the same locks.
+How weak evaluation can be gamed:
+- Blacklist-based “no hardcoded content” can be bypassed by runtime injection or alternate strings.
+- SPA checks can be satisfied by hash navigation + trivial DOM selectors.
+- Keyword-based “no frameworks” can be bypassed with CDNs, renamed deps, or bundling.
 
-- **O(n) duplicate detection**
-  - For each message, it linearly scans `seen_order_ids` (grows without bound).
-
-- **Report generation blocks ingestion**
-  - `generate_report()` locks `messages` and `stats` and performs full scans and string building while holding locks.
-
-#### Allocation-heavy hot path
-- `raw.split('|').map(|s| s.to_string()).collect::<Vec<String>>()`
-  - Allocates per field.
-- `field.split('=').collect::<Vec<&str>>()`
-  - Allocates `Vec` per field.
-- Stores per-message `FixMessage` with owned `String`s and pushes into `Vec` (unbounded memory growth).
-
-#### Incorrect parsing assumptions / delimiter handling
-- Splitting on `'|'` cannot handle escaped delimiters, so:
-  - `11=ORD|001` becomes `11=ORD` + `001` (invalid field), producing incorrect order IDs and false duplicate detection.
-  - `58=hello|world` is similarly corrupted.
-
-#### Memory growth risks
-- Stores all messages and all order IDs forever (no 10-second bound, no 8-hour stability).
-
-#### Stats correctness hazards
-- Uses signed `i64` counters and adds quantities into `i64` (`quantity as i64`), risking overflow → negative values under long runs / high volume.
-- `get_stats()` clones the whole map (allocations + lock hold).
-
-Conclusion: The current implementation cannot meet throughput, cannot provide non-blocking queries, cannot preserve correctness with escaped delimiters, and cannot satisfy deterministic memory bounds.
+Calibration lessons applied to FIX analyzer:
+- Don’t rely on “sample parses” or “seems fast”. Build **executable enforcement** for parsing correctness, allocations, and throughput.
+- Don’t hinge correctness on flaky external dependencies.
+- Deterministic memory behavior must be achieved by **construction** (bounded structures), not by “we didn’t observe growth”.
 
 ---
 
-### PHASE 2 — Deep Technical Analysis (Parsing / Concurrency / Memory / Streaming)
+### 2. Audit the Original FIX Analyzer (Identify Scaling & Correctness Failures)
+I audited `repository_before/src/lib.rs` and identified:
+- **Serialization bottlenecks**: `Mutex` around every hot structure (`messages`, `stats`, `seen_order_ids`).
+- **Allocation-heavy hot path**: `split` + `to_string` per field, per-field `Vec` allocations, storing full messages.
+- **Unbounded memory**: stores all messages and all order IDs indefinitely (violates 10s buffer, violates 8h stability).
+- **Incorrect parsing**: naive `split('|')` breaks escaped pipes in values; corrupts `11` and `58`.
+- **Stats correctness hazards**: signed counters (`i64`) used for monotonically increasing stats and volume accumulation → overflow risk.
+- **Reporting blocks ingestion**: report generation holds locks and scans all messages.
 
-#### Parsing layer: FIX delimiter + escaping rules (as enforced here)
-Dataset format: `tag=value|tag=value|...|`
-- Field delimiter is `|` (byte `0x7C`).
-- Literal `|` inside a value is represented as `\|` (backslash escape).
-- Escape rule implemented:
-  - When scanning a value, `\X` decodes to literal `X` (including `|` and `\`).
-  - Unescaped `|` terminates a field.
-- Tag/value split:
-  - Split on the **first `=`** to avoid corrupting values that might contain `=`.
+---
 
-Malformed message behavior:
-- Invalid/missing `=` in a field → error → message skipped, error reported (no panic).
+### 3. Define a Correctness + Performance Contract (Before Writing Code)
+I defined a contract that must be *enforced*:
+- **Parsing correctness**:
+  - `|` is the delimiter; literal `|` in a value is encoded as `\|`.
+  - Split tag/value on the **first `=`** only.
+  - Malformed input must be logged and skipped with **zero crashes**.
+  - Microsecond timestamps must preserve precision (no float time).
+- **Concurrency**:
+  - Stats queries and report generation must not block ingestion (no shared mutex).
+- **Memory**:
+  - Cannot buffer >10s: solution must not store raw messages.
+  - 8h @ 100k msg/sec with zero growth: bounded structures only.
+  - No heap allocations in hot path after warmup.
+- **Throughput**:
+  - 1,000,000 messages in <3 seconds (release), enforced by a test.
 
-#### Concurrency model: lock-free stats + concurrent readers
-Design intent:
-- **Single-threaded ingestion** preserves arrival order.
-- **Concurrent queries** read atomics without taking locks; ingestion continues.
+---
 
-Implementation:
-- Global counters: `AtomicU64` (total, malformed, buy, sell).
-- Per-symbol counters: fixed-capacity open-addressing table with atomics:
-  - Slot claim via CAS on `AtomicU64 key_hash`.
-  - Counters are atomics updated with `fetch_add`.
-  - Symbol bytes stored in a fixed-capacity monotonic arena.
+### 4. Implement Zero-Copy Parsing With Escape-Aware Delimiters
+Strategy:
+- Scan bytes and find **unescaped** `|` delimiters (backslash escape support).
+- Represent values as `EscapedValue<'a>` (slice into the original buffer), and decode only when required.
+- Decode logic is explicit and bounded: `\X` becomes literal `X`.
+- Timestamp parsing is integer-based with `FixTimestamp { seconds, micros }` to preserve microseconds.
+
+Why this avoids “fake correctness”:
+- Escaped pipes are handled by the delimiter scan itself; not by post-processing.
+- Malformed fields (missing `=`) return a bounded error path and are skipped in `process_message_lossy`.
+
+---
+
+### 5. Replace Mutex Stats With Lock-Free Atomics (Bounded, Deterministic)
+Design:
+- Global counters (`total`, `malformed`, `buy`, `sell`) are `AtomicU64`.
+- Per-symbol stats use:
+  - Fixed-capacity open-addressing table (bounded slots).
+  - Slot claim via CAS on an atomic hash.
+  - Symbol bytes stored once in a fixed-size monotonic arena (bounded bytes).
+  - Per-slot counters as atomics.
 
 Memory ordering:
-- Insertion publishes `meta` (offset+len) with `Release` after storing bytes.
-- Readers load with `Acquire` to see a consistent initialized key.
+- Insertion publishes the symbol’s arena offset/len with `Release` after bytes are written.
+- Readers load with `Acquire` to see consistent initialization.
 
-#### Memory model: bounded memory + no hot-path allocations after warmup
-Bounded allocations are explicit and occur at initialization/warmup:
-- Slot array and arena buffer allocated once in `TradeAnalyzer::new`.
-- New symbols consume arena bytes until capacity; after that insertion returns a bounded error.
-
-Hot path:
-- Parsing is slice-based.
-- Stats updates are atomic ops.
-- No `Vec`, `String`, `HashMap`, or `format!` in ingestion.
-
-This is enforced by tests via a counting global allocator:
-- `hot_path_has_no_heap_allocations_after_warmup` asserts 0 allocations while processing 200k messages after warmup.
-
-#### Streaming guarantees: reporting without ingestion pause
-Report generation uses:
-- Atomic loads + iteration over slots, writing directly to a `Write`.
-- No mutex acquisition, so ingestion does not block.
+Bounded failure mode:
+- If symbol table or arena is full, ingestion fails with an explicit bounded error (`TableFull` / `ArenaFull`) — no silent growth, no hidden buffering.
 
 ---
 
-### PHASE 3 — Problem Restatement & Constraints (Why naïve approaches fail)
-
-- Naïve parsing (`split('|')`) fails because delimiter characters can appear in values when escaped (`\|`).
-- Mutex-based stats collapse because all producers and readers serialize on shared locks at high message rates.
-- Buffering messages to build reports violates:
-  - the 10-second buffer bound
-  - the 8-hour zero-growth requirement
-  - and causes report generation to pause ingestion
-- Microsecond timestamps must not be parsed into floats; float parsing/formatting risks rounding and precision loss.
-- Deterministic memory is mandatory: "no growth" must be achieved by **construction** (bounded structures), not by hope.
+### 6. Streaming Compliance Reports (No Ingestion Pause)
+Report generation:
+- Reads only atomics and iterates symbol slots.
+- Writes to `Write` (streaming) — no full message scans, no locking.
+- This allows report generation while ingestion continues.
 
 ---
 
-### PHASE 4 — Architecture & Strategy (End-to-end)
+### 7. Enforce the Contract With Tests (Behavior, Not Surface Output)
+Enforcement tests (release-mode) were added under `repository_after/tests/`:
+- Escaped pipe parsing in tag **58**.
+- Order ID with escaped pipe in tag **11**.
+- Malformed message is logged and skipped without panic.
+- Timestamp microseconds preserved.
+- Concurrent reporting during ingestion does not deadlock/block.
+- **No allocations in hot path after warmup**: verified by a counting global allocator.
+- **1,000,000 messages < 3 seconds**: verified in release.
 
-**Data flow**
-1. Ingest raw message bytes (`&[u8]`) in arrival order.
-2. Parse required tags (`11,55,54,38,52`) plus validate escaped delimiter handling via tag `58`.
-3. Update atomic counters:
-   - global totals
-   - per-side counts
-   - per-symbol count + volume (bounded table)
-4. Concurrent queries/report generation read atomics and write streaming output.
-
-**Constraint enforcement**
-- **No external parsing libs**: manual scanner + slice splitting.
-- **Escaped delimiter correctness**: delimiter scan respects backslash escapes.
-- **Lock-free stats**: atomics only, no mutex.
-- **Concurrent queries without blocking**: report is atomic loads; no shared locks.
-- **No buffering >10s**: no message buffering at all.
-- **No hot-path allocations after warmup**: allocator-count test enforces this.
-
-Rejected designs (and why)
-- `Mutex<HashMap>`: violates no-blocking and throughput targets.
-- Storing every order ID for dedup: violates bounded memory over 8 hours.
-- Parsing via regex/nom/pest: explicitly disallowed and allocation-heavy.
+This is intentionally “hard to fake”: tests measure allocations and time, not just outputs.
 
 ---
 
-### PHASE 5 — Ground Truth Implementation (Where it lives)
-
-Implementation is in:
-- `repository_after/src/lib.rs`
-- `repository_after/src/main.rs`
-- Tests in `repository_after/tests/`
-
-Key properties:
-- Manual escape-aware field boundary scan
-- Zero-copy field values (`EscapedValue<'a>`)
-- Atomic stats and bounded symbol storage
-- Streaming report via `write_report`
-
----
-
-### PHASE 6 — Validation & Enforcement
-
-Enforced by Dockerfile + release tests:
-- Dockerfile runs `cargo test --release`.
-
-Tests:
-- `tests/fix_parser_and_analyzer.rs`
-  - Escaped pipe parsing for tag 58
-  - Order ID containing escaped pipe
-  - Malformed message skip + log path (no crash)
-  - Microsecond timestamp parse validation
-  - Concurrent report generation while ingesting (no lock-based deadlock)
-- `tests/perf_and_alloc.rs`
-  - **No allocations after warmup**
-  - **1,000,000 messages < 3 seconds**
+### 8. Make Docker/Evaluation Match the Dataset Pattern (Before/After + JSON Reports)
+To match the repository-wide evaluation pattern:
+- Added an `evaluation/` Rust runner that executes a generated harness against:
+  - `repository_before` (expected to fail)
+  - `repository_after` (expected to pass)
+- The evaluator writes:
+  - `evaluation/reports/latest.json`
+  - `evaluation/reports/<YYYY-MM-DD>/<HH-MM-SS>/report.json`
+- Added `docker-compose.yml` services:
+  - `test-before`, `test-after`, `evaluation`
+- On your machine (Compose v1), the correct CLI is **`docker-compose`**, not `docker compose`.
 
 ---
 
-### PHASE 7 — Ground Truth Notes
+### 9. Result: Deterministic, Enforced Guarantees
+The “after” implementation:
+- Correctly handles escaped delimiters (including in order IDs and text fields).
+- Has lock-free stats and non-blocking report generation.
+- Uses bounded memory structures and enforces no hot-path allocations after warmup.
+- Meets the 1M<3s throughput contract (release) under enforcement tests.
+- Produces evaluation JSON artifacts via Docker and docker-compose.
 
-The calibration baseline (605d32) demonstrates that weak/heuristic evaluators can be passed by implementations that satisfy superficial criteria but violate real requirements. This FIX analyzer implementation intentionally avoids that trap by:
-- enforcing correctness through explicit edge-case tests
-- enforcing performance and allocation constraints mechanically
-- using bounded, deterministic memory by construction
+---
+
+### Trajectory Transferability Notes (Template Nodes)
+This trajectory is structured as reusable nodes:
+**Audit → Contract → Design → Execute → Verify → Package**
+
+How to transfer this trajectory:
+- **Performance Optimization**:
+  - Replace “parsing rules audit” with “profiling + bottleneck audit”.
+  - Contract becomes SLOs/allocations/latency budgets.
+  - Verification becomes benchmarks + alloc counters + load tests.
+- **Testing/Verification Work**:
+  - Audit becomes threat-modeling of evaluator gaps.
+  - Contract becomes invariants and negative cases.
+  - Verification emphasizes enforcement (no flakiness, no heuristics).
+- **Systems/Concurrency Work**:
+  - Contract focuses on bounded queues, backpressure, and memory ordering.
+  - Verification includes contention tests and long-run stability checks.
+
+Core principle:
+- Keep the structure constant; change the artifacts and enforcement signals to match the domain.
 
 
