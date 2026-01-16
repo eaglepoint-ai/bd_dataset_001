@@ -1,0 +1,9 @@
+{
+    "instance_id": "7f7184",
+    "problem_statement": "The `BaseModel` class is a poorly designed god class that violates the Single Responsibility Principle by combining multiple unrelated entities (User, Place, State, Review, Amenity). Your task is to refactor this into a proper OOP hierarchy.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/7f7184-Python-Breaking-up-God-class-per-OOP-principles",
+    "environment_setup": "Dockerfile"
+  }
+  
