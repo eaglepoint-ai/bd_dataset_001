@@ -7,7 +7,7 @@ import uuid
 import platform
 import subprocess
 from pathlib import Path
-from datetime import datetime, timezone, timezone
+from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parent.parent
 REPORTS = ROOT / "evaluation" / "reports"
@@ -220,12 +220,19 @@ def run_evaluation():
         }
 
 def main():
-    """Main entry point"""
+    """Main entry point - CI-safe version that ONLY writes to evaluation/reports/latest.json"""
+    # ROOT is already defined at module level - use it
+    
     started_at = datetime.now(timezone.utc)
     run_id = str(uuid.uuid4())
+    report = None
+    exit_code = 1
     
     try:
+        # Ensure reports directory exists
         REPORTS.mkdir(parents=True, exist_ok=True)
+        
+        # Run evaluation
         report = run_evaluation()
         
         finished_at = datetime.now(timezone.utc)
@@ -236,47 +243,15 @@ def main():
         report["finished_at"] = finished_at.isoformat()
         report["duration_seconds"] = duration
         
-        # Generate output path (matching working example pattern)
-        timestamp = finished_at.strftime("%Y-%m-%d/%H-%M-%S")
-        report_dir = REPORTS / timestamp
-        report_dir.mkdir(parents=True, exist_ok=True)
-        
-        report_path = report_dir / "report.json"
-        report_json = json.dumps(report, indent=2)
-        
-        # Write to standard location
-        with open(report_path, "w") as f:
-            f.write(report_json)
-        
-        # Also write to latest.json
-        latest_path = REPORTS / "latest.json"
-        with open(latest_path, "w") as f:
-            f.write(report_json)
-        
-        # Write to root as report.json (CodeBuild might look here)
-        root_report = ROOT / "report.json"
-        with open(root_report, "w") as f:
-            f.write(report_json)
-        
-        # Print report to stdout (CodeBuild captures this)
-        print(report_json)
-        
-        # Print info to stderr
-        print(f"\n✅ Report saved to: {report_path}", file=sys.stderr)
-        print(f"✅ Latest report: {latest_path}", file=sys.stderr)
-        print(f"✅ Root report: {root_report}", file=sys.stderr)
-        print(f"Run ID: {run_id}", file=sys.stderr)
-        print(f"Duration: {duration:.2f}s", file=sys.stderr)
-        print(f"Success: {'✅ YES' if report['success'] else '❌ NO'}", file=sys.stderr)
-        
-        return 0 if report["success"] else 1
+        exit_code = 0 if report["success"] else 1
         
     except Exception as e:
         import traceback
         finished_at = datetime.now(timezone.utc)
         duration = (finished_at - started_at).total_seconds()
         
-        error_report = {
+        # Create error report
+        report = {
             "run_id": run_id,
             "started_at": started_at.isoformat(),
             "finished_at": finished_at.isoformat(),
@@ -288,23 +263,36 @@ def main():
             "success": False,
             "error": str(e)
         }
-        error_json = json.dumps(error_report, indent=2)
-        
-        # Write error report
-        try:
-            error_path = REPORTS / "latest.json"
-            with open(error_path, "w") as f:
-                f.write(error_json)
-            root_error = ROOT / "report.json"
-            with open(root_error, "w") as f:
-                f.write(error_json)
-            print(error_json)  # Print to stdout
-        except Exception:
-            pass
-        
+        exit_code = 1
         print(f"\n❌ ERROR: {str(e)}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
-        return 1
+    
+    # CRITICAL: Write to evaluation/reports/latest.json unconditionally
+    # This is the ONLY file the CI evaluator checks
+    try:
+        report_json = json.dumps(report, indent=2)
+        latest_path = REPORTS / "latest.json"
+        
+        # Write the file (this is what CI looks for)
+        with open(latest_path, "w") as f:
+            f.write(report_json)
+        
+        # Print to stdout for logging
+        print(report_json)
+        
+        # Print info to stderr
+        print(f"\n✅ Report written to: {latest_path}", file=sys.stderr)
+        print(f"Run ID: {run_id}", file=sys.stderr)
+        print(f"Duration: {duration:.2f}s", file=sys.stderr)
+        print(f"Success: {'✅ YES' if report['success'] else '❌ NO'}", file=sys.stderr)
+        
+    except Exception as write_error:
+        # Even if writing fails, try to print error
+        print(f"\n❌ FATAL: Failed to write report: {write_error}", file=sys.stderr)
+        print(json.dumps(report, indent=2))  # At least print to stdout
+    
+    # Exit AFTER writing the file
+    return exit_code
 
 if __name__ == "__main__":
     sys.exit(main())
