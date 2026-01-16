@@ -14,6 +14,14 @@ from datetime import datetime, timezone
 ROOT = Path(__file__).resolve().parent.parent
 REPORTS = ROOT / "evaluation" / "reports"
 
+def get_timestamped_report_path():
+    """Generate timestamped report path: evaluation/YYYY-MM-DD/HH-MM-SS/report.json"""
+    now = datetime.now(timezone.utc)
+    date_dir = now.strftime("%Y-%m-%d")
+    time_dir = now.strftime("%H-%M-%S")
+    timestamped_dir = ROOT / "evaluation" / date_dir / time_dir
+    return timestamped_dir / "report.json"
+
 def get_git_info():
     """Get git commit and branch info"""
     try:
@@ -362,6 +370,17 @@ def run_evaluation():
             }
         }
 
+def write_report_file(report, file_path):
+    """Helper function to write report to a file"""
+    try:
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(file_path, "w") as f:
+            json.dump(report, f, indent=2)
+        return True
+    except Exception as e:
+        print(f"Warning: Failed to write report to {file_path}: {e}", file=sys.stderr)
+        return False
+
 def main():
     """Main entry point - writes to both evaluation/reports/latest.json and report.json"""
     # ROOT is already defined at module level - use it
@@ -370,6 +389,45 @@ def main():
     run_id = str(uuid.uuid4())[:8]  # Short run ID
     report = None
     exit_code = 1
+    
+    # Initialize a minimal report in case of catastrophic failure
+    minimal_report = {
+        "run_id": run_id,
+        "started_at": started_at.isoformat(),
+        "finished_at": started_at.isoformat(),
+        "duration_seconds": 0.0,
+        "success": False,
+        "error": "Evaluation failed to start",
+        "environment": {},
+        "results": {
+            "before": {
+                "success": False,
+                "exit_code": 1,
+                "tests": [],
+                "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+                "stdout": "",
+                "stderr": "Evaluation failed to start"
+            },
+            "after": {
+                "success": False,
+                "exit_code": 1,
+                "tests": [],
+                "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+                "stdout": "",
+                "stderr": "Evaluation failed to start"
+            },
+            "comparison": {
+                "before_tests_passed": False,
+                "after_tests_passed": False,
+                "before_total": 0,
+                "before_passed": 0,
+                "before_failed": 0,
+                "after_total": 0,
+                "after_passed": 0,
+                "after_failed": 0
+            }
+        }
+    }
     
     try:
         # Ensure reports directory exists
@@ -394,6 +452,11 @@ def main():
         duration = (finished_at - started_at).total_seconds()
         
         # Create error report
+        try:
+            env_info = environment_info()
+        except:
+            env_info = {}
+        
         error_result = {
             "success": False,
             "exit_code": 1,
@@ -409,7 +472,7 @@ def main():
             "duration_seconds": duration,
             "success": False,
             "error": str(e),
-            "environment": environment_info(),
+            "environment": env_info,
             "results": {
                 "before": error_result,
                 "after": error_result,
@@ -429,47 +492,54 @@ def main():
         print(f"\n❌ ERROR: {str(e)}", file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
     
+    # Ensure report exists (use minimal if somehow None)
+    if report is None:
+        report = minimal_report
+        report["finished_at"] = datetime.now(timezone.utc).isoformat()
+        report["duration_seconds"] = (datetime.now(timezone.utc) - started_at).total_seconds()
+    
     # CRITICAL: Write to both latest.json and report.json
-    # The CI evaluator expects report.json
-    try:
-        report_json = json.dumps(report, indent=2)
-        
-        # Write to latest.json (for local reference)
-        latest_path = REPORTS / "latest.json"
-        with open(latest_path, "w") as f:
-            f.write(report_json)
-        
-        # Write to report.json (this is what the CI evaluator checks)
-        report_path = REPORTS / "report.json"
-        with open(report_path, "w") as f:
-            f.write(report_json)
-        
-        # Also write to root evaluation directory as report.json (some evaluators check there)
-        root_eval_report_path = ROOT / "evaluation" / "report.json"
-        with open(root_eval_report_path, "w") as f:
-            f.write(report_json)
-        
-        # Write to project root as report.json (CI evaluator expects this)
-        root_report_path = ROOT / "report.json"
-        with open(root_report_path, "w") as f:
-            f.write(report_json)
-        
-        # Print to stdout for logging
-        print(report_json)
-        
-        # Print info to stderr
-        print(f"\n✅ Report written to: {latest_path}", file=sys.stderr)
-        print(f"✅ Report written to: {report_path}", file=sys.stderr)
-        print(f"✅ Report written to: {root_eval_report_path}", file=sys.stderr)
-        print(f"✅ Report written to: {root_report_path}", file=sys.stderr)
-        print(f"Run ID: {run_id}", file=sys.stderr)
-        print(f"Duration: {duration:.2f}s", file=sys.stderr)
-        print(f"Success: {'✅ YES' if report['success'] else '❌ NO'}", file=sys.stderr)
-        
-    except Exception as write_error:
-        # Even if writing fails, try to print error
-        print(f"\n❌ FATAL: Failed to write report: {write_error}", file=sys.stderr)
-        print(json.dumps(report, indent=2))  # At least print to stdout
+    # The CI evaluator expects report.json - write to multiple locations to ensure CI finds it
+    # Match the structure from other apps: evaluation/YYYY-MM-DD/HH-MM-SS/report.json
+    report_json = json.dumps(report, indent=2)
+    
+    # Get timestamped report path (matches other app structure)
+    timestamped_report_path = get_timestamped_report_path()
+    
+    # List of all locations to write report.json
+    report_paths = [
+        timestamped_report_path,            # Timestamped path: evaluation/YYYY-MM-DD/HH-MM-SS/report.json (matches other apps)
+        REPORTS / "latest.json",            # For local reference
+        REPORTS / "report.json",            # In reports subdirectory
+        ROOT / "evaluation" / "report.json",  # In evaluation directory
+        ROOT / "report.json",              # In project root (most likely CI location)
+    ]
+    
+    # Write to all locations
+    written_count = 0
+    for path in report_paths:
+        if write_report_file(report, path):
+            written_count += 1
+    
+    # Print to stdout for logging (CI may capture this)
+    print(report_json)
+    
+    # Print info to stderr
+    print(f"\n✅ Report written to {written_count}/{len(report_paths)} locations", file=sys.stderr)
+    for path in report_paths:
+        if path.exists():
+            print(f"  ✓ {path}", file=sys.stderr)
+        else:
+            print(f"  ✗ {path} (FAILED)", file=sys.stderr)
+    
+    print(f"Run ID: {run_id}", file=sys.stderr)
+    print(f"Duration: {report.get('duration_seconds', 0):.2f}s", file=sys.stderr)
+    print(f"Success: {'✅ YES' if report.get('success', False) else '❌ NO'}", file=sys.stderr)
+    
+    # If no files were written, at least print to stdout so CI can capture it
+    if written_count == 0:
+        print(f"\n❌ FATAL: Failed to write report to any location!", file=sys.stderr)
+        print(report_json)  # At least print to stdout
     
     # Exit AFTER writing the file
     return exit_code
