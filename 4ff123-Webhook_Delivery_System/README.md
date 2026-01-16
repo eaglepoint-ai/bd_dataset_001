@@ -70,3 +70,77 @@ Constraints:
 - Must handle 1000+ concurrent pending deliveries
 - All async operations must be properly handled (no unhandled rejections)
 
+## Running Tests
+
+### Using Docker (Recommended)
+
+Run tests on repository_after:
+```bash
+docker compose run --rm app-after
+```
+
+Run full evaluation:
+```bash
+docker compose run --rm evaluation
+```
+
+Build without cache (if needed):
+```bash
+docker compose build --no-cache
+```
+
+### Local Testing
+
+Install dependencies:
+```bash
+cd repository_after
+npm install
+cd ..
+```
+
+Run tests:
+```bash
+REPO=repository_after npm test
+```
+
+Run evaluation:
+```bash
+npm run evaluation
+```
+
+## Expected Output
+
+### Test Output Format
+```
+ Starting Tests for: repository_after
+ Path: /app/repository_after
+
+running 'Requirement 1: Endpoint registration...' ... [PASS]
+running 'Requirement 2: Event submission...' ... [PASS]
+...
+
+==================================================
+TEST SUMMARY
+==================================================
+ ✓ [1/10] Requirement 1: Endpoint registration...
+ ✓ [2/10] Requirement 2: Event submission...
+...
+--------------------------------------------------
+Total: 10 | Passed: 10 | Failed: 0
+Success Rate: 100.0%
+==================================================
+```
+
+## Implementation Details
+
+The webhook service is implemented in `repository_after/webhookService.js` and includes:
+
+- **Endpoint Registration**: Store endpoints with URL and HMAC secret
+- **Event Queuing**: Per-endpoint queues maintain delivery order
+- **HTTP Delivery**: POST requests with signature headers
+- **Retry Logic**: Exponential backoff (1s, 2s, 4s, 8s, 16s)
+- **Dead Letter Queue**: Failed events after max attempts
+- **Graceful Shutdown**: Complete in-flight deliveries
+- **Timeout Handling**: 30 second timeout per delivery
+- **Memory Efficient**: No unbounded growth, handles 1000+ concurrent deliveries
+

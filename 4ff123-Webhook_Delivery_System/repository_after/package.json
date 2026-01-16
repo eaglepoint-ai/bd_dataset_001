@@ -1,0 +1,17 @@
+{
+  "name": "webhook-delivery-system",
+  "version": "1.0.0",
+  "description": "Webhook delivery service with automatic retry and dead letter queue",
+  "main": "webhookService.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node ../scripts/test-summary.js",
+    "evaluation": "node ../evaluation/evaluation.js"
+  },
+  "keywords": ["webhook", "delivery", "retry", "node.js"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

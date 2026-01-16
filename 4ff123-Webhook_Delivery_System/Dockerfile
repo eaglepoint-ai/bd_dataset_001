@@ -2,15 +2,16 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy source files
+# Copy all files
 COPY . .
 
-# Run tests
+# Install dependencies from repository_after
+WORKDIR /app/repository_after
+RUN npm install
+
+# Go back to root
+WORKDIR /app
+
+# Default command
 CMD ["npm", "test"]
 
