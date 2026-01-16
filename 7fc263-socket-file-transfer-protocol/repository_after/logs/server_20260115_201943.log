@@ -1,0 +1,6 @@
+2026-01-15 20:19:43,535 - MainThread - INFO - Server initialized on 0.0.0.0:9999
+2026-01-15 20:19:43,536 - MainThread - INFO - Server listening on 0.0.0.0:9999
+2026-01-15 20:21:25,225 - Thread-1 (handle_client) - INFO - New connection from ('127.0.0.1', 62460)
+2026-01-15 20:21:25,225 - Thread-1 (handle_client) - INFO - Client ('127.0.0.1', 62460) requested file: filename.txt
+2026-01-15 20:21:25,225 - Thread-1 (handle_client) - WARNING - File 'filename.txt' not found for ('127.0.0.1', 62460)
+2026-01-15 20:21:25,226 - Thread-1 (handle_client) - INFO - Connection closed with ('127.0.0.1', 62460)

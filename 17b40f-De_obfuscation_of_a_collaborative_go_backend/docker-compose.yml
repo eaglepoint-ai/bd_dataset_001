@@ -6,11 +6,10 @@ services:
 
   server:
     build: .
-    working_dir: /app/repository_before
     depends_on:
       - db
     volumes:
-      - ./repository_before:/app/repository_before
+      - ./repository_after:/app/repository_after
     environment:
       - GO111MODULE=on
       - DATABASE_URL=mongodb://db:27017
@@ -23,7 +22,6 @@ services:
     working_dir: /app/repository_before
     depends_on:
       - db
-      - server
     volumes:
       - ./repository_before:/app/repository_before
       - ./tests:/app/repository_before/tests

@@ -5,17 +5,23 @@ WORKDIR /app
 # Install git for fetching dependencies
 RUN apk add --no-cache git
 
-# Copy repository_before folder
-COPY repository_before/ ./repository_before/
+# Copy repository_after folder (de-obfuscated code)
+COPY repository_after/ ./repository_after/
 
-# Copy tests folder INTO repository_before so they share the same go.mod/sum
-COPY tests/ ./repository_before/tests/
+# Copy root-level tests folder INTO repository_after so they share the same go.mod/sum
+COPY tests/ ./repository_after/tests_integration/
 
-# Set working directory to repository_before
-WORKDIR /app/repository_before
+# Set working directory to repository_after
+WORKDIR /app/repository_after
 
 # Download dependencies
 RUN go mod download
 
-# Default command - run the server
-CMD ["go", "run", "server.go"]
+# Build the application
+RUN go build -o server server.go
+
+# Expose the port
+EXPOSE 8080
+
+# Default command - run the compiled server
+CMD ["./server"]

@@ -1,0 +1,8 @@
+2026-01-15 20:30:10,852 - INFO - Client initialized for localhost:9999
+2026-01-15 20:30:10,852 - INFO - Connection attempt 1/5 to localhost:9999
+2026-01-15 20:30:10,862 - INFO - Successfully connected to localhost:9999
+2026-01-15 20:30:10,863 - INFO - Requested file: medium.txt
+2026-01-15 20:30:10,911 - INFO - Receiving: medium.txt (61890 bytes)
+2026-01-15 20:30:10,911 - INFO - Expected checksum: 39668799d95a31ad4b595f25d25b0e4c
+2026-01-15 20:30:10,943 - INFO - File integrity verified: 39668799d95a31ad4b595f25d25b0e4c
+2026-01-15 20:30:10,944 - INFO - Connection closed
