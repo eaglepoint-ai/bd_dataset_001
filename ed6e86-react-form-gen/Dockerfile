@@ -12,13 +12,35 @@ RUN pip3 install --no-cache-dir --break-system-packages -r requirements.txt
 # Copy package files for repository_after to enable dependency caching
 COPY repository_after/package*.json ./repository_after/
 
-# Install dependencies for repository_after (Next.js) - done in build for faster subsequent runs
+# Install dependencies for repository_after (Next.js) - MUST be done in Dockerfile, not in docker-compose or commands
+# This ensures platform-specific binaries (like @next/swc-linux-x64-musl for Alpine) are installed
 WORKDIR /app/repository_after
-RUN if [ -f "package.json" ]; then npm ci --only=production=false; fi
+# Use npm install (not npm ci) to ensure platform-specific optional dependencies are installed
+# npm ci uses exact versions from package-lock.json which might not install platform-specific binaries correctly
+# --include=optional ensures optional dependencies (like platform-specific SWC binaries) are installed
+RUN npm install --include=optional --only=production=false
 
-# Copy everything else
+# Copy everything else (after npm install to preserve node_modules)
+# .dockerignore ensures node_modules is not copied from host
 WORKDIR /app
 COPY . .
+
+# Reinstall dependencies after COPY to ensure platform-specific binaries are correct for Alpine
+# This ensures the correct musl SWC binary is installed even if package-lock.json was from a different platform
+WORKDIR /app/repository_after
+RUN npm install --include=optional --only=production=false
+
+# Verify that the correct SWC binary for Alpine (musl) is installed
+# Fail the build if musl binary is not found (Alpine requires musl, not glibc)
+RUN test -d node_modules/@next/swc-linux-x64-musl || \
+    (echo "ERROR: @next/swc-linux-x64-musl not found! Alpine requires musl SWC binary." && \
+     echo "Installed SWC packages:" && \
+     ls -la node_modules/@next/swc-* 2>/dev/null || echo "No SWC packages found" && \
+     exit 1)
+
+# Ensure npm and node are available in PATH (they should be from base image)
+# Verify npm installation
+RUN npm --version && node --version
 
 # Return to root
 WORKDIR /app

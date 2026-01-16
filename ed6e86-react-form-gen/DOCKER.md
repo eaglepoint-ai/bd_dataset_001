@@ -26,10 +26,10 @@ docker compose run --rm app python3 -c "import os; from pathlib import Path; roo
 
 ### Test 2: Run Tests on repository_after
 
-This installs dependencies, runs type checking, and runs Jest tests:
+This runs type checking and Jest tests (dependencies are already installed in Dockerfile):
 
 ```bash
-docker compose run --rm app sh -c "cd repository_after && npm ci && npm run type-check && npm test -- --passWithNoTests --ci"
+docker compose run --rm app sh -c "cd repository_after && npm run type-check && npm test -- --passWithNoTests --ci"
 ```
 
 ### Test 3: Type Check Only
