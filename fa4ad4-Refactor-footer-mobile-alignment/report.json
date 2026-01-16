@@ -1,0 +1,98 @@
+{
+  "run_id": "ftlej1ho",
+  "task_id": "fa4ad4",
+  "task_name": "Footer Mobile Alignment Refactor",
+  "started_at": "2026-01-15T14:13:56.342Z",
+  "finished_at": "2026-01-15T14:13:58.602Z",
+  "success": true,
+  "error": null,
+  "environment": {
+    "node_version": "v20.20.0",
+    "platform": "linux",
+    "os_release": "6.6.87.2-microsoft-standard-WSL2",
+    "architecture": "x64",
+    "hostname": "d220c10915ed",
+    "git_commit": "unknown",
+    "git_branch": "unknown"
+  },
+  "results": {
+    "before": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "test_structure.ts::Structure: Is JavaScript Project",
+          "name": "Structure: Is JavaScript Project",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test_structure.ts::Structure: Has JavaScript Source Files",
+          "name": "Structure: Has JavaScript Source Files",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test_structure.ts::Dependencies: TypeScript NOT Installed",
+          "name": "Dependencies: TypeScript NOT Installed",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test_structure.ts::Legacy Quality: Footer Component Unrefactored",
+          "name": "Legacy Quality: Footer Component Unrefactored",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "\n> footer-mobile-alignment-tests@1.0.0 test\n> ts-node tests/test_structure.ts\n\n\n🔍 Starting Structural Validation for: repository_before\n📂 Path: /app/repository_before/demo-app\n\nrunning 'Structure: Is JavaScript Project' ... [PASS] Structure: Is JavaScript Project\nrunning 'Structure: Has JavaScript Source Files' ... [PASS] Structure: Has JavaScript Source Files\nrunning 'Dependencies: TypeScript NOT Installed' ... [PASS] Dependencies: TypeScript NOT Installed\nrunning 'Legacy Quality: Footer Component Unrefactored' ... [PASS] Legacy Quality: Footer Component Unrefactored\n\n==================================================\nTEST SUMMARY\n==================================================\n✅ [1/4] Structure: Is JavaScript Project\n✅ [2/4] Structure: Has JavaScript Source Files\n✅ [3/4] Dependencies: TypeScript NOT Installed\n✅ [4/4] Legacy Quality: Footer Component Unrefactored\n--------------------------------------------------\nTotal: 4 | Passed: 4 | Failed: 0\nSuccess Rate: 100.0%\n==================================================\n",
+      "stderr": ""
+    },
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "test_structure.ts::Structure: TypeScript Configuration",
+          "name": "Structure: TypeScript Configuration",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test_structure.ts::Structure: No JavaScript Source Files",
+          "name": "Structure: No JavaScript Source Files",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test_structure.ts::Dependencies: TypeScript Installed",
+          "name": "Dependencies: TypeScript Installed",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test_structure.ts::Refactor Quality: Footer Component Length",
+          "name": "Refactor Quality: Footer Component Length",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "\n> footer-mobile-alignment-tests@1.0.0 test\n> ts-node tests/test_structure.ts\n\n\n🔍 Starting Structural Validation for: repository_after\n📂 Path: /app/repository_after/demo-app\n\nrunning 'Structure: TypeScript Configuration' ... [PASS] Structure: TypeScript Configuration\nrunning 'Structure: No JavaScript Source Files' ... [PASS] Structure: No JavaScript Source Files\nrunning 'Dependencies: TypeScript Installed' ... [PASS] Dependencies: TypeScript Installed\nrunning 'Refactor Quality: Footer Component Length' ... [PASS] Refactor Quality: Footer Component Length\n\n==================================================\nTEST SUMMARY\n==================================================\n✅ [1/4] Structure: TypeScript Configuration\n✅ [2/4] Structure: No JavaScript Source Files\n✅ [3/4] Dependencies: TypeScript Installed\n✅ [4/4] Refactor Quality: Footer Component Length\n--------------------------------------------------\nTotal: 4 | Passed: 4 | Failed: 0\nSuccess Rate: 100.0%\n==================================================\n",
+      "stderr": ""
+    },
+    "comparison": {
+      "before_tests_passed": true,
+      "after_tests_passed": true,
+      "before_passed": 4,
+      "before_failed": 0,
+      "after_passed": 4,
+      "after_failed": 0
+    }
+  }
+}
