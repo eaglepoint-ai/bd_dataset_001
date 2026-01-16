@@ -9,8 +9,5 @@
   },
   "keywords": ["memory-leak", "node.js", "task-processor"],
   "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "jest": "29.7.0"
-  }
+  "license": "MIT"
 }

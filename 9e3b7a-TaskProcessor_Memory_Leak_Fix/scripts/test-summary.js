@@ -9,38 +9,30 @@ console.log(` Path: /app/${repo}\n`);
 
 const env = { ...process.env, REPO: repo, CI: 'true' };
 
-const commands = [
-  'node_modules/.bin/jest',
-  './node_modules/.bin/jest',
-  'jest'
-];
-
+// Run the new manual test runner
 let success = false;
 let results = null;
 
-for (const cmd of commands) {
-  try {
-    const stdout = execSync(`${cmd} tests/memory-leaks.test.js --json --forceExit --silent`, {
-      env,
-      encoding: 'utf-8',
-      stdio: ['ignore', 'pipe', 'pipe']
-    });
-    const jsonStart = stdout.indexOf('{');
-    if (jsonStart !== -1) {
-      results = JSON.parse(stdout.substring(jsonStart));
+try {
+  const stdout = execSync('node tests/run-tests.js', {
+    env,
+    encoding: 'utf-8',
+    cwd: projectRoot,
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
+  const jsonStart = stdout.indexOf('{');
+  if (jsonStart !== -1) {
+    results = JSON.parse(stdout.substring(jsonStart));
+    success = true;
+  }
+} catch (e) {
+  const out = e.stdout ? e.stdout.toString() : '';
+  const jsonStart = out.indexOf('{');
+  if (jsonStart !== -1) {
+    try {
+      results = JSON.parse(out.substring(jsonStart));
       success = true;
-      break;
-    }
-  } catch (e) {
-    const out = e.stdout ? e.stdout.toString() : '';
-    const jsonStart = out.indexOf('{');
-    if (jsonStart !== -1 && out.includes('{"numTotalTests"')) {
-      try {
-        results = JSON.parse(out.substring(jsonStart));
-        success = true;
-        break;
-      } catch {}
-    }
+    } catch {}
   }
 }
 
