@@ -1,0 +1,24 @@
+{
+    "instance_id": "3203b9",
+    "problem_statement": "",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/3203b9-High-Performance-Matrix-Rotation",
+    "environment_setup": "Dockerfile",
+    "FAIL_TO_PASS": [
+    "tests/test_matrix_rotation.py::test_rotate_2x2",
+    "tests/test_matrix_rotation.py::test_rotate_3x3",
+    "tests/test_matrix_rotation.py::test_rotate_5x5",
+    "tests/test_matrix_rotation.py::test_rotate_4x4",
+    "tests/test_matrix_rotation.py::test_rotate_100x100",
+    "tests/test_matrix_rotation.py::test_rotate_500x500",
+    "tests/test_matrix_rotation.py::test_rotate_1000x1000",
+    "tests/test_matrix_rotation.py::test_rotate_2000x2000",
+    "tests/test_matrix_rotation.py::test_in_place_modification",
+    "tests/test_matrix_rotation.py::test_double_rotation",
+    "tests/test_matrix_rotation.py::test_quadruple_rotation"
+    ],
+    "PASS_TO_PASS": [
+      "tests/test_matrix_rotation.py::test_rotate_1x1"
+    ]
+}  

@@ -1,0 +1,13 @@
+diff --git a/repository_before/rotation.py b/repository_after/rotation.py
+index 7768257..d26d6e6 100644
+--- a/repository_before/rotation.py
++++ b/repository_after/rotation.py
+@@ -3,7 +3,7 @@ def rotate_2d_matrix(matrix):
+     _len = len(matrix)
+     for row in range(int(_len / 2)):
+         offset = 0
+-        і = _len - 1 - row
++        i = _len - 1 - row
+         for column in range(row, _len - 1 - row):
+             top = matrix[row][column]
+             matrix[row][column] = matrix[i - offset][row]
