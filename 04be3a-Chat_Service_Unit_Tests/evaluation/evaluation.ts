@@ -179,17 +179,7 @@ async function main() {
   );
 
   // Output path matching the reference
-  const now = new Date();
-  const dateStr = now.toISOString().split("T")[0];
-  const timeStr = now.toTimeString().split(" ")[0].replace(/:/g, "-");
-  const outputDir = path.join(
-    projectRoot,
-    "evaluation",
-    "reports",
-    dateStr,
-    timeStr
-  );
-  const outputFile = path.join(outputDir, "report.json");
+  const outputFile = path.join(projectRoot, "evaluation", "report.json");
 
   console.log(`\n📄 Output: ${outputFile}\n`);
 
