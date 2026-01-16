@@ -38,20 +38,21 @@ The CartService is a Node.js/Mongoose service handling shopping cart operations 
 
 ## Docker Commands
 
-### Run Unit Tests
+
+### Run Program Unit Tests
 Runs the Jest unit tests in `repository_after/`:
 ```bash
 docker compose run --rm run_tests
 ```
 
-### Run Tests with Coverage
-Runs unit tests and generates coverage report:
+### Run Metatests
+Runs the metatests in `tests/` (verifies the unit tests):
 ```bash
-docker compose run --rm run_coverage
+docker compose run --rm run_metatest
 ```
 
-### Run Full Evaluation
-Runs unit tests, metatests, and generates evaluation report:
+### Run Evaluation (Generate Report)
+Runs both and generates the evaluation report:
 ```bash
 docker compose run --rm run_evaluation
 ```
