@@ -1,92 +1,30 @@
-# project template
+# Huffman Coding Python Project
 
-Starter scaffold for bd dataset task.
+## Purpose
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+This project implements **Huffman coding** in Python. It reads a text file, counts character frequencies, builds a Huffman tree using a priority queue, generates optimal binary codes, encodes the text, and displays a summary table with:
 
----
+- Character frequencies
+- Huffman codes
+- Original and encoded bit counts
+- Compression ratio  
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+The project includes automated **unit tests** and an **evaluation system** that compares `repository_before` and `repository_after` implementations and generates a machine-readable report.
 
-### Setup Steps
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
 
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
+## Running Tests and Evaluation
 
-3. **Update `.gitignore`** to reflect your language and library setup
+Use Docker Compose to run tests and evaluation:
 
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+```bash
+# Run all unit tests with detailed output
+docker compose run test-after
 ```
 
-### Report Schema
+# Run evaluation and generate JSON report
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+```bash
+# Run all evaluation results
+docker compose run evaluation
 ```
-
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
-
----
-
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
-
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
