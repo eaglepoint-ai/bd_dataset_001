@@ -1,6 +1,58 @@
 services:
+  # Run the legacy "before" implementation
+  before:
+    build: .
+    command: python repository_before/async_processing_pipeline.py
+    volumes:
+      - .:/app
+
+  # Run the refactored "after" implementation
+  after:
+    build: .
+    command: python repository_after/refactored.py
+    volumes:
+      - .:/app
+
+  # Run full validation (before + after + performance)
+  validate:
+    build: .
+    command: python evaluation/evaluation.py --validate-before --validate-after --trials 3 --items 5 --buffer 3
+    volumes:
+      - .:/app
+      - ./evaluation/reports:/app/evaluation/reports
+
+  # Run validation for before only
+  validate-before:
+    build: .
+    command: python evaluation/evaluation.py --validate-before --trials 1 --items 1 --buffer 1
+    volumes:
+      - .:/app
+
+  # Run validation for after only
+  validate-after:
+    build: .
+    command: python evaluation/evaluation.py --validate-after --trials 1 --items 1 --buffer 1
+    volumes:
+      - .:/app
+
+  # Run performance tests only (no validation)
+  performance:
+    build: .
+    command: python evaluation/evaluation.py --trials 3 --items 5 --buffer 3
+    volumes:
+      - .:/app
+      - ./evaluation/reports:/app/evaluation/reports
+
+  # Run unit tests
   tests:
     build: .
     command: pytest -q tests
+    volumes:
+      - .:/app
+
+  # Run comparison script
+  compare:
+    build: .
+    command: python compare_implementations.py
     volumes:
       - .:/app

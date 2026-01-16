@@ -36,6 +36,40 @@ The evaluation script validates all 12 technical requirements:
 
 ## Docker Execution Instructions
 
+### Using Docker Compose (Recommended)
+
+Docker Compose provides convenient service names for each command:
+
+```bash
+# Run the legacy "before" implementation
+docker-compose up before
+
+# Run the refactored "after" implementation
+docker-compose up after
+
+# Run full validation (before + after + performance)
+docker-compose up validate
+
+# Run validation for before only (should FAIL)
+docker-compose up validate-before
+
+# Run validation for after only (should PASS)
+docker-compose up validate-after
+
+# Run performance tests only
+docker-compose up performance
+
+# Run unit tests
+docker-compose up tests
+
+# Run comparison script
+docker-compose up compare
+```
+
+### Using Docker Run (Alternative)
+
+You can also use `docker run` commands directly:
+
 ### Quick Start - Full Validation
 
 Run the complete evaluation with requirement validation for both implementations:
