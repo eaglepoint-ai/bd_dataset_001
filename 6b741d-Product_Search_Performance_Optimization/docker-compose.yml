@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    command: npm test
+    volumes:
+      - .:/app
+      - /app/node_modules
+    working_dir: /app
+

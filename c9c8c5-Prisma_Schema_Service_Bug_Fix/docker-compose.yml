@@ -1,0 +1,6 @@
+services:
+  run_before:
+    build:
+      context: .
+      dockerfile: Dockerfile
+

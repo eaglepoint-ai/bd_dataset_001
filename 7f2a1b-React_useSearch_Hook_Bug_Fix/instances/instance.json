@@ -1,0 +1,12 @@
+{
+  "instance_id": "7f2a1b-React_useSearch_Hook_Bug_Fix",
+  "problem_statement": "Fix bugs in the useSearch React hook including stale closures, race conditions, memory leaks, and broken debounce functionality.",
+  "base_commit": "",
+  "test_patch": "",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001",
+  "environment_setup": {
+    "dockerfile": "Dockerfile",
+    "docker_compose": "docker-compose.yml"
+  }
+}
+

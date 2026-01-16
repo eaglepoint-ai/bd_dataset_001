@@ -1,0 +1,24 @@
+services:
+  test-before:
+    build: .
+    image: usesearch-test
+    container_name: usesearch-test-before
+    command: npm run test:before
+    volumes:
+      - ./evaluation:/app/evaluation
+
+  test-after:
+    build: .
+    image: usesearch-test
+    container_name: usesearch-test-after
+    command: npm run test:after
+    volumes:
+      - ./evaluation:/app/evaluation
+
+  evaluate:
+    build: .
+    image: usesearch-test
+    container_name: usesearch-evaluate
+    command: npm run evaluate
+    volumes:
+      - ./evaluation:/app/evaluation

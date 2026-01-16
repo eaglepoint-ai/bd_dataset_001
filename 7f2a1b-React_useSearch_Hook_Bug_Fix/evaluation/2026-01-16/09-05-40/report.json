@@ -1,0 +1,58 @@
+{
+  "run_id": "1e2a2d89",
+  "started_at": "2026-01-16T06:05:40.774Z",
+  "finished_at": "2026-01-16T06:05:40.775Z",
+  "duration_seconds": 0,
+  "success": false,
+  "error": "After implementation tests failed",
+  "environment": {
+    "node_version": "v23.11.1",
+    "platform": "linux",
+    "os": "Linux",
+    "os_release": "6.6.87.2-microsoft-standard-WSL2",
+    "architecture": "x64",
+    "hostname": "LAPTOP-1CKLVAHN",
+    "git_commit": "59b6cf81",
+    "git_branch": "7f2a1b-react-usesearch-hook-bug-fix"
+  },
+  "results": {
+    "before": {
+      "success": false,
+      "exit_code": 1,
+      "tests": [],
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "",
+      "stderr": "\u001b[31m\u001b[31m\u001b[1m\u001b[1m● \u001b[22m\u001b[1mValidation Error\u001b[22m:\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m  Preset \u001b[1mts-jest\u001b[22m not found.\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m  \u001b[1mConfiguration Documentation:\u001b[22m\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m  https://jestjs.io/docs/configuration\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m\u001b[39m\u001b[31m\u001b[39m\n"
+    },
+    "after": {
+      "success": false,
+      "exit_code": 1,
+      "tests": [],
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "",
+      "stderr": "\u001b[31m\u001b[31m\u001b[1m\u001b[1m● \u001b[22m\u001b[1mValidation Error\u001b[22m:\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m  Preset \u001b[1mts-jest\u001b[22m not found.\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m  \u001b[1mConfiguration Documentation:\u001b[22m\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m  https://jestjs.io/docs/configuration\u001b[39m\u001b[31m\u001b[39m\n\u001b[31m\u001b[31m\u001b[39m\u001b[31m\u001b[39m\n"
+    },
+    "comparison": {
+      "before_tests_passed": false,
+      "after_tests_passed": false,
+      "before_total": 0,
+      "before_passed": 0,
+      "before_failed": 0,
+      "after_total": 0,
+      "after_passed": 0,
+      "after_failed": 0
+    }
+  }
+}

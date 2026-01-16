@@ -1,0 +1,4 @@
+services:
+  run_before:
+    build: .
+    command: sh -c "npm install && npx tsc --noEmit && echo 'Build successful. Run npm test to execute tests.'"
