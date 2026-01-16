@@ -230,13 +230,24 @@ def main():
     report_dir.mkdir(parents=True, exist_ok=True)
     
     report_path = report_dir / "report.json"
-    report_path.write_text(json.dumps(report, indent=2))
+    report_json = json.dumps(report, indent=2)
+    report_path.write_text(report_json)
     
     latest_path = REPORTS / "latest.json"
-    latest_path.write_text(json.dumps(report, indent=2))
+    latest_path.write_text(report_json)
     
-    print(f"Report written to {report_path}")
-    print(f"Latest report: {latest_path}")
+    # Also write to root for evaluation systems that look there
+    root_report = ROOT / "report.json"
+    root_report.write_text(report_json)
+    
+    # Print report to stdout for CI/CD systems to capture
+    print("=== EVALUATION REPORT ===")
+    print(report_json)
+    print("=== END REPORT ===")
+    
+    print(f"Report written to {report_path}", file=sys.stderr)
+    print(f"Latest report: {latest_path}", file=sys.stderr)
+    print(f"Root report: {root_report}", file=sys.stderr)
     
     return 0 if report["success"] else 1
 
