@@ -13,9 +13,13 @@
 #include <direct.h>
 #include <windows.h>
 #define mkdir(path, mode) _mkdir(path)
+#define popen _popen
+#define pclose _pclose
+#define WEXITSTATUS(x) (x)
 #else
 #include <unistd.h>
 #include <sys/utsname.h>
+#include <sys/wait.h>
 #endif
 
 struct TestCase {
@@ -142,63 +146,86 @@ std::string escape_json(const std::string &str) {
 
 TestResult run_test(const std::string &test_name, const std::string &label) {
     std::cout << "\nRUNNING TESTS: " << label << "\n";
+    std::cout.flush();
 
-    std::string output_file = "test_output_" + test_name + ".txt";
-#ifdef _WIN32
-    std::string cmd = "test.exe " + test_name + " > " + output_file + " 2>&1";
-#else
-    std::string cmd = "./test " + test_name + " > " + output_file + " 2>&1";
-#endif
-    
-    std::cout << "Executing: " << cmd << "\n";
-    int exit_code = std::system(cmd.c_str());
-    std::cout << "Exit code: " << exit_code << "\n";
-    
     TestResult result;
-    result.exit_code = exit_code;
-    result.success = (exit_code == 0);
+    result.exit_code = -1;
+    result.success = false;
     result.total = 0;
     result.passed = 0;
     result.failed = 0;
+    result.stdout_output = "";
 
-    std::ifstream file(output_file);
-    if (!file.is_open()) {
-        std::cerr << "WARNING: Could not open output file: " << output_file << "\n";
-        std::cerr << "Test may have failed to run or output redirection failed\n";
-        result.stdout_output = "ERROR: Could not read test output file";
+#ifdef _WIN32
+    std::string test_exe = "test.exe";
+#else
+    std::string test_exe = "./test";
+#endif
+
+    // Check if test executable exists
+    std::ifstream test_check(test_exe);
+    if (!test_check.good()) {
+        std::cerr << "ERROR: Test executable not found: " << test_exe << "\n";
+        result.stdout_output = "ERROR: Test executable not found";
         return result;
     }
+    test_check.close();
+
+    // Run test and capture output directly
+    std::string cmd = test_exe + " " + test_name;
+    std::cout << "Executing: " << cmd << "\n";
+    std::cout.flush();
     
-    std::string line;
+    FILE* pipe = popen(cmd.c_str(), "r");
+    if (!pipe) {
+        std::cerr << "ERROR: Failed to execute test command\n";
+        result.stdout_output = "ERROR: Failed to execute test";
+        return result;
+    }
+
+    char buffer[256];
     std::string output;
-    while (std::getline(file, line)) {
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        std::string line(buffer);
+        // Remove trailing newline if present
+        if (!line.empty() && line[line.length()-1] == '\n') {
+            line.erase(line.length()-1);
+        }
+        
         std::cout << line << "\n";
         output += line + "\n";
         
         if (line.find("[PASS]") != std::string::npos) {
             TestCase tc;
-            size_t pos = line.find("] ") + 2;
-            tc.name = line.substr(pos);
-            tc.outcome = "passed";
-            result.tests.push_back(tc);
-            result.passed++;
-            result.total++;
+            size_t pos = line.find("] ");
+            if (pos != std::string::npos) {
+                tc.name = line.substr(pos + 2);
+                tc.outcome = "passed";
+                result.tests.push_back(tc);
+                result.passed++;
+                result.total++;
+            }
         } else if (line.find("[FAIL]") != std::string::npos) {
             TestCase tc;
-            size_t pos = line.find("] ") + 2;
-            tc.name = line.substr(pos);
-            tc.outcome = "failed";
-            result.tests.push_back(tc);
-            result.failed++;
-            result.total++;
+            size_t pos = line.find("] ");
+            if (pos != std::string::npos) {
+                tc.name = line.substr(pos + 2);
+                tc.outcome = "failed";
+                result.tests.push_back(tc);
+                result.failed++;
+                result.total++;
+            }
         }
     }
-    file.close();
+    
+    int exit_code = pclose(pipe);
+    result.exit_code = WEXITSTATUS(exit_code);
+    result.success = (result.exit_code == 0);
     result.stdout_output = output;
     
+    std::cout << "Exit code: " << result.exit_code << "\n";
     std::cout << "Parsed " << result.total << " tests (" << result.passed << " passed, " << result.failed << " failed)\n";
-    
-    std::remove(output_file.c_str());
+    std::cout.flush();
 
     return result;
 }
