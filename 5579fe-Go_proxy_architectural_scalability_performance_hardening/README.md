@@ -12,19 +12,19 @@ This repository demonstrates a Go-based proxy implementation with an architectur
 ### 1. Run Tests for `repository_before`
 
 ```bash
-docker compose run --rm tests go run repository_before/main.go
+docker compose run --rm tests go test -v ./tests -tags=before
 ```
 
 ### 2. Run Tests for `repository_after`
 
 ```bash
-# No tests to run
+docker compose run --rm tests go test -v ./tests -tags=after
 ```
 
 ### 3. Run Evaluations
 
 ```bash
-docker compose run --rm tests go run evaluation/evaluation.go
+docker compose run --rm tests go run evaluation/evaluation.go --root .
 ```
 
 ## Projects
@@ -35,3 +35,9 @@ docker compose run --rm tests go run evaluation/evaluation.go
 | `repository_after/`  | Completed implementation of the Go Proxy       |
 | `tests/`             | Meta-test suite for the Go Proxy               |
 | `evaluation/`        | Evaluation script to verify the implementation |
+
+## Generate patch
+
+```bash
+git diff --no-index repository_before repository_after > patches/task_001.patch
+```
