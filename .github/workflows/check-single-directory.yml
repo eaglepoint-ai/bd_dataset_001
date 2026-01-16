@@ -104,18 +104,20 @@ jobs:
 
           # At this point DIR_COUNT == 1: enforce PR title matches the single directory
           SINGLE_DIR="$(printf "%s\n" "$UNIQUE_DIRS" | sed '/^$/d')"
-          TITLE="$PR_TITLE"
+          # Trim leading/trailing whitespace from title
+          TITLE="$(echo -e "${PR_TITLE}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
 
           echo "Single changed directory: $SINGLE_DIR"
           echo "PR title: $TITLE"
 
-          # Optional: ensure title follows the same pattern as the PR-title workflow
-          PATTERN="^[a-z0-9]{6}-[a-zA-Z0-9_]+$"
+          # [a-zA-Z0-9_-]+ - one or more letters, numbers, underscores or hyphens
+          # $ - end of string
+          PATTERN="^[a-z0-9]{6}-[a-zA-Z0-9_-]+$"
 
           if [[ ! "$TITLE" =~ $PATTERN ]]; then
             echo "FAIL: PR title does not match the required format."
             echo "Current title: '$TITLE'"
-            echo "Expected format: 6 lowercase letters/digits + hyphen + letters/numbers/underscores"
+            echo "Expected format: 6 lowercase letters/digits + hyphen + letters/numbers/underscores/hyphens"
             echo "Example titles:"
             echo "  3gu4a1-Todo_list_app"
             echo "  8235d7-Test_LRU_cache_test_generation"
