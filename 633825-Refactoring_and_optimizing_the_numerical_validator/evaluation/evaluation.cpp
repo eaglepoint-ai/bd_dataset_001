@@ -307,9 +307,13 @@ int main(int argc, char *argv[]) {
     Environment env = get_environment();
     
     std::cout << "Run ID: " << run_id << "\n";
+    std::cout << "Output path: " << output_path << "\n";
 
     std::time_t start_time = std::time(nullptr);
 
+    TestResult before, after;
+    bool compile_success = true;
+    
     std::cout << "\nCompiling tests...\n";
 #ifdef _WIN32
     int compile_result = std::system("g++ -std=c++17 -o test.exe ./tests/main.cpp");
@@ -318,22 +322,23 @@ int main(int argc, char *argv[]) {
 #endif
     if (compile_result != 0) {
         std::cerr << "Failed to compile tests\n";
-        return 1;
+        compile_success = false;
+    } else {
+        before = run_test("test_original", "BEFORE (repository_before)");
+        after = run_test("test_optimized", "AFTER (repository_after)");
     }
-
-    TestResult before = run_test("test_original", "BEFORE (repository_before)");
-    TestResult after = run_test("test_optimized", "AFTER (repository_after)");
 
     std::time_t end_time = std::time(nullptr);
     double duration = std::difftime(end_time, start_time);
     std::string finished_at = get_timestamp();
-    bool success = after.success;
+    bool success = compile_success && after.success;
 
     std::cout << "\nEVALUATION SUMMARY\n";
     std::cout << "Before: " << (before.success ? "PASSED" : "FAILED") << " (" << before.passed << "/" << before.total << ")\n";
     std::cout << "After: " << (after.success ? "PASSED" : "FAILED") << " (" << after.passed << "/" << after.total << ")\n";
 
     save_report(run_id, started_at, finished_at, duration, success, env, before, after, output_path);
+    
     std::cout << "\nReport saved to: " << output_path << "\n";
     std::cout << "Duration: " << std::fixed << std::setprecision(2) << duration << "s\n";
     std::cout << "Success: " << (success ? "YES" : "NO") << "\n";
