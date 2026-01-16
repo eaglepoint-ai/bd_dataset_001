@@ -1,0 +1,47 @@
+{
+  "run_id": "07e0b750-8d20-41b4-b0ff-56ab39fe9f68",
+  "started_at": "2026-01-16T13:45:27.648652Z",
+  "finished_at": "2026-01-16T13:45:27.648662Z",
+  "duration_seconds": 1e-05,
+  "environment": {
+    "python_version": "3.11.14",
+    "platform": "linux-64bit"
+  },
+  "before": {
+    "tests": {
+      "output": "============================= test session starts ==============================\nplatform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python\ncachedir: .pytest_cache\nrootdir: /app\ncollecting ... collected 26 items\n\ntests/test_webhook.py::WebhookTestCase::test_database_error_handling PASSED [  3%]\ntests/test_webhook.py::WebhookTestCase::test_empty_payload PASSED        [  7%]\ntests/test_webhook.py::WebhookTestCase::test_empty_signature_header FAILED [ 11%]\ntests/test_webhook.py::WebhookTestCase::test_integrity_error_handling PASSED [ 15%]\ntests/test_webhook.py::WebhookTestCase::test_invalid_json_payload_malformed PASSED [ 19%]\ntests/test_webhook.py::WebhookTestCase::test_invalid_json_payload_none PASSED [ 23%]\ntests/test_webhook.py::WebhookTestCase::test_invalid_signature PASSED    [ 26%]\ntests/test_webhook.py::WebhookTestCase::test_invalid_timestamp_type_list PASSED [ 30%]\ntests/test_webhook.py::WebhookTestCase::test_invalid_timestamp_type_string PASSED [ 34%]\ntests/test_webhook.py::WebhookTestCase::test_missing_signature_header PASSED [ 38%]\ntests/test_webhook.py::WebhookTestCase::test_missing_timestamp_in_payload PASSED [ 42%]\ntests/test_webhook.py::WebhookTestCase::test_replay_attack_exactly_five_minutes PASSED [ 46%]\ntests/test_webhook.py::WebhookTestCase::test_replay_attack_future_timestamp PASSED [ 50%]\ntests/test_webhook.py::WebhookTestCase::test_replay_attack_rejection PASSED [ 53%]\ntests/test_webhook.py::WebhookTestCase::test_sqlalchemy_error_on_add PASSED [ 57%]\ntests/test_webhook.py::WebhookTestCase::test_sqlalchemy_error_on_commit PASSED [ 61%]\ntests/test_webhook.py::WebhookTestCase::test_timestamp_none_in_payload FAILED [ 65%]\ntests/test_webhook.py::WebhookTestCase::test_type_error_in_transaction_creation PASSED [ 69%]\ntests/test_webhook.py::WebhookTestCase::test_unexpected_exception_handling PASSED [ 73%]\ntests/test_webhook.py::WebhookTestCase::test_verify_signature PASSED     [ 76%]\ntests/test_webhook.py::WebhookTestCase::test_verify_signature_different_payload_order PASSED [ 80%]\ntests/test_webhook.py::WebhookTestCase::test_verify_signature_empty_secret_key PASSED [ 84%]\ntests/test_webhook.py::WebhookTestCase::test_verify_signature_wrong_secret_key PASSED [ 88%]\ntests/test_webhook.py::WebhookTestCase::test_webhook_endpoint_success PASSED [ 92%]\ntests/test_webhook.py::WebhookTestCase::test_webhook_with_missing_content_type PASSED [ 96%]\ntests/test_webhook.py::WebhookTestCase::test_webhook_with_wrong_content_type PASSED [100%]\n\n=================================== FAILURES ===================================\n_________________ WebhookTestCase.test_empty_signature_header __________________\ntests/test_webhook.py:209: in test_empty_signature_header\n    self.assertEqual(response.status_code, 400)\nE   AssertionError: 403 != 400\n________________ WebhookTestCase.test_timestamp_none_in_payload ________________\ntests/test_webhook.py:244: in test_timestamp_none_in_payload\n    self.assertIn('Missing timestamp in payload', json.loads(response.data)['error'])\nE   AssertionError: 'Missing timestamp in payload' not found in \"Invalid data: 'NoneType' object cannot be interpreted as an integer\"\n=========================== short test summary info ============================\nFAILED tests/test_webhook.py::WebhookTestCase::test_empty_signature_header - ...\nFAILED tests/test_webhook.py::WebhookTestCase::test_timestamp_none_in_payload\n========================= 2 failed, 24 passed in 6.44s =========================\n",
+      "return_code": 1,
+      "passed": false
+    },
+    "metrics": {
+      "test_counts": {
+        "total": 26,
+        "passed": 24,
+        "failed": 2,
+        "errors": 0
+      }
+    }
+  },
+  "after": {
+    "tests": {
+      "output": "============================= test session starts ==============================\nplatform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python\ncachedir: .pytest_cache\nrootdir: /app\ncollecting ... collected 26 items\n\ntests/test_webhook.py::WebhookTestCase::test_database_error_handling PASSED [  3%]\ntests/test_webhook.py::WebhookTestCase::test_empty_payload PASSED        [  7%]\ntests/test_webhook.py::WebhookTestCase::test_empty_signature_header PASSED [ 11%]\ntests/test_webhook.py::WebhookTestCase::test_integrity_error_handling PASSED [ 15%]\ntests/test_webhook.py::WebhookTestCase::test_invalid_json_payload_malformed PASSED [ 19%]\ntests/test_webhook.py::WebhookTestCase::test_invalid_json_payload_none PASSED [ 23%]\ntests/test_webhook.py::WebhookTestCase::test_invalid_signature PASSED    [ 26%]\ntests/test_webhook.py::WebhookTestCase::test_invalid_timestamp_type_list PASSED [ 30%]\ntests/test_webhook.py::WebhookTestCase::test_invalid_timestamp_type_string PASSED [ 34%]\ntests/test_webhook.py::WebhookTestCase::test_missing_signature_header PASSED [ 38%]\ntests/test_webhook.py::WebhookTestCase::test_missing_timestamp_in_payload PASSED [ 42%]\ntests/test_webhook.py::WebhookTestCase::test_replay_attack_exactly_five_minutes PASSED [ 46%]\ntests/test_webhook.py::WebhookTestCase::test_replay_attack_future_timestamp PASSED [ 50%]\ntests/test_webhook.py::WebhookTestCase::test_replay_attack_rejection PASSED [ 53%]\ntests/test_webhook.py::WebhookTestCase::test_sqlalchemy_error_on_add PASSED [ 57%]\ntests/test_webhook.py::WebhookTestCase::test_sqlalchemy_error_on_commit PASSED [ 61%]\ntests/test_webhook.py::WebhookTestCase::test_timestamp_none_in_payload PASSED [ 65%]\ntests/test_webhook.py::WebhookTestCase::test_type_error_in_transaction_creation PASSED [ 69%]\ntests/test_webhook.py::WebhookTestCase::test_unexpected_exception_handling PASSED [ 73%]\ntests/test_webhook.py::WebhookTestCase::test_verify_signature PASSED     [ 76%]\ntests/test_webhook.py::WebhookTestCase::test_verify_signature_different_payload_order PASSED [ 80%]\ntests/test_webhook.py::WebhookTestCase::test_verify_signature_empty_secret_key PASSED [ 84%]\ntests/test_webhook.py::WebhookTestCase::test_verify_signature_wrong_secret_key PASSED [ 88%]\ntests/test_webhook.py::WebhookTestCase::test_webhook_endpoint_success PASSED [ 92%]\ntests/test_webhook.py::WebhookTestCase::test_webhook_with_missing_content_type PASSED [ 96%]\ntests/test_webhook.py::WebhookTestCase::test_webhook_with_wrong_content_type PASSED [100%]\n\n============================== 26 passed in 4.61s ==============================\n",
+      "return_code": 0,
+      "passed": true
+    },
+    "metrics": {
+      "test_counts": {
+        "total": 26,
+        "passed": 26,
+        "failed": 0,
+        "errors": 0
+      }
+    }
+  },
+  "comparison": {
+    "passed_gate": true,
+    "test_count_increase": 0,
+    "improvement_summary": "After implementation has 26 tests vs 26 in before"
+  },
+  "success": true,
+  "error": null
+}

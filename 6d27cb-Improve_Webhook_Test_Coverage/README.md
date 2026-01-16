@@ -22,12 +22,13 @@ docker compose run --rm -e PYTHONPATH=/app/repository_before app pytest tests/ -
 ```
 
 **Expected behavior:**
-- Functional tests: ✅ PASS
-- Bug verification tests: ✅ PASS (confirms bugs exist in original implementation)
+- 24 tests: ✅ PASS
+- 2 tests: ❌ FAIL (reveals bugs in original implementation)
+- Exit code: 1 (expected - this is correct behavior)
 
 ### Run tests (after – expected all pass)
 ```bash
-docker compose run --rm -e PYTHONPATH=/app/repository_after app pytest -q
+docker compose run --rm -e PYTHONPATH=/app/repository_after app pytest tests/ -q
 ```
 
 **Expected behavior:**
