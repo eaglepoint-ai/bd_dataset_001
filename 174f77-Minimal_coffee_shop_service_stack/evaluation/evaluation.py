@@ -277,7 +277,7 @@ def main():
     report, test_counts = run_evaluation()
     
     # Write report to latest.json only
-    latest_path = REPORTS / "report.json"
+    latest_path = REPORTS / "latest.json"
     latest_path.write_text(json.dumps(report, indent=2))
     print(f"Report written to {latest_path}")
     
