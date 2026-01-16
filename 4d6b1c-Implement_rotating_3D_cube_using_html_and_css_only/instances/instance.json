@@ -1,1 +1,8 @@
-{}
+{
+    "instance_id": "4d6b1c",
+    "problem_statement": "Create a fully functional, visually polished 3D rotating cube using only HTML and CSS, without any JavaScript or external libraries. The cube should rotate smoothly along the X, Y, and Z axes, demonstrating true 3D depth, while each face features a modern glassmorphism design with high transparency, subtle backdrop-filter: blur(), semi-transparent white borders, and soft inner glows. The cube must be perfectly centered on a dark gradient background, remain responsive across different screen sizes, and the entire implementation should be contained within a single HTML file with all necessary CSS included.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/4d6b1c-Implement_rotating_3D_cube_using_html_and_css_only",
+    "environment_setup": "Dockerfile"
+}

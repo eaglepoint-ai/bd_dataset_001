@@ -1,6 +1,10 @@
 services:
-  app:
-    build: .
-    command: pytest -q tests
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app/tests/
     volumes:
       - .:/app
+      - /app/tests/node_modules
+    ipc: host

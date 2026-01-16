@@ -1,0 +1,11 @@
+{
+    "name": "cube-tests",
+    "version": "1.0.0",
+    "description": "Playwright tests for 3D cube",
+    "scripts": {
+        "test": "playwright test"
+    },
+    "devDependencies": {
+        "@playwright/test": "1.57.0"
+    }
+}
