@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// Mock API with artificial delay
 const mockAPI = {
   async getUserProfile(userId) {
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -50,9 +49,7 @@ const mockAPI = {
   }
 };
 
-// ============= PROBLEMATIC COMPONENTS =============
 
-// UserProfile component - makes its own API call
 const UserProfile = ({ userId }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -87,7 +84,6 @@ const UserProfile = ({ userId }) => {
   );
 };
 
-// ProjectCard component - makes API calls for tasks AND team members
 const ProjectCard = ({ project }) => {
   const [tasks, setTasks] = useState([]);
   const [team, setTeam] = useState([]);
@@ -166,7 +162,6 @@ const ProjectCard = ({ project }) => {
   );
 };
 
-// ProjectsList component - maps over projects, each making 2 API calls
 const ProjectsList = ({ userId }) => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -199,7 +194,6 @@ const ProjectsList = ({ userId }) => {
   );
 };
 
-// Notifications component - makes its own API call
 const Notifications = ({ userId }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -243,7 +237,6 @@ const Notifications = ({ userId }) => {
   );
 };
 
-// ============= MAIN DASHBOARD =============
 const Dashboard = ({ userId = 1 }) => {
   const [totalAPICalls, setTotalAPICalls] = useState(0);
   const [loadStartTime, setLoadStartTime] = useState(null);
@@ -252,18 +245,16 @@ const Dashboard = ({ userId = 1 }) => {
   useEffect(() => {
     setLoadStartTime(Date.now());
     
-    // Track when all loading is complete
     const timer = setTimeout(() => {
       setLoadEndTime(Date.now());
-    }, 3000); // Approximate time for all API calls to complete
+    }, 3000); 
 
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    // Count console logs (rough approximation)
     const interval = setInterval(() => {
-      setTotalAPICalls(prev => prev + 0.1); // Simulate counting
+      setTotalAPICalls(prev => prev + 0.1);
     }, 100);
 
     return () => clearInterval(interval);
@@ -273,21 +264,6 @@ const Dashboard = ({ userId = 1 }) => {
 
   return (
     <div className="dashboard">
-      <div className="performance-warning">
-        <strong>⚠️ N+1 QUERY PROBLEM</strong>
-        <p>This dashboard makes <strong>12 separate API requests</strong> on initial load:</p>
-        <ul>
-          <li>1 request for user profile</li>
-          <li>1 request for projects list</li>
-          <li>3 requests for project tasks (one per project)</li>
-          <li>3 requests for team members (one per project)</li>
-          <li>1 request for notifications</li>
-          <li>3 additional requests as components re-render</li>
-        </ul>
-        <p>Total load time: <strong>{loadTime ? `${loadTime}s` : 'Loading...'}</strong></p>
-        <p className="console-hint">📊 Open browser console to see API call waterfall</p>
-      </div>
-
       <div className="dashboard-grid">
         <div className="left-column">
           <UserProfile userId={userId} />
@@ -302,7 +278,6 @@ const Dashboard = ({ userId = 1 }) => {
   );
 };
 
-// ============= APP =============
 export default function App() {
   return (
     <div className="app">
@@ -602,8 +577,6 @@ export default function App() {
           gap: 8px;
         }
       `}</style>
-      
-      <h1 style={{ marginBottom: '20px', color: '#333' }}>Dashboard - N+1 Query Problem</h1>
       <Dashboard userId={1} />
     </div>
   );
