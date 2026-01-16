@@ -66,7 +66,7 @@ public class Evaluation {
         List<String> compileCmd = new ArrayList<>();
         compileCmd.add("javac");
         compileCmd.add("-cp");
-        compileCmd.add(".:junit-platform-console-standalone-1.9.3.jar");
+        compileCmd.add(".:/opt/junit-platform-console-standalone.jar");
         compileCmd.add("-d");
         compileCmd.add("/tmp/classes");
         
@@ -115,7 +115,7 @@ public class Evaluation {
         List<String> runCmd = new ArrayList<>();
         runCmd.add("java");
         runCmd.add("-cp");
-        runCmd.add("/tmp/classes:junit-platform-console-standalone-1.9.3.jar");
+        runCmd.add("/tmp/classes:/opt/junit-platform-console-standalone.jar");
         runCmd.add("org.junit.platform.console.ConsoleLauncher");
         runCmd.add("--class-path=/tmp/classes");
         runCmd.add("--select-class=FetchOptimizationTest");
