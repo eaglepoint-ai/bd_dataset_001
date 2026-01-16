@@ -65,10 +65,11 @@ def validate_requirements(module_path: str) -> dict:
     
     tree = ast.parse(source_code)
     
-    # Requirement 1-5: Concurrent, async, non-blocking processing
+    # Requirement 1-5: Concurrent, async, non-blocking processing (5 requirements)
     req_1_5 = {
         "name": "Requirements 1-5: Concurrent, Async, Non-blocking Processing",
         "passed": False,
+        "count": 5,  # This group represents 5 requirements
         "details": []
     }
     
@@ -85,10 +86,11 @@ def validate_requirements(module_path: str) -> dict:
     
     results["requirements"]["req_1_5"] = req_1_5
     
-    # Requirement 6-7: Queue-based data management
+    # Requirement 6-7: Queue-based data management (2 requirements)
     req_6_7 = {
         "name": "Requirements 6-7: Queue-based Data Management",
         "passed": False,
+        "count": 2,  # This group represents 2 requirements
         "details": []
     }
     
@@ -101,10 +103,11 @@ def validate_requirements(module_path: str) -> dict:
     
     results["requirements"]["req_6_7"] = req_6_7
     
-    # Requirement 8: Type safety with Protocol
+    # Requirement 8: Type safety with Protocol (1 requirement)
     req_8 = {
         "name": "Requirement 8: Strict Type Hinting with Protocol",
         "passed": False,
+        "count": 1,  # This group represents 1 requirement
         "details": []
     }
     
@@ -123,10 +126,11 @@ def validate_requirements(module_path: str) -> dict:
     
     results["requirements"]["req_8"] = req_8
     
-    # Requirement 9: Circular buffer with deque
+    # Requirement 9: Circular buffer with deque (1 requirement)
     req_9 = {
         "name": "Requirement 9: Circular Buffer Pattern",
         "passed": False,
+        "count": 1,  # This group represents 1 requirement
         "details": []
     }
     
@@ -144,10 +148,11 @@ def validate_requirements(module_path: str) -> dict:
     
     results["requirements"]["req_9"] = req_9
     
-    # Requirement 10-11: No global state
+    # Requirement 10-11: No global state (2 requirements)
     req_10_11 = {
         "name": "Requirements 10-11: No Global State",
         "passed": False,
+        "count": 2,  # This group represents 2 requirements
         "details": []
     }
     
@@ -175,10 +180,11 @@ def validate_requirements(module_path: str) -> dict:
     
     results["requirements"]["req_10_11"] = req_10_11
     
-    # Requirement 12: No for/while loops in processing logic
+    # Requirement 12: No for/while loops in processing logic (1 requirement)
     req_12 = {
         "name": "Requirement 12: No for/while Loops (Use Comprehensions)",
         "passed": False,
+        "count": 1,  # This group represents 1 requirement
         "details": []
     }
     
@@ -204,12 +210,13 @@ def validate_requirements(module_path: str) -> dict:
     
     results["requirements"]["req_12"] = req_12
     
-    # Count passed/failed
+    # Count passed/failed based on requirement counts
     for req_key, req_data in results["requirements"].items():
+        req_count = req_data.get("count", 1)
         if req_data["passed"]:
-            results["passed"] += 1
+            results["passed"] += req_count
         else:
-            results["failed"] += 1
+            results["failed"] += req_count
     
     return results
 
@@ -316,9 +323,10 @@ def main() -> None:
         print("=" * 70)
         after_val = payload["after_validation"]
         if after_val["passed"] == after_val["total_requirements"]:
-            print("✅ ALL REQUIREMENTS PASSED - Implementation is compliant!")
+            print(f"✅ ALL REQUIREMENTS PASSED - {after_val['passed']}/{after_val['total_requirements']} requirements met!")
         else:
-            print(f"❌ FAILED: {after_val['failed']}/{after_val['total_requirements']} requirements not met")
+            print(f"❌ IMPLEMENTATION FAILED - Only {after_val['passed']}/{after_val['total_requirements']} requirements passed")
+            print(f"   {after_val['failed']} requirements not met")
 
 
 if __name__ == "__main__":
