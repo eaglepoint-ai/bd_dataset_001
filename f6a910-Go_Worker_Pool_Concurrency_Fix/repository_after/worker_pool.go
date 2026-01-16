@@ -14,10 +14,10 @@ var (
 	ErrNilTask    = errors.New("task cannot be nil")
 )
 
-
 // Task represents a unit of work for the worker pool.
 type Task func() error
 
+type WorkerPool struct {
 	workerCount int // Number of workers
 
 	// taskQueue holds submitted tasks. Buffered to match worker count for efficiency.
@@ -70,15 +70,17 @@ func (wp *WorkerPool) worker(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			// Context cancelled, exit worker.
+			// Context cancelled, exit worker immediately.
 			return
 		case task, ok := <-wp.taskQueue:
 			if !ok {
-				// taskQueue closed, no more tasks.
+				// taskQueue closed and empty, return.
 				return
 			}
-			err := task()
-			wp.saveResult(err)
+			if task != nil {
+				err := task()
+				wp.saveResult(err)
+			}
 		}
 	}
 }
@@ -92,20 +94,30 @@ func (wp *WorkerPool) saveResult(err error) {
 }
 
 // Submit adds a task to the pool. Returns error if the pool is stopped, has no workers, or task is nil.
-func (wp *WorkerPool) Submit(task Task) error {
+func (wp *WorkerPool) Submit(task Task) (err error) {
 	if task == nil {
 		return ErrNilTask
 	}
 	if wp.workerCount == 0 {
 		return ErrNoWorkers
 	}
-	// Check if pool is stopped before submitting.
+
+	// Double-check quit channel to avoid panic-recover if possible
 	select {
 	case <-wp.quit:
 		return ErrPoolClosed
 	default:
 	}
-	// Try to submit the task, or fail if pool is stopped concurrently.
+
+	// Handle race condition where taskQueue is closed during send
+	defer func() {
+		if r := recover(); r != nil {
+			err = ErrPoolClosed
+		}
+	}()
+
+	// Try to submit the task.
+	// If taskQueue is closed by Stop() while we are blocked here, it triggers a panic, caught by recover.
 	select {
 	case wp.taskQueue <- task:
 		return nil
