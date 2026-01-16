@@ -52,9 +52,17 @@ Do not add new dependencies. Use only React built-in hooks.
 - TypeScript compilation passes with no errors
 
 ## Commands
-
 ```bash
-# Build and run tests
-docker-compose run --rm run_before
+# Build and run BEFORE tests
+docker run --rm npm run test:before
 ```
 
+```bash
+# Build and run AFTER tests
+docker run --rm npm run test:after
+```
+
+```bash
+# Build and run EVALUATION
+docker run --rm -v $(pwd)/evaluation:/app/evaluation npm run evaluate
+```
