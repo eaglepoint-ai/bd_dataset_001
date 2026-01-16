@@ -43,23 +43,42 @@ function parseJestJson(stdout, stderr, exitCode) {
   const tests = [];
   let passed = 0;
   let failed = 0;
+  const testDetails = [];
 
-  const match = stdout.match(/(\d+) amount passed and (\d+) amount failed/);
-  if (match) {
-    passed = parseInt(match[1], 10);
-    failed = parseInt(match[2], 10);
-    
-    // Create dummy test results to satisfy the schema
-    for (let i = 0; i < passed; i++) {
-      tests.push({ nodeid: `test-${i}`, name: `Passed test ${i}`, outcome: 'passed' });
+  // Extract test names from the output
+  const testLines = stdout.split('\n').filter(line => line.includes('running \''));
+  testLines.forEach(line => {
+    const nameMatch = line.match(/running '([^']+)'/);
+    const statusMatch = line.match(/\[(PASS|FAIL)\]/);
+    if (nameMatch && statusMatch) {
+      const name = nameMatch[1];
+      const status = statusMatch[1];
+      testDetails.push({ name, status });
+      if (status === 'PASS') passed++;
+      else failed++;
     }
-    for (let i = 0; i < failed; i++) {
-      tests.push({ nodeid: `test-${i}`, name: `Failed test ${i}`, outcome: 'failed' });
+  });
+
+  // Fallback to summary line if we couldn't parse test names
+  if (testDetails.length === 0) {
+    const match = stdout.match(/Total: (\d+) \| Passed: (\d+) \| Failed: (\d+)/);
+    if (match) {
+      passed = parseInt(match[2], 10);
+      failed = parseInt(match[3], 10);
     }
   }
 
+  // Create test results for schema
+  testDetails.forEach((test, idx) => {
+    tests.push({ 
+      nodeid: `test-${idx}`, 
+      name: test.name, 
+      outcome: test.status === 'PASS' ? 'passed' : 'failed' 
+    });
+  });
+
   return {
-    success: exitCode === 0 && failed === 0 && (passed + failed) > 0,
+    success: false, // Will be set in runTests
     exit_code: exitCode,
     tests,
     summary: {
@@ -69,6 +88,7 @@ function parseJestJson(stdout, stderr, exitCode) {
       errors: (exitCode !== 0 && failed === 0) ? 1 : 0,
       skipped: 0
     },
+    testDetails,
     stdout,
     stderr
   };
@@ -93,11 +113,10 @@ function runTests(repoPath, label, expectLeaks = false) {
   let exitCode = 0;
   
   try {
-    // Use --json flag for reliable parsing and redirect stderr to stdout to capture everything
-    stdout = execSync('npm test 2>&1', { 
+    stdout = execSync('npm test', { 
       env, 
       encoding: 'utf-8', 
-      stdio: 'pipe' 
+      stdio: 'pipe'
     });
   } catch (e) {
     stdout = e.stdout?.toString() || '';
@@ -106,8 +125,26 @@ function runTests(repoPath, label, expectLeaks = false) {
   }
 
   const result = parseJestJson(stdout, stderr, exitCode);
-
+  
+  // Print results
   console.log(`\nResults: ${result.summary.passed} passed, ${result.summary.failed} failed (total: ${result.summary.total})`);
+  if (result.testDetails && result.testDetails.length > 0) {
+    result.testDetails.forEach(test => {
+      console.log(`   ${test.name}`);
+    });
+  }
+  
+  // A repository check is successful if:
+  // 1. For 'before': we EXPECT it to fail (as it has memory leaks), so success is if it HAS failures.
+  // 2. For 'after': we expect it to PASS completely.
+  
+  if (expectLeaks) {
+    // repository_before should fail tests
+    result.success = (result.summary.failed > 0);
+  } else {
+    // repository_after should pass all tests
+    result.success = (exitCode === 0 && result.summary.failed === 0 && result.summary.passed > 0);
+  }
 
   return result;
 }
@@ -143,13 +180,14 @@ function main() {
   console.log('='.repeat(60));
   
   console.log(`\nBefore Implementation (repository_before):`);
-  console.log(`  Overall: ${beforeResults.success ? '✅ PASSED' : '✅ PASSED'}`);
+  console.log(`  Overall: ${beforeResults.success ? '✅ PASSED' : '❌ FAILED'}`);
   console.log(`  Tests: ${beforeResults.summary.passed}/${beforeResults.summary.total} passed`);
 
   console.log(`\nAfter Implementation (repository_after):`);
-  console.log(`  Overall: ${afterResults.success ? '✅ PASSED' : '✅ PASSED'}`);
+  console.log(`  Overall: ${afterResults.success ? '✅ PASSED' : '❌ FAILED'}`);
   console.log(`  Tests: ${afterResults.summary.passed}/${afterResults.summary.total} passed`);
 
+  // Job is successful if BOTH stages met their expectations
   const success = beforeResults.success && afterResults.success;
 
   const report = {

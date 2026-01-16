@@ -189,20 +189,14 @@ class TaskProcessor extends EventEmitter {
     task.startedAt = Date.now();
     this.processing.set(id, task);
 
+    let timeoutId;
     try {
       // FIX 9: Store timeout ID so it can be cleared
-      let timeoutId;
       const timeoutPromise = new Promise((_, reject) => {
         timeoutId = setTimeout(() => reject(new Error('Timeout')), task.timeout);
       });
 
       const result = await Promise.race([task.fn(), timeoutPromise]);
-
-      // FIX 9: Clear timeout if task completes before timeout
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-
       this._completeTask(id, result);
     } catch (error) {
       if (task.attempt < task.retries) {
@@ -211,6 +205,11 @@ class TaskProcessor extends EventEmitter {
         this._processNext();
       } else {
         this._failTask(id, error);
+      }
+    } finally {
+      // FIX 9: Clear timeout if task completes before timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     }
 
