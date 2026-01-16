@@ -1,0 +1,8 @@
+{
+    "instance_id": "36b153",
+    "problem_statement": "The current RemoveForm React component allows users to delete a song by ID, but it suffers from multiple functionality, UX, and architectural shortcomings that make it unreliable and difficult to maintain. The component lacks proper client-side validation, allowing empty or invalid values to be submitted, and provides no protection against duplicate submissions. Error handling is incomplete, with messages only logged to the console instead of being displayed to users, and incorrect text is shown in some failure scenarios. There is no loading indicator, no confirmation step before deletion, and no mechanism to cancel in-flight requests, which can lead to poor user experience and potential memory leaks. Architecturally, the component calls Axios directly instead of using a reusable API service, relies on outdated CommonJS imports, and lacks proper TypeScript typings for API responses. These issues reduce usability, accessibility, and maintainability, making a refactor necessary to deliver a more robust, user-friendly, and production-ready solution.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/36b153-Song_Delete_Form_Refactor",
+    "environment_setup": "Dockerfile"
+}  
