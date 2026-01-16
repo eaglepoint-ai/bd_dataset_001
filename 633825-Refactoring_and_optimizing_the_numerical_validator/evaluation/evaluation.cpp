@@ -149,7 +149,10 @@ TestResult run_test(const std::string &test_name, const std::string &label) {
 #else
     std::string cmd = "./test " + test_name + " > " + output_file + " 2>&1";
 #endif
+    
+    std::cout << "Executing: " << cmd << "\n";
     int exit_code = std::system(cmd.c_str());
+    std::cout << "Exit code: " << exit_code << "\n";
     
     TestResult result;
     result.exit_code = exit_code;
@@ -159,35 +162,43 @@ TestResult run_test(const std::string &test_name, const std::string &label) {
     result.failed = 0;
 
     std::ifstream file(output_file);
-    if (file.is_open()) {
-        std::string line;
-        std::string output;
-        while (std::getline(file, line)) {
-            std::cout << line << "\n";
-            output += line + "\n";
-            
-            if (line.find("[PASS]") != std::string::npos) {
-                TestCase tc;
-                size_t pos = line.find("] ") + 2;
-                tc.name = line.substr(pos);
-                tc.outcome = "passed";
-                result.tests.push_back(tc);
-                result.passed++;
-                result.total++;
-            } else if (line.find("[FAIL]") != std::string::npos) {
-                TestCase tc;
-                size_t pos = line.find("] ") + 2;
-                tc.name = line.substr(pos);
-                tc.outcome = "failed";
-                result.tests.push_back(tc);
-                result.failed++;
-                result.total++;
-            }
-        }
-        file.close();
-        result.stdout_output = output;
-        std::remove(output_file.c_str());
+    if (!file.is_open()) {
+        std::cerr << "WARNING: Could not open output file: " << output_file << "\n";
+        std::cerr << "Test may have failed to run or output redirection failed\n";
+        result.stdout_output = "ERROR: Could not read test output file";
+        return result;
     }
+    
+    std::string line;
+    std::string output;
+    while (std::getline(file, line)) {
+        std::cout << line << "\n";
+        output += line + "\n";
+        
+        if (line.find("[PASS]") != std::string::npos) {
+            TestCase tc;
+            size_t pos = line.find("] ") + 2;
+            tc.name = line.substr(pos);
+            tc.outcome = "passed";
+            result.tests.push_back(tc);
+            result.passed++;
+            result.total++;
+        } else if (line.find("[FAIL]") != std::string::npos) {
+            TestCase tc;
+            size_t pos = line.find("] ") + 2;
+            tc.name = line.substr(pos);
+            tc.outcome = "failed";
+            result.tests.push_back(tc);
+            result.failed++;
+            result.total++;
+        }
+    }
+    file.close();
+    result.stdout_output = output;
+    
+    std::cout << "Parsed " << result.total << " tests (" << result.passed << " passed, " << result.failed << " failed)\n";
+    
+    std::remove(output_file.c_str());
 
     return result;
 }
@@ -313,6 +324,19 @@ int main(int argc, char *argv[]) {
 
     TestResult before, after;
     bool compile_success = true;
+    
+    // Initialize with default values
+    before.exit_code = -1;
+    before.success = false;
+    before.total = 0;
+    before.passed = 0;
+    before.failed = 0;
+    
+    after.exit_code = -1;
+    after.success = false;
+    after.total = 0;
+    after.passed = 0;
+    after.failed = 0;
     
     std::cout << "\nCompiling tests...\n";
 #ifdef _WIN32
