@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./repository_before
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - voting-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./repository_before
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - voting-network
+    restart: unless-stopped
+
+networks:
+  voting-network:
+    driver: bridge
+

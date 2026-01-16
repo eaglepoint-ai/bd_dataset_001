@@ -1,0 +1,94 @@
+# Real-time Voting App
+
+## Problem Statement
+
+You are building an internal tool for team decision-making. The application allows users to create polls, share them via URL, and see voting results update in real-time without page refresh. The system must handle concurrent voters and maintain vote integrity.
+
+## Category
+
+**New Feature Development** (Full-Stack: Go + React)
+
+## Prompt
+
+Real-time Voting Application
+
+Context:
+You are building an internal tool for team decision-making. The application allows users to create polls with multiple options, share them via unique URLs, vote on polls, and see results update live without refreshing the page. The system must handle concurrent voters and maintain vote integrity.
+
+Business Requirement:
+Build a full-stack voting application with a Go backend and React frontend that supports real-time result updates via WebSocket.
+
+Language and Environment:
+- Backend: Go (version 1.21+)
+- Frontend: React 18 with Vite
+- WebSocket library: gorilla/websocket (backend)
+- No external databases (in-memory storage only)
+- No authentication required (cookie-based session tracking)
+
+Required Deliverables:
+1. Go backend with REST API and WebSocket support
+2. React frontend with responsive design
+3. docker-compose.yml to run both services
+
+Functional Requirements:
+1. Create poll: Question + 2-5 options, returns unique poll ID/URL
+2. Vote on poll: One vote per browser session (use cookies)
+3. Real-time updates: All viewers see vote counts update instantly via WebSocket
+4. Close poll: Creator can close poll to stop accepting votes
+5. Share URL: Polls accessible via shareable link (e.g., /polls/{id})
+
+Technical Constraints:
+1. Backend must handle concurrent vote submissions safely (use mutex/locks)
+2. WebSocket must broadcast updates to all connected clients viewing same poll
+3. Frontend must reconnect WebSocket on disconnection
+4. All data stored in-memory (no persistence required)
+
+API Endpoints:
+- POST /api/polls - Create new poll
+- GET /api/polls/{id} - Get poll data
+- POST /api/polls/{id}/vote - Submit vote
+- POST /api/polls/{id}/close - Close poll
+- WS /ws/polls/{id} - WebSocket for real-time updates
+
+Validation Scenarios:
+1. Create poll with 3 options → Returns valid poll ID
+2. Vote on poll → Vote count increments
+3. Second browser votes → First browser sees update without refresh
+4. Same browser votes twice → Rejected with error
+5. Vote on closed poll → Rejected with error
+6. Invalid poll ID → 404 error page
+
+Non-Functional Requirements:
+1. Handle 100+ concurrent WebSocket connections
+2. Responsive UI (mobile and desktop)
+3. Page load time under 2 seconds
+
+## Requirements Summary
+
+1. Create complete Go backend with gorilla/websocket for real-time updates
+2. Create React 18 frontend with Vite bundler
+3. Implement proper HTTP routing for REST endpoints
+4. Implement WebSocket broadcast to all poll viewers
+5. Use cookies for session-based vote tracking (one vote per browser)
+6. Handle concurrent access with proper synchronization (mutex)
+7. Include docker-compose.yml for running both services
+8. If you are not familiar with Go or React, refer to:
+   - Go Official Documentation: https://go.dev/doc/
+   - gorilla/websocket: https://github.com/gorilla/websocket
+   - React Documentation: https://react.dev/
+   - Vite Documentation: https://vitejs.dev/
+   - You may also use an AI assistant to help implement the solution
+
+## Discrimination Notes
+
+This task is highly discriminating because:
+- Requires correct HTTP routing patterns (common mistake: double slashes)
+- Requires proper WebSocket lifecycle management
+- Requires thread-safe concurrent access handling
+- Requires full-stack integration (Go + React + Docker)
+- Multiple AI responses failed due to:
+  - Routing bugs (double slashes in URL patterns)
+  - Incomplete code (placeholder comments)
+  - Using Go 1.22+ features on Go 1.21
+  - Hallucinated APIs (e.g., time.Now().Read())
+
