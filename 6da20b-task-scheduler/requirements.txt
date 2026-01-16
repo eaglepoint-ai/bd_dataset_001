@@ -1,1 +1,2 @@
-# Add your Python dependencies here
+# Python dependencies for task scheduler project
+# No external dependencies needed - uses only standard library

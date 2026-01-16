@@ -1,52 +1,167 @@
-# project template
+# Task Scheduler
 
-Starter scaffold for bd dataset task.
+A Python-based task scheduling system that assigns tasks across multiple days while respecting time windows and dependency constraints.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+## Problem Overview
 
----
+The scheduler reads task definitions from a JSON file (`task.json`) where each task has:
+- **duration**: How long the task takes (in hours)
+- **earliest**: Earliest start time (hour of day, 0-24)
+- **latest**: Latest finish time (hour of day, 0-24)
+- **after**: (Optional) Task must start after this task completes
+- **not_same_day_as**: (Optional) Task cannot be on the same day as this task
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
-
-### Setup Steps
-
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
+## Project Structure
 
 ```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+├── repository_before/     # Original buggy code
+│   ├── scheduler.py
+│   └── task.json
+├── repository_after/      # Fixed code
+│   ├── scheduler.py
+│   └── task.json
+├── tests/                 # Test suite
+│   └── test_scheduler.py
+├── evaluation/            # Evaluation scripts
+│   ├── evaluation.py
+│   └── reports/          # Generated reports (YYYY-MM-DD/HH-MM-SS/)
+├── patches/               # Diff between before/after
+│   └── diff.patch
+├── trajectory/            # Development notes
+│   └── trajectory.md
+├── Dockerfile
+├── docker-compose.yml
+└── requirements.txt
 ```
+
+## Issues Fixed
+
+The original `repository_before/scheduler.py` had these critical bugs:
+
+1. **File path handling**: Used `open("task.json")` which fails when run from different directories
+2. **Null value handling**: `task.get("earliest", 0)` returns `None` for explicit null values, causing TypeError
+3. **Infinite recursion**: `not_same_day_as` constraint called itself without a base case
+4. **Global state**: Poor management of the `day` variable
+5. **Missing validation**: No checks for invalid time windows, circular dependencies, or missing fields
+6. **No error handling**: Missing required JSON fields caused cryptic errors
+
+## Quick Start
+
+### Run Locally
+
+```bash
+# Run the fixed scheduler
+cd repository_after
+python3 scheduler.py
+
+# Run the broken scheduler (will crash with RecursionError)
+cd repository_before
+python3 scheduler.py
+```
+
+### Run Tests
+
+```bash
+# Test the before version
+python3 tests/test_scheduler.py repository_before/scheduler.py "BEFORE"
+
+# Test the after version
+python3 tests/test_scheduler.py repository_after/scheduler.py "AFTER"
+```
+
+### Run Evaluation
+
+```bash
+# Run full evaluation (generates report)
+python3 evaluation/evaluation.py
+```
+
+## Docker Commands
+
+### Build the Docker Image
+
+```bash
+docker build -t task-scheduler .
+```
+
+### Run Individual Services
+
+```bash
+# Run tests on the BEFORE version (buggy)
+docker compose run --rm test-before
+
+# Run tests on the AFTER version (fixed)
+docker compose run --rm test-after
+
+# Run full evaluation (compares before and after)
+docker compose run --rm evaluation
+```
+
+### Run All Services
+
+```bash
+# Run all services (tests + evaluation)
+docker compose up
+```
+
+### Clean Up
+
+```bash
+# Remove containers and images
+docker compose down --rmi all
+
+# Remove orphaned containers
+docker compose down --remove-orphans
+```
+
+## Test Results
+
+| Version | Tests Passed | Pass Rate |
+|---------|--------------|-----------|
+| Before  | 3/9          | 33%       |
+| After   | 9/9          | 100%      |
+
+**Improvements**: +6 tests fixed, +66.7% pass rate
+
+## Example Output
+
+### Fixed Scheduler Output
+
+```
+Scheduling process:
+
+Scheduling 'Task A'...
+  ✓ Scheduled 'Task A' on Day 1, 8:00 to 10:00
+
+Scheduling 'Task B'...
+  ✓ Scheduled 'Task B' on Day 1, 10:00 to 11:00
+
+Scheduling 'Task C'...
+  Moving 'Task C' to day 2 (not_same_day_as 'Task A')
+  ✓ Scheduled 'Task C' on Day 2, 0:00 to 0.5:00
+
+==================================================
+Final Schedule:
+==================================================
+Day 1: Task A -> 8:00 to 10:00
+Day 1: Task B -> 10:00 to 11:00
+Day 2: Task C -> 0:00 to 0.5:00
+```
+
+## Reports
+
+Evaluation reports are generated in:
+```
+evaluation/reports/YYYY-MM-DD/HH-MM-SS/
+├── report.json      # Machine-readable results
+├── report.txt       # Human-readable summary
+├── before_results.json
+└── after_results.json
+```
+
+## License
+
+MIT
 
 ### Report Schema
 

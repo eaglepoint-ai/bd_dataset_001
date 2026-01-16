@@ -1,6 +1,30 @@
 services:
-  app:
+  # Run tests on the BEFORE version
+  test-before:
     build: .
-    command: pytest -q tests
+    command: python3 tests/test_scheduler.py repository_before/scheduler.py repository_before
     volumes:
-      - .:/app
+      - ./evaluation/reports:/app/evaluation/reports
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # Run tests on the AFTER version
+  test-after:
+    build: .
+    command: python3 tests/test_scheduler.py repository_after/scheduler.py repository_after
+    volumes:
+      - ./evaluation/reports:/app/evaluation/reports
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # Run the evaluation (compares before and after)
+  evaluation:
+    build: .
+    command: python3 evaluation/evaluation.py
+    volumes:
+      - ./evaluation/reports:/app/evaluation/reports
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - test-before
+      - test-after
