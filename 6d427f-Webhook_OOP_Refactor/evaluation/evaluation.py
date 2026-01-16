@@ -19,14 +19,14 @@ def environment_info():
         "platform": platform.platform()
     }
 
-def run_tests(context_path=None):
+def run_tests(context_path=None, test_path="tests"):
     env = os.environ.copy()
     if context_path:
         env["PYTHONPATH"] = str(context_path) + os.pathsep + env.get("PYTHONPATH", "")
         
     try:
         proc = subprocess.run(
-            ["pytest", "tests", "-v"],
+            ["pytest", str(test_path), "-v"],
             cwd=ROOT,
             capture_output=True,
             text=True,
@@ -78,7 +78,13 @@ def run_metrics(repo_path: Path):
 
 def evaluate(repo_name: str):
     repo_path = ROOT / repo_name
-    tests = run_tests(repo_path)
+    
+    # Check if specific tests exist for this repository version
+    test_path = repo_path / "tests"
+    if not test_path.exists():
+        test_path = "tests"
+    
+    tests = run_tests(repo_path, test_path)
     metrics = run_metrics(repo_path)
     return {
         "tests": tests,
