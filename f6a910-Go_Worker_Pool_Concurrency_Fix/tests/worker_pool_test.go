@@ -257,7 +257,7 @@ func TestStressLoad(t *testing.T) {
 
 	const totalTasks = 100_000
 	// Use enough workers to actually process the load
-	pool := NewWorkerPool(100)
+	pool := NewWorkerPool(100) 
 	pool.Start(context.Background())
 
 	var counter int32
@@ -269,7 +269,7 @@ func TestStressLoad(t *testing.T) {
 	go func() {
 		defer submitWg.Done()
 		for i := 0; i < totalTasks; i++ {
-			// We check error here. If Submit fails BEFORE Stop is called,
+			// We check error here. If Submit fails BEFORE Stop is called, 
 			// it's a real bug (or buffer full if not handled).
 			err := pool.Submit(func() error {
 				atomic.AddInt32(&counter, 1)
@@ -284,7 +284,7 @@ func TestStressLoad(t *testing.T) {
 	// 2. Wait for ALL submissions to finish
 	submitWg.Wait() // <--- CRITICAL FIX: Block here until loop is done
 
-	// 3. Now it is safe to Stop.
+	// 3. Now it is safe to Stop. 
 	// Stop() will wait for the workers to drain the queue.
 	pool.Stop()
 
@@ -294,6 +294,7 @@ func TestStressLoad(t *testing.T) {
 		t.Errorf("Stress test failed. Processed %d out of %d tasks", finalCount, totalTasks)
 	}
 }
+
 
 // -------------------------------------------------------------------
 // REQUIREMENT 1 & 2: Race Conditions & Race Detector Clean
@@ -336,6 +337,7 @@ func TestRaceCondition_ConcurrentSubmissions(t *testing.T) {
 	}
 }
 
+
 func TestNegativeWorkers(t *testing.T) {
 	// Should not panic, should treat as 0 or 1 depending on implementation choice.
 	// Based on solution: treated as 0 workers.
@@ -346,7 +348,7 @@ func TestNegativeWorkers(t *testing.T) {
 	// Verify it behaves like 0 workers (returns error on submit)
 	// or at least doesn't crash.
 	err := pool.Submit(func() error { return nil })
-
+	
 	// If it allows submission but doesn't process, that's a block (timeout needed)
 	// If it treats as 0, it returns error immediately.
 	// We just want to ensure NO PANIC happened above.
@@ -392,7 +394,7 @@ func TestResultsImmutability(t *testing.T) {
 	if len(results2) != 1 {
 		t.Error("Security Fail: External caller was able to modify internal pool state! GetResults() must return a copy.")
 	}
-
+	
 	pool.Stop()
 }
 
@@ -431,7 +433,7 @@ func TestRaceCondition_ReadWhileWrite(t *testing.T) {
 			default:
 				_ = pool.GetResults()
 				// yield slightly to let writers run
-				time.Sleep(10 * time.Microsecond)
+				time.Sleep(10 * time.Microsecond) 
 			}
 		}
 	}()
