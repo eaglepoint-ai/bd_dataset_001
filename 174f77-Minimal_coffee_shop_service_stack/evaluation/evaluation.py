@@ -260,7 +260,7 @@ def run_evaluation():
         "success": comparison["passed_gate"],
         "error": error
     }
-    
+
     # Return report and test_counts separately for terminal output
     return report, test_counts
 
@@ -268,31 +268,31 @@ def run_evaluation():
 def main():
     """
     Entry point for evaluation.
-    
+
     Returns:
         int: 0 if success, 1 if failure
     """
     REPORTS.mkdir(parents=True, exist_ok=True)
-    
+
     report, test_counts = run_evaluation()
-    
+
     # Write report to latest.json only
     latest_path = REPORTS / "latest.json"
     latest_path.write_text(json.dumps(report, indent=2))
     print(f"Report written to {latest_path}")
-    
+
     # Print summary with test counts
     print(f"\n{'='*60}")
     print("Evaluation Summary")
     print('='*60)
-    
+
     # Before tests
     before_total = test_counts["before"]["total"]
     before_passed = test_counts["before"]["passed"]
     before_failed = test_counts["before"]["failed"]
     print(f"Before tests: {before_total} total, {before_passed} passed, {before_failed} failed")
     print(f"Before tests passed: {report['before']['tests']['passed']}")
-    
+
     print('-'*60)
 
     # After tests
