@@ -1,5 +1,21 @@
-FROM python:3.11-slim
+FROM node:18-alpine
+
 WORKDIR /app
-COPY . /app
-RUN pip install --no-cache-dir -r requirements.txt
-CMD ["pytest", "-q", "tests"]
+
+# Copy repository_after
+COPY repository_after/package*.json ./
+RUN npm install
+
+COPY repository_after/ ./
+
+# Copy evaluation script
+COPY evaluation/ /evaluation/
+
+# Build the Next.js app
+RUN npm run build
+
+# Expose port
+EXPOSE 3000
+
+# Default command runs the app
+CMD ["npm", "start"]

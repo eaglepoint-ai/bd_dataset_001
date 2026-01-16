@@ -1,6 +1,23 @@
+version: '3.8'
+
 services:
-  app:
+  songlist-app:
     build: .
-    command: pytest -q tests
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
     volumes:
-      - .:/app
+      - ./evaluation:/evaluation
+
+  songlist-test:
+    build: .
+    command: npm test
+    volumes:
+      - ./evaluation:/evaluation
+
+  songlist-evaluate:
+    build: .
+    command: node /evaluation/evaluation.js
+    volumes:
+      - ./evaluation:/evaluation

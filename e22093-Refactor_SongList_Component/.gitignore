@@ -1,1 +1,7 @@
-evaluation/2025-12-21/
+node_modules/
+dist/
+build/
+.env
+.DS_Store
+*.log
+evaluation/reports/
