@@ -1,0 +1,9 @@
+{
+  "instance_id": "b1c7f0",
+  "problem_statement": "Fix critical bugs in legacy TaskScheduler: circular dependency loops, race conditions, memory leaks from uncleaned timeouts, missing cancel support, O(n log n) sorting, and stuck tasks with failed dependencies.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/b1c7f0-Task_Scheduler_Fix",
+  "environment_setup": "Dockerfile"
+}
+

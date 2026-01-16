@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-01-15T11:55:02.750584",
+  "run_date": "2026-01-15 11:55:02",
+  "before": {
+    "tests": {
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "errors": 1,
+      "skipped": 0
+    },
+    "return_code": 2,
+    "passed": false,
+    "output": {
+      "text": "============================= test session starts ==============================\nplatform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python3.11\ncachedir: .pytest_cache\nrootdir: /app\ncollecting ... collected 0 items / 1 error\n\n==================================== ERRORS ====================================\n_________________ ERROR collecting tests/test_email_parser.py __________________\nImportError while importing test module '/app/tests/test_email_parser.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/test_email_parser.py:8: in <module>\n    from email_parser import EmailParser, ParseResult\nE   ModuleNotFoundError: No module named 'email_parser'\n=========================== short test summary info ============================\nERROR tests/test_email_parser.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n=============================== 1 error in 1.97s ===============================\n",
+      "truncated": false,
+      "original_length": 1195
+    },
+    "errors": {
+      "text": "",
+      "truncated": false,
+      "original_length": 0
+    }
+  },
+  "after": {
+    "tests": {
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "errors": 1,
+      "skipped": 0
+    },
+    "return_code": 2,
+    "passed": false,
+    "output": {
+      "text": "============================= test session starts ==============================\nplatform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python3.11\ncachedir: .pytest_cache\nrootdir: /app\ncollecting ... collected 0 items / 1 error\n\n==================================== ERRORS ====================================\n_________________ ERROR collecting tests/test_email_parser.py __________________\nImportError while importing test module '/app/tests/test_email_parser.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/usr/local/lib/python3.11/importlib/__init__.py:126: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/test_email_parser.py:8: in <module>\n    from email_parser import EmailParser, ParseResult\nE   ModuleNotFoundError: No module named 'email_parser'\n=========================== short test summary info ============================\nERROR tests/test_email_parser.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n=============================== 1 error in 0.63s ===============================\n",
+      "truncated": false,
+      "original_length": 1195
+    },
+    "errors": {
+      "text": "",
+      "truncated": false,
+      "original_length": 0
+    }
+  },
+  "comparison": {
+    "improvement": false,
+    "tests_fixed": 0,
+    "all_tests_pass": false,
+    "summary": "After implementation: 0/1 tests passed. Improvement: 0 additional tests passing."
+  },
+  "success": false
+}
