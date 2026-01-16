@@ -2,5 +2,5 @@ services:
   app:
     build: .
     volumes:
-      - ./:/workspace
-      - /workspace/node_modules
+      - ./:/app
+      - /app/node_modules

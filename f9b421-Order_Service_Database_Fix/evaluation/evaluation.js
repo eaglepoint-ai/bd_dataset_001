@@ -216,25 +216,6 @@ async function main() {
     const reportPath = generateReportPath();
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
-    // 6. Print Final Summary to Console
-    console.log(`\n${"=".repeat(60)}`);
-    console.log(`EVALUATION COMPLETE`);
-    console.log(`${"=".repeat(60)}`);
-
-    console.log(`\nBefore Implementation:`);
-    console.log(
-      `  Status:   ${beforeResult.success ? "✅ PASSED" : "❌ FAILED"}`
-    );
-    console.log(`  Score:    ${comparison.before_score}`);
-    console.log(`  Duration: ${beforeResult.duration_seconds.toFixed(3)}s`);
-
-    console.log(`\nAfter Implementation:`);
-    console.log(
-      `  Status:   ${afterResult.success ? "✅ PASSED" : "❌ FAILED"}`
-    );
-    console.log(`  Score:    ${comparison.after_score}`);
-    console.log(`  Duration: ${afterResult.duration_seconds.toFixed(3)}s`);
-
     console.log(`\nReport saved to: ${reportPath}`);
 
     // Exit code depends on "After" succeeding
