@@ -78,13 +78,15 @@ function parseJestOutput(stdout) {
 }
 
 function runTests(repoPath, label, expectLeaks = false) {
+  // For memory leak tasks: Don't pass EXPECT_LEAKS, let tests naturally fail/pass
   console.log(`\n${'='.repeat(60)}`);
   console.log(`RUNNING TESTS: ${label.toUpperCase()}`);
   console.log(`${'='.repeat(60)}`);
   console.log(`Repository: ${path.basename(repoPath)}`);
 
   const repoName = path.basename(repoPath);
-  const env = { ...process.env, REPO: repoName, EXPECT_LEAKS: expectLeaks ? 'true' : 'false', CI: 'true' };
+  // Don't set EXPECT_LEAKS - let tests fail naturally in before, pass in after
+  const env = { ...process.env, REPO: repoName, CI: 'true' };
   let stdout = '';
   let stderr = '';
   let exitCode = 0;
@@ -169,7 +171,8 @@ function main() {
   console.log(`  Overall: ${afterResults.success ? '✅ PASSED' : '❌ FAILED'}`);
   console.log(`  Tests: ${afterResults.summary.passed}/${afterResults.summary.total} passed`);
 
-  const success = beforeResults.success && afterResults.success;
+  // For memory leak fix: before should fail (leaks detected), after should pass (leaks fixed)
+  const success = !beforeResults.success && afterResults.success && afterResults.summary.failed === 0;
 
   const report = {
     run_id: runId,
