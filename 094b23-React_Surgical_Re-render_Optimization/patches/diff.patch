@@ -1,0 +1,75 @@
+diff --git a/repository_after/Dashboard.js b/repository_after/Dashboard.js
+new file mode 100644
+index 0000000..c4f127e
+--- /dev/null
++++ b/repository_after/Dashboard.js
+@@ -0,0 +1,66 @@
++import React, { useState, useEffect, useCallback, useReducer } from 'react';
++
++const Item = React.memo(({ item, onUpdate }) => {
++  console.log(`Rendering Item: ${item.id}`);
++  return (
++    <div>
++      <span>{item.name}: </span>
++      <input
++        value={item.value}
++        onChange={(e) => onUpdate(item.id, e.target.value)}
++      />
++    </div>
++  );
++});
++
++const initialState = {
++  items: [
++    { id: 1, name: 'Metric A', value: '' },
++    { id: 2, name: 'Metric B', value: '' },
++    { id: 3, name: 'Metric C', value: '' },
++    { id: 4, name: 'Metric D', value: '' },
++    { id: 5, name: 'Metric E', value: '' },
++  ],
++};
++
++const reducer = (state, action) => {
++  switch (action.type) {
++    case 'UPDATE_ITEM':
++      return {
++        ...state,
++        items: state.items.map(item =>
++          item.id === action.payload.id ? { ...item, value: action.payload.value } : item
++        ),
++      };
++    default:
++      return state;
++  }
++};
++
++export default function Dashboard() {
++  const [state, dispatch] = useReducer(reducer, initialState);
++  const [search, setSearch] = useState('');
++
++  const handleUpdate = useCallback((id, newValue) => {
++    dispatch({ type: 'UPDATE_ITEM', payload: { id, value: newValue } });
++  }, []);
++
++  const filteredItems = state.items.filter(item =>
++    item.name.toLowerCase().includes(search.toLowerCase())
++  );
++
++  return (
++    <div>
++      <input
++        placeholder="Global Search..."
++        value={search}
++        onChange={(e) => setSearch(e.target.value)}
++      />
++      {filteredItems.map(item => (
++        <Item key={item.id} item={item} onUpdate={handleUpdate} />
++      ))}
++    </div>
++  );
++}
++
++// Explanation: React.memo alone might not be enough if the onUpdate reference is unstable because it can lead to unnecessary re-renders of the Item component. By using useCallback, we ensure that the onUpdate function reference remains stable, preventing re-renders unless the actual props change.
+diff --git a/repository_before/dashboard.js b/repository_before/dashboard.js
+deleted file mode 100644
+index e69de29..0000000
