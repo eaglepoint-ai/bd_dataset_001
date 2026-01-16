@@ -197,7 +197,8 @@ void save_report(const std::string &run_id, const std::string &started_at, const
                  const TestResult &before, const TestResult &after, const std::string &output_path) {
     std::ofstream file(output_path);
     if (!file.is_open()) {
-        std::cerr << "Failed to open output file: " << output_path << "\n";
+        std::cerr << "ERROR: Failed to open output file: " << output_path << "\n";
+        std::cerr << "Check if directory exists and has write permissions\n";
         return;
     }
 
@@ -273,7 +274,17 @@ void save_report(const std::string &run_id, const std::string &started_at, const
     file << "  }\n";
     file << "}\n";
 
+    file.flush();
+    if (file.fail()) {
+        std::cerr << "ERROR: Failed to write to file: " << output_path << "\n";
+    }
     file.close();
+    
+    if (file.fail()) {
+        std::cerr << "ERROR: Failed to close file: " << output_path << "\n";
+    } else {
+        std::cout << "Report successfully written and closed\n";
+    }
 }
 
 int main(int argc, char *argv[]) {
