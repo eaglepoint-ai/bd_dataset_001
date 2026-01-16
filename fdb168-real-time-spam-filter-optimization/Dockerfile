@@ -11,6 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY repository_before/ ./repository_before/
 COPY repository_after/ ./repository_after/
 COPY tests/ ./tests/
+COPY evaluation/ ./evaluation/
 
 # Default command runs the calculator tests
 CMD ["python", "-m", "pytest", "tests/", "-v", "--tb=short"]
