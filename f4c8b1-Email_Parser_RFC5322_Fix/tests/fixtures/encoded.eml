@@ -1,0 +1,14 @@
+From: sender@example.com
+To: recipient@example.com
+Subject: =?UTF-8?B?SGVsbG8gV29ybGQ=?=
+Date: Mon, 15 Jan 2026 10:00:00 +0000
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+This email has an encoded subject line.
+It should decode to "Hello World".
+
+This line has a soft break=
+ that continues here.
+
+And hex encoding: =C3=A9 (should be é)

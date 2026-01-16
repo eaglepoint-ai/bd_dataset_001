@@ -1,0 +1,30 @@
+From: sender@example.com
+To: recipient@example.com
+Subject: Nested Multipart Email
+Date: Mon, 15 Jan 2026 10:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="outer"
+
+--outer
+Content-Type: multipart/alternative; boundary="inner"
+
+--inner
+Content-Type: text/plain; charset=utf-8
+
+Plain text version
+
+--inner
+Content-Type: text/html; charset=utf-8
+
+<html><body>HTML version</body></html>
+
+--inner--
+
+--outer
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="doc.pdf"
+Content-Transfer-Encoding: base64
+
+RmFrZSBQREYgY29udGVudA==
+
+--outer--

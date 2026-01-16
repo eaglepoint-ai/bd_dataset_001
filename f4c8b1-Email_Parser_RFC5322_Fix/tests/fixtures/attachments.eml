@@ -1,0 +1,33 @@
+From: sender@example.com
+To: recipient@example.com
+Subject: Email with Attachments
+Date: Mon, 15 Jan 2026 10:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="boundary456"
+
+--boundary456
+Content-Type: text/plain; charset=utf-8
+
+Email body with three attachments.
+
+--boundary456
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: attachment; filename="file1.txt"
+
+Content of file1.txt
+
+--boundary456
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="document.pdf"
+Content-Transfer-Encoding: base64
+
+VGhpcyBpcyBhIGZha2UgUERGIGNvbnRlbnQ=
+
+--boundary456
+Content-Type: image/png
+Content-Disposition: attachment; filename="image.png"
+Content-Transfer-Encoding: base64
+
+aVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQUFZQUFBQUFBQUFN
+
+--boundary456--

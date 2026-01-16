@@ -1,0 +1,8 @@
+From: sender@example.com
+To: recipient@example.com
+Subject: Malformed Email
+Content-Type: text/plain; charset=invalid-charset
+Content-Transfer-Encoding: base64
+
+This has an invalid charset and bad base64 encoding!!!
+Not proper base64 at all.
