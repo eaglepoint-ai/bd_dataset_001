@@ -65,13 +65,21 @@ function parseJestJson(stdout, stderr, exitCode) {
     if (match) {
       passed = parseInt(match[2], 10);
       failed = parseInt(match[3], 10);
+      
+      // Create dummy entries for fallback
+      for (let i = 0; i < passed; i++) {
+        testDetails.push({ name: `Memory Leak Test ${i + 1}`, status: 'PASS' });
+      }
+      for (let i = 0; i < failed; i++) {
+        testDetails.push({ name: `Memory Leak Test ${passed + i + 1}`, status: 'FAIL' });
+      }
     }
   }
 
-  // Create test results for schema
+  // Create test results for schema with proper nodeid format
   testDetails.forEach((test, idx) => {
     tests.push({ 
-      nodeid: `test-${idx}`, 
+      nodeid: `memory-leaks.test.js::${test.name}`,
       name: test.name, 
       outcome: test.status === 'PASS' ? 'passed' : 'failed' 
     });
