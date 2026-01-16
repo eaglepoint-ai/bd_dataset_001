@@ -15,11 +15,12 @@ ROOT = Path(__file__).resolve().parent.parent
 REPORTS = ROOT / "evaluation" / "reports"
 
 def get_timestamped_report_path():
-    """Generate timestamped report path: evaluation/YYYY-MM-DD/HH-MM-SS/report.json"""
+    """Generate timestamped report path: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json"""
     now = datetime.now(timezone.utc)
     date_dir = now.strftime("%Y-%m-%d")
     time_dir = now.strftime("%H-%M-%S")
-    timestamped_dir = ROOT / "evaluation" / date_dir / time_dir
+    # Match template structure: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
+    timestamped_dir = ROOT / "evaluation" / "reports" / date_dir / time_dir
     return timestamped_dir / "report.json"
 
 def get_git_info():
@@ -498,48 +499,63 @@ def main():
         report["finished_at"] = datetime.now(timezone.utc).isoformat()
         report["duration_seconds"] = (datetime.now(timezone.utc) - started_at).total_seconds()
     
-    # CRITICAL: Write to both latest.json and report.json
-    # The CI evaluator expects report.json - write to multiple locations to ensure CI finds it
-    # Match the structure from other apps: evaluation/YYYY-MM-DD/HH-MM-SS/report.json
-    report_json = json.dumps(report, indent=2)
-    
-    # Get timestamped report path (matches other app structure)
-    timestamped_report_path = get_timestamped_report_path()
-    
-    # List of all locations to write report.json
-    report_paths = [
-        timestamped_report_path,            # Timestamped path: evaluation/YYYY-MM-DD/HH-MM-SS/report.json (matches other apps)
-        REPORTS / "latest.json",            # For local reference
-        REPORTS / "report.json",            # In reports subdirectory
-        ROOT / "evaluation" / "report.json",  # In evaluation directory
-        ROOT / "report.json",              # In project root (most likely CI location)
-    ]
-    
-    # Write to all locations
-    written_count = 0
-    for path in report_paths:
-        if write_report_file(report, path):
-            written_count += 1
-    
-    # Print to stdout for logging (CI may capture this)
-    print(report_json)
-    
-    # Print info to stderr
-    print(f"\n✅ Report written to {written_count}/{len(report_paths)} locations", file=sys.stderr)
-    for path in report_paths:
-        if path.exists():
-            print(f"  ✓ {path}", file=sys.stderr)
-        else:
-            print(f"  ✗ {path} (FAILED)", file=sys.stderr)
-    
-    print(f"Run ID: {run_id}", file=sys.stderr)
-    print(f"Duration: {report.get('duration_seconds', 0):.2f}s", file=sys.stderr)
-    print(f"Success: {'✅ YES' if report.get('success', False) else '❌ NO'}", file=sys.stderr)
-    
-    # If no files were written, at least print to stdout so CI can capture it
-    if written_count == 0:
-        print(f"\n❌ FATAL: Failed to write report to any location!", file=sys.stderr)
-        print(report_json)  # At least print to stdout
+    # CRITICAL: Write report.json - MUST happen before exit
+    # Use try-finally to ensure report is ALWAYS written, even on catastrophic failure
+    try:
+        # CRITICAL: Write to both latest.json and report.json
+        # The CI evaluator expects report.json - write to multiple locations to ensure CI finds it
+        # Match the structure from template: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
+        report_json = json.dumps(report, indent=2)
+        
+        # Get timestamped report path (matches template structure)
+        timestamped_report_path = get_timestamped_report_path()
+        
+        # List of all locations to write report.json
+        # Priority order: root first (CI most likely checks here), then timestamped, then backups
+        report_paths = [
+            ROOT / "report.json",              # In project root (PRIMARY - CI checks this first)
+            timestamped_report_path,            # Timestamped path: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json (matches template)
+            REPORTS / "report.json",            # In reports subdirectory (backup)
+            REPORTS / "latest.json",            # For local reference
+            ROOT / "evaluation" / "report.json",  # In evaluation directory (backup)
+        ]
+        
+        # Write to all locations
+        written_count = 0
+        for path in report_paths:
+            if write_report_file(report, path):
+                written_count += 1
+        
+        # Print to stdout for logging (CI may capture this)
+        print(report_json)
+        
+        # Print info to stderr
+        print(f"\n✅ Report written to {written_count}/{len(report_paths)} locations", file=sys.stderr)
+        for path in report_paths:
+            if path.exists():
+                print(f"  ✓ {path}", file=sys.stderr)
+            else:
+                print(f"  ✗ {path} (FAILED)", file=sys.stderr)
+        
+        print(f"Run ID: {run_id}", file=sys.stderr)
+        print(f"Duration: {report.get('duration_seconds', 0):.2f}s", file=sys.stderr)
+        print(f"Success: {'✅ YES' if report.get('success', False) else '❌ NO'}", file=sys.stderr)
+        
+        # If no files were written, at least print to stdout so CI can capture it
+        if written_count == 0:
+            print(f"\n❌ FATAL: Failed to write report to any location!", file=sys.stderr)
+            print(report_json)  # At least print to stdout
+        
+    except Exception as write_error:
+        # Last resort: try to write at least to root
+        try:
+            emergency_path = ROOT / "report.json"
+            with open(emergency_path, "w") as f:
+                json.dump(report, f, indent=2)
+            print(f"\n⚠️  Emergency report written to: {emergency_path}", file=sys.stderr)
+        except:
+            print(f"\n❌ CRITICAL: Failed to write report even to emergency location!", file=sys.stderr)
+            print(json.dumps(report, indent=2))  # At least print to stdout
     
     # Exit AFTER writing the file
     return exit_code
