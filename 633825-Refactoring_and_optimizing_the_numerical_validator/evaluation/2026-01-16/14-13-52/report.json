@@ -1,0 +1,25 @@
+{
+  "run_id": "4c0a",
+  "started_at": "2026-01-16T14:13:52",
+  "finished_at": "2026-01-16T14:13:52",
+  "duration_seconds": 0.000000,
+  "success": false,
+  "results": {
+    "before": {
+      "success": false,
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0
+      }
+    },
+    "after": {
+      "success": false,
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0
+      }
+    }
+  }
+}

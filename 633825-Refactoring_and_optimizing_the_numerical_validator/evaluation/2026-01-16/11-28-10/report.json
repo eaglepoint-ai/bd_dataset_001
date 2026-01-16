@@ -1,0 +1,25 @@
+{
+  "run_id": "5c1068",
+  "started_at": "2026-01-16T11:28:10",
+  "finished_at": "2026-01-16T11:28:11",
+  "duration_seconds": 1.000000,
+  "success": true,
+  "results": {
+    "before": {
+      "success": false,
+      "summary": {
+        "total": 15,
+        "passed": 12,
+        "failed": 3
+      }
+    },
+    "after": {
+      "success": true,
+      "summary": {
+        "total": 14,
+        "passed": 14,
+        "failed": 0
+      }
+    }
+  }
+}
