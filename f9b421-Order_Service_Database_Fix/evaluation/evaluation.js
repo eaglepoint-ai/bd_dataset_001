@@ -1,9 +1,17 @@
+#!/usr/bin/env node
+
+/**
+ * Evaluation runner for Order Service Refactor.
+ * Clean version: No git errors, no real-time log clutter.
+ */
+
 const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 const os = require("os");
 const crypto = require("crypto");
 
+// --- CONFIGURATION ---
 const ROOT_DIR = path.resolve(__dirname, "..");
 const TEST_SUITE_PATH = path.join(ROOT_DIR, "tests", "test-suite.js");
 
@@ -18,6 +26,8 @@ const TARGETS = {
   },
 };
 
+// --- HELPER FUNCTIONS ---
+
 function generateRunId() {
   return crypto.randomBytes(4).toString("hex");
 }
@@ -25,16 +35,22 @@ function generateRunId() {
 function getGitInfo() {
   const info = { commit: "unknown", branch: "unknown" };
   try {
+    // FIX: added { stdio: 'pipe' } to prevent "/bin/sh: git: not found" from printing
     info.commit = require("child_process")
-      .execSync("git rev-parse HEAD", { timeout: 1000 })
+      .execSync("git rev-parse HEAD", { timeout: 1000, stdio: "pipe" })
       .toString()
       .trim()
       .substring(0, 8);
     info.branch = require("child_process")
-      .execSync("git rev-parse --abbrev-ref HEAD", { timeout: 1000 })
+      .execSync("git rev-parse --abbrev-ref HEAD", {
+        timeout: 1000,
+        stdio: "pipe",
+      })
       .toString()
       .trim();
-  } catch (e) {}
+  } catch (e) {
+    // Git not available, ignore silently
+  }
   return info;
 }
 
@@ -56,9 +72,8 @@ function getEnvironmentInfo() {
  */
 function runTestSuite(targetLabel, targetPathRelative) {
   return new Promise((resolve) => {
-    console.log(`\n${"=".repeat(60)}`);
-    console.log(`RUNNING TESTS: ${targetLabel.toUpperCase()}`);
-    console.log(`${"=".repeat(60)}`);
+    // We remove the console logs here to keep the output clean
+    // console.log(`Running: ${targetLabel}...`);
 
     const startTime = Date.now();
 
@@ -76,18 +91,17 @@ function runTestSuite(targetLabel, targetPathRelative) {
     child.stdout.on("data", (data) => {
       const str = data.toString();
       stdout += str;
-      process.stdout.write(str);
+      // FIX: Removed process.stdout.write(str) so logs don't clutter the screen
     });
 
     child.stderr.on("data", (data) => {
       const str = data.toString();
       stderr += str;
-      process.stderr.write(str);
+      // FIX: Removed process.stderr.write(str)
     });
 
     child.on("close", (code) => {
       const duration = (Date.now() - startTime) / 1000;
-
       const results = parseTestOutput(stdout);
 
       resolve({
@@ -102,16 +116,10 @@ function runTestSuite(targetLabel, targetPathRelative) {
   });
 }
 
-/**
- * Parses the console output from test-suite.js to extract metrics
- */
 function parseTestOutput(output) {
   const tests = [];
   const lines = output.split("\n");
-
   const testLineRegex = /^(.*?)\s\.\.\.\s(✅ PASS|❌ FAIL)/;
-
-  // Regex for summary: "TEST SUMMARY: 5/6 Passed"
   const summaryRegex = /TEST SUMMARY: (\d+)\/(\d+) Passed/;
 
   let totalParsed = 0;
@@ -145,8 +153,8 @@ function parseTestOutput(output) {
 
 function generateReportPath() {
   const now = new Date();
-  const dateStr = now.toISOString().split("T")[0]; // YYYY-MM-DD
-  const timeStr = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS
+  const dateStr = now.toISOString().split("T")[0];
+  const timeStr = now.toTimeString().split(" ")[0].replace(/:/g, "-");
 
   const reportDir = path.join(
     ROOT_DIR,
@@ -166,17 +174,11 @@ async function main() {
   const runId = generateRunId();
   const startedAt = new Date();
 
-  console.log(`Run ID: ${runId}`);
-  console.log(`Started at: ${startedAt.toISOString()}`);
-
   try {
-    // 1. Run "Before"
     const beforeResult = await runTestSuite(
       TARGETS.before.label,
       TARGETS.before.path
     );
-
-    // 2. Run "After"
     const afterResult = await runTestSuite(
       TARGETS.after.label,
       TARGETS.after.path
@@ -184,7 +186,6 @@ async function main() {
 
     const finishedAt = new Date();
 
-    // 3. Build Comparison Data
     const comparison = {
       before_success: beforeResult.success,
       after_success: afterResult.success,
@@ -199,7 +200,6 @@ async function main() {
       },
     };
 
-    // 4. Construct Final Report
     const report = {
       run_id: runId,
       started_at: startedAt.toISOString(),
@@ -212,13 +212,12 @@ async function main() {
       },
     };
 
-    // 5. Save JSON
     const reportPath = generateReportPath();
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
-    console.log(`\nReport saved to: ${reportPath}`);
+    console.log("\n✅ Evaluation Completed successfully!");
+    console.log(`\n📄 Report saved to: ${reportPath}`);
 
-    // Exit code depends on "After" succeeding
     process.exit(afterResult.success ? 0 : 1);
   } catch (error) {
     console.error("\n❌ CRITICAL ERROR:", error);
