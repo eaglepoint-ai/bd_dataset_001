@@ -1,2 +1,0 @@
-# Node.js project - see package.json for dependencies
-

@@ -1,0 +1,14 @@
+{
+  "name": "prisma-bug-fix-evaluation",
+  "version": "1.0.0",
+  "description": "Evaluation script for Prisma Schema & Service Bug Fix",
+  "main": "evaluation.ts",
+  "scripts": {
+    "evaluate": "ts-node evaluation.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  }
+}

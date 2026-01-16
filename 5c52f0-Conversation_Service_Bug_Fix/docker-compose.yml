@@ -1,5 +1,0 @@
-services:
-  run_before:
-    build: .
-    command: npx tsc --noEmit
-
