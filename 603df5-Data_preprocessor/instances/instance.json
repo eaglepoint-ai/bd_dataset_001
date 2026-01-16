@@ -1,0 +1,8 @@
+{
+    "instance_id": "603df5",
+    "problem_statement": "The DataPreprocessor class contains significant code duplication and tightly coupled logic that makes the code hard to maintain, extend, and test. Similar operations for the train and test datasets are repeated instead of being handled through shared reusable methods. Missing-value handling for the store dataset is written as long sequences of nearly identical statements, increasing the risk of errors and inconsistencies. File loading and saving are performed directly inside the main workflow method, mixing I/O concerns with processing logic. These issues reduce readability and violate basic software design principles such as modularity and separation of concerns. Refactoring is necessary to create a cleaner, more maintainable, and better-structured implementation without changing the external behavior of the program.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/603df5-Data_preprocessor",
+    "environment_setup": "Dockerfile"
+}  
