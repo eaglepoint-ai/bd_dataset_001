@@ -1,4 +1,4 @@
-const mysql = require('mysql2/promise');
+const mysql = require("mysql2/promise");
 
 class OrderService {
   constructor(pool) {
@@ -7,13 +7,13 @@ class OrderService {
 
   async getOrdersWithItems(userId) {
     const [orders] = await this.pool.query(
-      'SELECT * FROM orders WHERE user_id = ?',
+      "SELECT * FROM orders WHERE user_id = ?",
       [userId]
     );
 
     for (const order of orders) {
       const [items] = await this.pool.query(
-        'SELECT * FROM order_items WHERE order_id = ?',
+        "SELECT * FROM order_items WHERE order_id = ?",
         [order.id]
       );
       order.items = items;
@@ -30,39 +30,39 @@ class OrderService {
 
   async createOrder(userId, items) {
     const [orderResult] = await this.pool.query(
-      'INSERT INTO orders (user_id, status, created_at) VALUES (?, ?, NOW())',
-      [userId, 'pending']
+      "INSERT INTO orders (user_id, status, created_at) VALUES (?, ?, NOW())",
+      [userId, "pending"]
     );
     const orderId = orderResult.insertId;
 
     for (const item of items) {
       await this.pool.query(
-        'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)',
+        "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)",
         [orderId, item.productId, item.quantity, item.price]
       );
 
       await this.pool.query(
-        'UPDATE products SET stock = stock - ? WHERE id = ?',
+        "UPDATE products SET stock = stock - ? WHERE id = ?",
         [item.quantity, item.productId]
       );
     }
 
-    return { orderId, status: 'pending' };
+    return { orderId, status: "pending" };
   }
 
   async reserveStock(productId, quantity) {
     const [rows] = await this.pool.query(
-      'SELECT stock FROM products WHERE id = ?',
+      "SELECT stock FROM products WHERE id = ?",
       [productId]
     );
 
     if (rows.length === 0) {
-      throw new Error('Product not found');
+      throw new Error("Product not found");
     }
 
     if (rows[0].stock >= quantity) {
       await this.pool.query(
-        'UPDATE products SET stock = stock - ? WHERE id = ?',
+        "UPDATE products SET stock = stock - ? WHERE id = ?",
         [quantity, productId]
       );
       return true;
@@ -85,7 +85,7 @@ class OrderService {
   }
 
   async getAllOrders(status) {
-    let query = 'SELECT * FROM orders';
+    let query = "SELECT * FROM orders";
     if (status) {
       query += ` WHERE status = '${status}'`;
     }
@@ -95,7 +95,7 @@ class OrderService {
 
   async updateOrderStatus(orderId, newStatus) {
     const [result] = await this.pool.query(
-      'UPDATE orders SET status = ? WHERE id = ?',
+      "UPDATE orders SET status = ? WHERE id = ?",
       [newStatus, orderId]
     );
     return result.affectedRows > 0;
@@ -103,4 +103,3 @@ class OrderService {
 }
 
 module.exports = OrderService;
-
