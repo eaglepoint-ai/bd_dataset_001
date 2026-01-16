@@ -1,0 +1,158 @@
+{
+  "run_id": "qutmyyux",
+  "task_id": "9e3b7a",
+  "task_name": "TaskProcessor Memory Leak Fix",
+  "started_at": "2026-01-16T07:59:42.653Z",
+  "finished_at": "2026-01-16T07:59:49.960Z",
+  "success": false,
+  "error": "One or more repositories failed their structural/functional checks",
+  "environment": {
+    "node_version": "v20.20.0",
+    "platform": "linux",
+    "os_release": "6.6.87.2-microsoft-standard-WSL2",
+    "architecture": "x64",
+    "hostname": "87a90c17ac99",
+    "git_commit": "unknown",
+    "git_branch": "unknown"
+  },
+  "results": {
+    "before": {
+      "success": false,
+      "exit_code": 1,
+      "tests": [
+        {
+          "nodeid": "test-0",
+          "name": "Passed test 0",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test-0",
+          "name": "Failed test 0",
+          "outcome": "failed"
+        },
+        {
+          "nodeid": "test-1",
+          "name": "Failed test 1",
+          "outcome": "failed"
+        },
+        {
+          "nodeid": "test-2",
+          "name": "Failed test 2",
+          "outcome": "failed"
+        },
+        {
+          "nodeid": "test-3",
+          "name": "Failed test 3",
+          "outcome": "failed"
+        },
+        {
+          "nodeid": "test-4",
+          "name": "Failed test 4",
+          "outcome": "failed"
+        },
+        {
+          "nodeid": "test-5",
+          "name": "Failed test 5",
+          "outcome": "failed"
+        },
+        {
+          "nodeid": "test-6",
+          "name": "Failed test 6",
+          "outcome": "failed"
+        },
+        {
+          "nodeid": "test-7",
+          "name": "Failed test 7",
+          "outcome": "failed"
+        },
+        {
+          "nodeid": "test-8",
+          "name": "Failed test 8",
+          "outcome": "failed"
+        }
+      ],
+      "summary": {
+        "total": 10,
+        "passed": 1,
+        "failed": 9,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "\n> taskprocessor-memory-leak-fix@1.0.0 test\n> node scripts/test-summary.js\n\n1 amount passed and 9 amount failed\n",
+      "stderr": ""
+    },
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "test-0",
+          "name": "Passed test 0",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test-1",
+          "name": "Passed test 1",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test-2",
+          "name": "Passed test 2",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test-3",
+          "name": "Passed test 3",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test-4",
+          "name": "Passed test 4",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test-5",
+          "name": "Passed test 5",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test-6",
+          "name": "Passed test 6",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test-7",
+          "name": "Passed test 7",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test-8",
+          "name": "Passed test 8",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "test-9",
+          "name": "Passed test 9",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 10,
+        "passed": 10,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "\n> taskprocessor-memory-leak-fix@1.0.0 test\n> node scripts/test-summary.js\n\n10 amount passed and 0 amount failed\n",
+      "stderr": ""
+    },
+    "comparison": {
+      "before_tests_passed": false,
+      "after_tests_passed": true,
+      "before_passed": 1,
+      "before_failed": 9,
+      "after_passed": 10,
+      "after_failed": 0
+    }
+  }
+}

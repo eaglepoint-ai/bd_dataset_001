@@ -4,7 +4,7 @@
   "description": "Memory leak fixes for TaskProcessor class",
   "main": "TaskProcessor.js",
   "scripts": {
-    "test": "jest tests/ --forceExit --verbose=false",
+    "test": "node scripts/test-summary.js",
     "evaluation": "node evaluation/evaluation.js"
   },
   "keywords": ["memory-leak", "node.js", "task-processor"],

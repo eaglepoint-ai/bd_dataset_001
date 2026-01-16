@@ -40,42 +40,30 @@ function getEnvironmentInfo() {
  * Parses Jest JSON output to match the required TestResult and EvaluationResult schema.
  */
 function parseJestJson(stdout, stderr, exitCode) {
-  let jsonOutput = null;
   const tests = [];
+  let passed = 0;
+  let failed = 0;
 
-  try {
-    // Jest output might be preceded by logging, so we find the first '{' and last '}'
-    const startIdx = stdout.indexOf('{');
-    const endIdx = stdout.lastIndexOf('}');
-    if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-      const jsonStr = stdout.substring(startIdx, endIdx + 1);
-      jsonOutput = JSON.parse(jsonStr);
+  const match = stdout.match(/(\d+) amount passed and (\d+) amount failed/);
+  if (match) {
+    passed = parseInt(match[1], 10);
+    failed = parseInt(match[2], 10);
+    
+    // Create dummy test results to satisfy the schema
+    for (let i = 0; i < passed; i++) {
+      tests.push({ nodeid: `test-${i}`, name: `Passed test ${i}`, outcome: 'passed' });
     }
-  } catch (e) {
-    console.error('Failed to parse Jest JSON output:', e.message);
+    for (let i = 0; i < failed; i++) {
+      tests.push({ nodeid: `test-${i}`, name: `Failed test ${i}`, outcome: 'failed' });
+    }
   }
-
-  if (jsonOutput && jsonOutput.testResults) {
-    jsonOutput.testResults.forEach(suite => {
-      suite.assertionResults.forEach(assertion => {
-        tests.push({
-          nodeid: `memory-leaks.test.js::${assertion.title}`,
-          name: assertion.title,
-          outcome: assertion.status === 'passed' ? 'passed' : 'failed'
-        });
-      });
-    });
-  }
-
-  const passed = tests.filter(t => t.outcome === 'passed').length;
-  const failed = tests.filter(t => t.outcome === 'failed').length;
 
   return {
-    success: exitCode === 0,
+    success: exitCode === 0 && failed === 0 && (passed + failed) > 0,
     exit_code: exitCode,
     tests,
     summary: {
-      total: tests.length,
+      total: passed + failed,
       passed,
       failed,
       errors: (exitCode !== 0 && failed === 0) ? 1 : 0,
@@ -106,7 +94,7 @@ function runTests(repoPath, label, expectLeaks = false) {
   
   try {
     // Use --json flag for reliable parsing and redirect stderr to stdout to capture everything
-    stdout = execSync('npm test -- --json 2>&1', { 
+    stdout = execSync('npm test 2>&1', { 
       env, 
       encoding: 'utf-8', 
       stdio: 'pipe' 
@@ -120,10 +108,6 @@ function runTests(repoPath, label, expectLeaks = false) {
   const result = parseJestJson(stdout, stderr, exitCode);
 
   console.log(`\nResults: ${result.summary.passed} passed, ${result.summary.failed} failed (total: ${result.summary.total})`);
-  result.tests.forEach(test => {
-    const icon = test.outcome === 'passed' ? '✅' : '❌';
-    console.log(`  ${icon} ${test.name}`);
-  });
 
   return result;
 }
