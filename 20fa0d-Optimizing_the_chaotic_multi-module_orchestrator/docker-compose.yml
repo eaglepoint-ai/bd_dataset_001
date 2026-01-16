@@ -1,6 +1,26 @@
+version: '3.8'
+
 services:
-  app:
-    build: .
-    command: pytest -q tests
+  chaotic-component-eval:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chaotic-component-evaluation
+    ports:
+      - "5173:5173"  # repository_before
+      - "5174:5174"  # repository_after
     volumes:
-      - .:/app
+      - ./evaluation:/app/evaluation
+      - ./test-results:/app/test-results
+    working_dir: /app
+    environment:
+      - NODE_ENV=development
+      - CI=true
+    # Start both dev servers inside the container so ports 5173 and 5174 are active
+    command: /entrypoint.sh dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173", "&&", "curl", "-f", "http://localhost:5174"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
