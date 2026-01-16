@@ -187,6 +187,15 @@ function main() {
   const reportPath = path.join(folder, 'report.json');
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   console.log(`Report written to ${reportPath}`);
+
+  // Print evaluation summary
+  console.log('============================================================');
+  console.log('EVALUATION COMPLETE');
+  console.log('============================================================');
+  console.log(`Run ID: ${report.run_id}`);
+  console.log(`Duration: ${report.duration_seconds.toFixed(2)}s`);
+  console.log(`Success: ${report.success ? '✅ YES' : '❌ NO'}`);
+
   return report.success ? 0 : 1;
 }
 
