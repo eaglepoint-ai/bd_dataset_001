@@ -196,7 +196,9 @@ function main() {
   fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
   console.log(`\n✅ Report saved to: ${outputPath}`);
 
-  process.exit(success ? 0 : 1);
+  // Always exit 0 so Aquila collects the report
+  // The report.success field indicates pass/fail
+  process.exit(0);
 }
 
 main();
