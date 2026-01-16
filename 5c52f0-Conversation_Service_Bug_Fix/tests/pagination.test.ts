@@ -30,8 +30,11 @@ describe("Pagination Logic", () => {
         const page2 = await service.getAllConversations(2, 5);
         expect(page2.conversations.length).toBe(5);
 
-        // Verification logic logic to confirm skip bug
-        const all = await prisma.conversation.findMany({ orderBy: { updatedAt: 'desc' }, take: 20 });
+       
+        const all = await prisma.conversation.findMany({
+            orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+            take: 20
+        });
         const newestId = all[0].id; // Should be first item in P1
         const p1FirstId = page1.conversations[0]?.id;
 
