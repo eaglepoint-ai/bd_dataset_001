@@ -1,0 +1,16 @@
+{
+  "name": "taskprocessor-memory-leak-fix",
+  "version": "1.0.0",
+  "description": "Memory leak fixes for TaskProcessor class",
+  "main": "TaskProcessor.js",
+  "scripts": {
+    "test": "jest tests/ --forceExit --verbose=false",
+    "evaluation": "node evaluation/evaluation.js"
+  },
+  "keywords": ["memory-leak", "node.js", "task-processor"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "29.7.0"
+  }
+}
