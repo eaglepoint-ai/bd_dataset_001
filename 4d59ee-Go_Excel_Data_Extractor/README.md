@@ -48,9 +48,36 @@ New Feature Development
 - Excel stores dates as serial numbers (days since December 30, 1899)
 - Empty cells should be null in JSON, not empty strings
 - Use the excelize library (github.com/xuri/excelize/v2)
-
 ## Commands
+
+## Usage
+
+### Running the Extractor
 ```bash
-docker-compose run --rm run_before
+go run ./repository_after/main.go <file.xlsx> <sheet_name>
+```
+
+### Local Development
+
+#### Running Tests
+```bash
+go test ./tests/... -v
+```
+
+#### Running Evaluation
+```bash
+go run evaluation/evaluation.go
+```
+
+### Using Docker
+
+#### Running Tests
+```bash
+docker compose run --rm app go test ./tests/... -v
+```
+
+#### Running Evaluation
+```bash
+docker compose run --rm app go run ./evaluation/evaluation.go
 ```
 

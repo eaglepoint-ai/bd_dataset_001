@@ -1,10 +1,12 @@
-FROM golang:1.21
+FROM golang:1.24.0
+
+ENV GOTOOLCHAIN=auto
 
 WORKDIR /app
 
-COPY repository_before/ ./
+COPY . ./
 
-RUN if [ -f "go.mod" ]; then go mod download; fi
+RUN if [ -f "go.mod" ]; 'then go mod download; fi'
 
 CMD ["echo", "Ready for implementation - create go.mod, main.go and build"]
 

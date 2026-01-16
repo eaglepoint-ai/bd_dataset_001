@@ -7,3 +7,4 @@
 go.sum
 vendor/
 
+/evaluation/reports

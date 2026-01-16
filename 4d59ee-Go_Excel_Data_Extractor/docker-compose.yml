@@ -1,9 +1,11 @@
-version: '3.8'
-
 services:
-  run_before:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: go_excel_extractor_before
-
+    volumes:
+      - ./repository_before:/app/repository_before:ro
+      - ./repository_after:/app/repository_after:ro
+      - ./tests:/app/tests
+      - ./evaluation:/app/evaluation
+    command: go mod tidy
