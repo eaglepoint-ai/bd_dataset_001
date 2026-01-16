@@ -1,11 +1,16 @@
 FROM rust:1.75-alpine
 
-WORKDIR /workspace
+WORKDIR /app
 
 RUN apk add --no-cache musl-dev
 
-COPY repository_after/ .
+# Cache-friendly copies (Cargo manifests first)
+COPY repository_after/Cargo.toml ./repository_after/Cargo.toml
+COPY repository_before/Cargo.toml ./repository_before/Cargo.toml
+COPY evaluation/Cargo.toml ./evaluation/Cargo.toml
 
-RUN cargo test --release
+# Copy all sources
+COPY . .
 
-CMD ["cargo", "test", "--release"]
+# Default command runs evaluation (expects before fail, after pass) and writes reports
+CMD ["cargo", "run", "--release", "--manifest-path", "evaluation/Cargo.toml"]
