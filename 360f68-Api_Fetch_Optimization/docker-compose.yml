@@ -6,8 +6,8 @@ services:
     working_dir: /app
     command: >
       bash -c "
-      javac -cp .:junit-platform-console-standalone.jar evaluation/Evaluation.java -d /tmp/classes &&
-      java  -cp /tmp/classes:junit-platform-console-standalone.jar Evaluation
+      javac -cp .:/opt/junit-platform-console-standalone.jar evaluation/Evaluation.java -d /tmp/classes &&
+      java  -cp /tmp/classes:/opt/junit-platform-console-standalone.jar Evaluation
       "
 
   test-before:
@@ -18,28 +18,19 @@ services:
     command: >
       bash -c "
       mkdir -p /tmp/before_wrapper &&
-      cat > /tmp/before_wrapper/FetchOptimization.java << 'EOF'
-      import java.util.*;
-      public class FetchOptimization {
-          public static List<Object> fetchItems(List<Object> items) {
-              List<Object> result = new ArrayList<>();
-              for (Object i : items) if (!result.contains(i)) result.add(i);
-              return result;
-          }
-          public static List<Object> fetchItems(List<Object> items, Integer p, Integer s) {
-              throw new UnsupportedOperationException();
-          }
-      }
-      EOF
-      &&
-      javac -cp .:junit-platform-console-standalone.jar \
-            /tmp/before_wrapper/FetchOptimization.java \
-            tests/FetchOptimizationTest.java \
-            -d /tmp/classes
-      &&
-      java -cp /tmp/classes:junit-platform-console-standalone.jar \
-           org.junit.platform.console.ConsoleLauncher \
-           --select-class FetchOptimizationTest
+      echo 'import java.util.*;' > /tmp/before_wrapper/FetchOptimization.java &&
+      echo 'public class FetchOptimization {' >> /tmp/before_wrapper/FetchOptimization.java &&
+      echo '    public static List<Object> fetchItems(List<Object> items) {' >> /tmp/before_wrapper/FetchOptimization.java &&
+      echo '        List<Object> result = new ArrayList<>();' >> /tmp/before_wrapper/FetchOptimization.java &&
+      echo '        for (Object i : items) if (!result.contains(i)) result.add(i);' >> /tmp/before_wrapper/FetchOptimization.java &&
+      echo '        return result;' >> /tmp/before_wrapper/FetchOptimization.java &&
+      echo '    }' >> /tmp/before_wrapper/FetchOptimization.java &&
+      echo '    public static List<Object> fetchItems(List<Object> items, Integer p, Integer s) {' >> /tmp/before_wrapper/FetchOptimization.java &&
+      echo '        throw new UnsupportedOperationException();' >> /tmp/before_wrapper/FetchOptimization.java &&
+      echo '    }' >> /tmp/before_wrapper/FetchOptimization.java &&
+      echo '}' >> /tmp/before_wrapper/FetchOptimization.java &&
+      javac -cp .:/opt/junit-platform-console-standalone.jar /tmp/before_wrapper/FetchOptimization.java tests/FetchOptimizationTest.java -d /tmp/classes &&
+      java -cp /tmp/classes:/opt/junit-platform-console-standalone.jar org.junit.platform.console.ConsoleLauncher --select-class FetchOptimizationTest
       "
 
   test-after:
@@ -49,12 +40,6 @@ services:
     working_dir: /app
     command: >
       bash -c "
-      javac -cp .:junit-platform-console-standalone.jar \
-            repository_after/fetchOptimization.java \
-            tests/FetchOptimizationTest.java \
-            -d /tmp/classes
-      &&
-      java -cp /tmp/classes:junit-platform-console-standalone.jar \
-           org.junit.platform.console.ConsoleLauncher \
-           --select-class FetchOptimizationTest
+      javac -cp .:/opt/junit-platform-console-standalone.jar repository_after/FetchOptimization.java tests/FetchOptimizationTest.java -d /tmp/classes &&
+      java -cp /tmp/classes:/opt/junit-platform-console-standalone.jar org.junit.platform.console.ConsoleLauncher --select-class FetchOptimizationTest
       "

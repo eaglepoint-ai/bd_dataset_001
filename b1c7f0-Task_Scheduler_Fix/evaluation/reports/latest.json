@@ -1,0 +1,33 @@
+{
+  "run_id": "2ee92ec9-428e-493f-9594-7c076ffb3981",
+  "started_at": "2026-01-15T08:52:08.542Z",
+  "finished_at": "2026-01-15T08:52:15.274Z",
+  "duration_seconds": 6.732,
+  "environment": {
+    "node_version": "v20.19.6",
+    "platform": "linux-x64",
+    "cwd": "/workspace"
+  },
+  "before": {
+    "tests": {
+      "passed": true,
+      "return_code": 0,
+      "output": "\n=== Running repository_before (baseline) ===\n\n(before) cycle detection failed as expected: run_timeout\n(before) concurrency max observed 2\n(before) retry timestamps: 1768467130652, 1768467130752, 1768467130851, 1768467130952\n(before) dependency failure run did not finish: run_timeout\n(before) timeout cleanup: not enforced\n(before) cancel pending:true running:false\n\n=== repository_before complete ===\n\n"
+    },
+    "metrics": {}
+  },
+  "after": {
+    "tests": {
+      "passed": true,
+      "return_code": 0,
+      "output": "\n=== Running repository_after (strict) ===\n\n✅ repository_after cycle detection passed\n✅ repository_after concurrency passed (max 2)\n✅ repository_after retry backoff passed (202/301/403 ms)\n✅ repository_after dependency failure propagation passed\n✅ repository_after timeout cleanup passed\n✅ repository_after cancel pending/running passed\n\n=== repository_after complete ===\n\n✅ Done (after)\n"
+    },
+    "metrics": {}
+  },
+  "comparison": {
+    "passed_gate": true,
+    "improvement_summary": "After implementation passed acceptance tests"
+  },
+  "success": true,
+  "error": null
+}

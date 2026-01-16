@@ -95,7 +95,7 @@ public class Evaluation {
             Files.write(wrapperFile, wrapperCode.getBytes());
             compileCmd.add(wrapperFile.toString());
         } else {
-            compileCmd.add(repository + "/fetchOptimization.java");
+            compileCmd.add(repository + "/FetchOptimization.java");
         }
         
         compileCmd.add("tests/FetchOptimizationTest.java");
@@ -197,11 +197,17 @@ public class Evaluation {
         json.append("  \"error\": ").append(after.passed ? "null" : "\"Tests failed\"").append("\n");
         json.append("}");
         
-        // Write report
+        // Write report 
         Path reportFile = reportPath.resolve("report.json");
         Files.write(reportFile, json.toString().getBytes());
         
+        // Also write to simple location for easy access (like email parser)
+        Path simpleReportFile = Paths.get("evaluation/report.json");
+        Files.createDirectories(simpleReportFile.getParent());
+        Files.write(simpleReportFile, json.toString().getBytes());
+        
         System.out.println("[eval] Report written to: " + reportFile);
+        System.out.println("[eval] Latest report also at: " + simpleReportFile);
     }
     
     private static void generateErrorReport(String runId, Instant startedAt, Exception error) {
@@ -225,6 +231,11 @@ public class Evaluation {
             
             Path reportFile = reportPath.resolve("report.json");
             Files.write(reportFile, json.toString().getBytes());
+            
+            // Also write to simple location for easy access
+            Path simpleReportFile = Paths.get("evaluation/report.json");
+            Files.createDirectories(simpleReportFile.getParent());
+            Files.write(simpleReportFile, json.toString().getBytes());
         } catch (Exception e) {
             System.err.println("Failed to write error report: " + e.getMessage());
         }

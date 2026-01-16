@@ -7,6 +7,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget -q https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.9.3/junit-platform-console-standalone-1.9.3.jar \
-    -O /app/junit-platform-console-standalone.jar
+    -O /opt/junit-platform-console-standalone.jar
 
 CMD ["bash"]
