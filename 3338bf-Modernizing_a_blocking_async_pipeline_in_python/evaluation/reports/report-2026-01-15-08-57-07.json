@@ -1,0 +1,45 @@
+{
+  "summary": {
+    "trials": 3,
+    "mean_elapsed": 2.0084546667834124,
+    "min_elapsed": 2.008448800072074,
+    "max_elapsed": 2.0084610001649708,
+    "stored_counts": [
+      3,
+      3,
+      3
+    ]
+  },
+  "results": [
+    {
+      "num_items": 5,
+      "buffer_size": 3,
+      "elapsed": 2.008454200113192,
+      "stored": [
+        "Finished 2",
+        "Finished 3",
+        "Finished 4"
+      ]
+    },
+    {
+      "num_items": 5,
+      "buffer_size": 3,
+      "elapsed": 2.008448800072074,
+      "stored": [
+        "Finished 2",
+        "Finished 3",
+        "Finished 4"
+      ]
+    },
+    {
+      "num_items": 5,
+      "buffer_size": 3,
+      "elapsed": 2.0084610001649708,
+      "stored": [
+        "Finished 2",
+        "Finished 3",
+        "Finished 4"
+      ]
+    }
+  ]
+}
