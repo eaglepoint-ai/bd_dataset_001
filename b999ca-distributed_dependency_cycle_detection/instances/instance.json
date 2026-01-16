@@ -1,0 +1,9 @@
+{
+    "instance_id": "5g27e7",
+    "problem_statement": "",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main",
+    "environment_setup": "Dockerfile"
+  }
+  
