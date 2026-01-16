@@ -1,9 +1,0 @@
-services:
-  app:
-    build: .
-    command: npx ts-node -e "console.log('TypeScript OK')"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    working_dir: /app
-

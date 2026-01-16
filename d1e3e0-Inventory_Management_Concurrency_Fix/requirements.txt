@@ -1,2 +1,0 @@
-# Node.js/TypeScript project - see package.json for dependencies
-
