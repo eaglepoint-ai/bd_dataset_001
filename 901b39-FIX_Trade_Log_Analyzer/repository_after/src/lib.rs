@@ -141,6 +141,7 @@ impl TradeAnalyzer {
         // text58 is parsed to validate escaped delimiter handling; we don't persist it.
         let _ = parsed.text58;
         let _ = parsed.order_id;
+        let _ = parsed.timestamp;
 
         Ok(())
     }
