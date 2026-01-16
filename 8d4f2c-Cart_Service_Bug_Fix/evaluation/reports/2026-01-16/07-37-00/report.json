@@ -1,0 +1,194 @@
+{
+  "run_id": "a87d7550",
+  "started_at": "2026-01-16T07:36:50.662Z",
+  "finished_at": "2026-01-16T07:37:00.573Z",
+  "duration_seconds": 9.911,
+  "success": true,
+  "error": null,
+  "environment": {
+    "node_version": "v20.20.0",
+    "platform": "linux",
+    "os": "Linux",
+    "os_release": "6.14.0-37-generic",
+    "architecture": "x64",
+    "hostname": "214e8e37fc31",
+    "git_commit": "unknown",
+    "git_branch": "unknown"
+  },
+  "results": {
+    "before": {
+      "success": false,
+      "exit_code": 1,
+      "tests": [
+        {
+          "name": "should throw error when adding item from different merchant",
+          "outcome": "failed"
+        },
+        {
+          "name": "should allow adding items from same merchant",
+          "outcome": "passed"
+        },
+        {
+          "name": "should reject quantity of 0",
+          "outcome": "passed"
+        },
+        {
+          "name": "should reject negative quantity",
+          "outcome": "passed"
+        },
+        {
+          "name": "should reject non-integer quantity",
+          "outcome": "failed"
+        },
+        {
+          "name": "should accept valid positive integer quantity",
+          "outcome": "passed"
+        },
+        {
+          "name": "should prevent duplicate items with atomic operation",
+          "outcome": "passed"
+        },
+        {
+          "name": "should apply discounted price when discount is active",
+          "outcome": "failed"
+        },
+        {
+          "name": "should use full price when discount is not active",
+          "outcome": "passed"
+        },
+        {
+          "name": "should return updated cart after removing item",
+          "outcome": "failed"
+        },
+        {
+          "name": "should recalculate pricing.subtotal after quantity update",
+          "outcome": "failed"
+        },
+        {
+          "name": "should recalculate pricing.totalItems after update",
+          "outcome": "failed"
+        },
+        {
+          "name": "should recalculate pricing after removeFromCart",
+          "outcome": "failed"
+        },
+        {
+          "name": "should handle cart with items but no merchantId set",
+          "outcome": "failed"
+        },
+        {
+          "name": "should correctly convert Decimal128 prices",
+          "outcome": "passed"
+        },
+        {
+          "name": "should return empty cart structure when no cart exists",
+          "outcome": "passed"
+        },
+        {
+          "name": "should return cart with zeroed pricing",
+          "outcome": "failed"
+        }
+      ],
+      "summary": {
+        "total": 17,
+        "passed": 8,
+        "failed": 9,
+        "skipped": 0
+      },
+      "stdout": "est.js:231:31)\n\n  ● CartService › Bug 6: Cart totals wrong after update › should recalculate pricing.subtotal after quantity update\n\n    expect(received).toBeCloseTo(expected, precision)\n\n    Expected: 79.95\n    Received: 0\n\n    Expected precision:    2\n    Expected difference: < 0.005\n    Received difference:   79.95\n\n      249 |       const cartSubtotal = parseFloat(updatedCart.pricing.subtotal.toString());\n      250 |       \n    > 251 |       expect(cartSubtotal).toBeCloseTo(itemSubtotal, 2);\n          |                            ^\n      252 |       expect(updatedCart.pricing.totalItems).toBe(5);\n      253 |     });\n      254 |\n\n      at Object.toBeCloseTo (tests/cartService.test.js:251:28)\n\n  ● CartService › Bug 6: Cart totals wrong after update › should recalculate pricing.totalItems after update\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: 8\n    Received: 0\n\n      269 |       });\n      270 |\n    > 271 |       expect(updatedCart.pricing.totalItems).toBe(8);\n          |                                              ^\n      272 |     });\n      273 |\n      274 |     it('should recalculate pricing after removeFromCart', async () => {\n\n      at Object.toBe (tests/cartService.test.js:271:46)\n\n  ● CartService › Bug 6: Cart totals wrong after update › should recalculate pricing after removeFromCart\n\n    TypeError: Cannot read properties of null (reading 'pricing')\n\n      286 |       const updatedCart = await CartService.removeFromCart(customerId, itemId);\n      287 |\n    > 288 |       expect(updatedCart.pricing.totalItems).toBe(3);\n          |                          ^\n      289 |     });\n      290 |   });\n      291 |\n\n      at Object.pricing (tests/cartService.test.js:288:26)\n\n  ● CartService › Edge cases › should handle cart with items but no merchantId set\n\n    TypeError: Cannot read properties of undefined (reading 'toString')\n\n      303 |       });\n      304 |\n    > 305 |       expect(cart.merchantId.toString()).toBe(merchant1._id.toString());\n          |                              ^\n      306 |     });\n      307 |\n      308 |     it('should correctly convert Decimal128 prices', async () => {\n\n      at Object.toString (tests/cartService.test.js:305:30)\n\n  ● CartService › clearCart › should return cart with zeroed pricing\n\n    expect(received).not.toBeNull()\n\n    Received: null\n\n      338 |       const clearedCart = await CartService.clearCart(customerId);\n      339 |\n    > 340 |       expect(clearedCart).not.toBeNull();\n          |                               ^\n      341 |       expect(clearedCart.items).toHaveLength(0);\n      342 |       expect(parseFloat(clearedCart.pricing.subtotal.toString())).toBe(0);\n      343 |       expect(clearedCart.pricing.totalItems).toBe(0);\n\n      at Object.toBeNull (tests/cartService.test.js:340:31)\n\nTest Suites: 1 failed, 1 total\nTests:       9 failed, 8 passed, 17 total\nSnapshots:   0 total\nTime:        3.438 s\nRan all test suites matching /\\/app\\/tests\\/cartService.test.js/i.\n",
+      "stderr": ""
+    },
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "name": "should throw error when adding item from different merchant",
+          "outcome": "passed"
+        },
+        {
+          "name": "should allow adding items from same merchant",
+          "outcome": "passed"
+        },
+        {
+          "name": "should reject quantity of 0",
+          "outcome": "passed"
+        },
+        {
+          "name": "should reject negative quantity",
+          "outcome": "passed"
+        },
+        {
+          "name": "should reject non-integer quantity",
+          "outcome": "passed"
+        },
+        {
+          "name": "should accept valid positive integer quantity",
+          "outcome": "passed"
+        },
+        {
+          "name": "should prevent duplicate items with atomic operation",
+          "outcome": "passed"
+        },
+        {
+          "name": "should apply discounted price when discount is active",
+          "outcome": "passed"
+        },
+        {
+          "name": "should use full price when discount is not active",
+          "outcome": "passed"
+        },
+        {
+          "name": "should return updated cart after removing item",
+          "outcome": "passed"
+        },
+        {
+          "name": "should recalculate pricing.subtotal after quantity update",
+          "outcome": "passed"
+        },
+        {
+          "name": "should recalculate pricing.totalItems after update",
+          "outcome": "passed"
+        },
+        {
+          "name": "should recalculate pricing after removeFromCart",
+          "outcome": "passed"
+        },
+        {
+          "name": "should handle cart with items but no merchantId set",
+          "outcome": "passed"
+        },
+        {
+          "name": "should correctly convert Decimal128 prices",
+          "outcome": "passed"
+        },
+        {
+          "name": "should return empty cart structure when no cart exists",
+          "outcome": "passed"
+        },
+        {
+          "name": "should return cart with zeroed pricing",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 17,
+        "passed": 17,
+        "failed": 0,
+        "skipped": 0
+      },
+      "stdout": "  console.log\n    Testing repository: repository_after\n\n      at Object.log (tests/cartService.test.js:7:9)\n\nPASS tests/cartService.test.js\n  CartService\n    Bug 1: Mixed merchant items\n      ✓ should throw error when adding item from different merchant (246 ms)\n      ✓ should allow adding items from same merchant (140 ms)\n    Bug 2: Invalid quantities\n      ✓ should reject quantity of 0 (42 ms)\n      ✓ should reject negative quantity (41 ms)\n      ✓ should reject non-integer quantity (60 ms)\n      ✓ should accept valid positive integer quantity (106 ms)\n    Bug 3: Duplicate items on rapid clicks\n      ✓ should prevent duplicate items with atomic operation (136 ms)\n    Bug 4: Discounts not applied\n      ✓ should apply discounted price when discount is active (129 ms)\n      ✓ should use full price when discount is not active (135 ms)\n    Bug 5: Remove gives no feedback\n      ✓ should return updated cart after removing item (137 ms)\n    Bug 6: Cart totals wrong after update\n      ✓ should recalculate pricing.subtotal after quantity update (140 ms)\n      ✓ should recalculate pricing.totalItems after update (183 ms)\n      ✓ should recalculate pricing after removeFromCart (167 ms)\n    Edge cases\n      ✓ should handle cart with items but no merchantId set (78 ms)\n      ✓ should correctly convert Decimal128 prices (111 ms)\n    getCart\n      ✓ should return empty cart structure when no cart exists (68 ms)\n    clearCart\n      ✓ should return cart with zeroed pricing (128 ms)\n\nTest Suites: 1 passed, 1 total\nTests:       17 passed, 17 total\nSnapshots:   0 total\nTime:        3.926 s, estimated 4 s\nRan all test suites matching /\\/app\\/tests\\/cartService.test.js/i.\n",
+      "stderr": ""
+    },
+    "comparison": {
+      "before_tests_passed": false,
+      "after_tests_passed": true,
+      "before_total": 17,
+      "before_passed": 8,
+      "before_failed": 9,
+      "after_total": 17,
+      "after_passed": 17,
+      "after_failed": 0
+    }
+  }
+}

@@ -120,12 +120,37 @@ def generate_report(before_results, after_results, report_path):
     
     # Determine success: after tests should all pass
     all_after_passed = after_passed == after_total and after_total > 0
+    before_all_passed = before_passed == before_total and before_total > 0
     
-    # Create report data
+    # Create report data - match the format expected by Aquila
     report = {
         "timestamp": datetime.now().isoformat(),
         "success": all_after_passed,
         "error": None if all_after_passed else "Some tests failed or evaluation incomplete",
+        "results": {
+            "before": {
+                "success": before_all_passed,
+                "exit_code": 0 if before_all_passed else 1,
+                "tests": [{"name": t["test_name"], "outcome": "passed" if t.get("passed") else "failed"} 
+                         for t in before_results.get("tests", [])],
+                "summary": {
+                    "total": before_total,
+                    "passed": before_passed,
+                    "failed": before_total - before_passed
+                }
+            },
+            "after": {
+                "success": all_after_passed,
+                "exit_code": 0 if all_after_passed else 1,
+                "tests": [{"name": t["test_name"], "outcome": "passed" if t.get("passed") else "failed"} 
+                         for t in after_results.get("tests", [])],
+                "summary": {
+                    "total": after_total,
+                    "passed": after_passed,
+                    "failed": after_total - after_passed
+                }
+            }
+        },
         "before_version": {
             "name": "repository_before",
             "tests_passed": before_passed,
