@@ -1,0 +1,21 @@
+services:
+  meta-test-before:
+    build: .
+    container_name: meta-test-before
+    command: ["repository_before"]
+  meta-test-after:
+    build: .
+    container_name: meta-test-after
+    command: ["repository_after"]
+  evaluation:
+    build: .
+    container_name: evaluation
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        "mkdir -p /app/evaluation/reports && python3 evaluation/evaluation.py",
+      ]
+    command: []
+    volumes:
+      - ./evaluation:/app/evaluation
