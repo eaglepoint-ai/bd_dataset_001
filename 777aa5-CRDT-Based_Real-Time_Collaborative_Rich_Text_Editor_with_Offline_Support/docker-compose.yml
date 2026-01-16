@@ -1,91 +1,85 @@
-version: '3.8'
-
 services:
-  # PostgreSQL Database
-  postgres:
+  # No baseline for 0-1 feature generation
+  run_before:
+    image: alpine:latest
+    command: sh -c "echo 'No baseline - this is a 0-1 feature generation task' && exit 0"
+
+  # Run tests on the implementation
+  run_after:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@postgres_after:5432/crdt_editor
+      REDIS_URL: redis://redis_after:6379
+    depends_on:
+      postgres_after:
+        condition: service_healthy
+      redis_after:
+        condition: service_healthy
+    working_dir: /app
+    command: npm test
+
+  postgres_after:
     image: postgres:15-alpine
-    container_name: crdt-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: crdt_editor
-    ports:
-      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./repository_after/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./repository_after/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:z
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # Redis Cache & Pub/Sub
-  redis:
+  redis_after:
     image: redis:7-alpine
-    container_name: crdt-redis
-    ports:
-      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # CRDT Editor Server
-  app:
-    build:
-      context: ./repository_after
-      dockerfile: Dockerfile
-    container_name: crdt-app
-    environment:
-      PORT: 3000
-      NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/crdt_editor
-      REDIS_URL: redis://redis:6379
-    ports:
-      - "3000:3000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  # Evaluation Service
+  # Run evaluation script
   evaluation:
     build:
-      context: ./repository_after
+      context: .
       dockerfile: Dockerfile
-      target: tests
-    container_name: crdt-evaluation
     environment:
       NODE_ENV: test
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/crdt_editor
-      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://postgres:postgres@postgres_eval:5432/crdt_editor
+      REDIS_URL: redis://redis_eval:6379
     volumes:
       - ./evaluation:/app/evaluation:z
-      - ./tests:/tests:z
-      - ./repository_after:/repository_after:z
     depends_on:
-      postgres:
+      postgres_eval:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-      app:
+      redis_eval:
         condition: service_healthy
     working_dir: /app
-    command: 
-      - /bin/sh
-      - -c
-      - "ln -sf . repository_after && ln -sf /app /repository_after && ./node_modules/.bin/tsc evaluation/evaluation.ts --module commonjs --target ES2020 --esModuleInterop --skipLibCheck --resolveJsonModule && node evaluation/evaluation.js"
-    profiles:
-      - evaluation
+    command: node evaluation/evaluation.js
 
-volumes:
-  postgres_data:
+  postgres_eval:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: crdt_editor
+    volumes:
+      - ./repository_after/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis_eval:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

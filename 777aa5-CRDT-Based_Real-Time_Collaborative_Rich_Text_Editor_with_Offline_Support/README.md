@@ -88,7 +88,7 @@ docker-compose up -d
 # PostgreSQL, Redis, and app will start in order
 
 # 3. Run tests
-docker-compose exec app npm test
+docker-compose run --rm run_after
 ```
 
 ## Running Evaluation
