@@ -1,0 +1,14 @@
+{
+  "name": "product-search-optimization",
+  "version": "1.0.0",
+  "description": "Product search performance optimization task",
+  "main": "repository_before/index.js",
+  "scripts": {
+    "test": "echo 'No tests defined yet'",
+    "start": "node repository_before/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
+
