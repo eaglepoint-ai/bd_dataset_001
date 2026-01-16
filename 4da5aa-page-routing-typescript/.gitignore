@@ -1,0 +1,23 @@
+# Helper scripts and temporary files
+tests/temp_env/
+repository_after/dist/
+dist/
+coverage/
+
+
+# Dependencies
+node_modules/
+repository_after/node_modules/
+repository_before/node_modules/
+
+# Environment variables
+.env
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Evaluation reports
+report.json
+evaluation/*/*
+

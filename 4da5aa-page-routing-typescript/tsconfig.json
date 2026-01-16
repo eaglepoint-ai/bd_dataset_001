@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "ES2020",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "baseUrl": ".",
+        "paths": {
+            "src/*": [
+                "repository_after/src/*"
+            ]
+        }
+    },
+    "include": [
+        "tests/**/*",
+        "repository_after/src/**/*"
+    ],
+    "ts-node": {
+        "require": [
+            "tsconfig-paths/register"
+        ]
+    }
+}

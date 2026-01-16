@@ -1,92 +1,58 @@
-# project template
+# Mechanical Refactor: Page Routing System
 
-Starter scaffold for bd dataset task.
+This dataset task contains a production-style TypeScript function with intentional quirks.
+The objective is **pure structural de-duplication** while preserving **bit-for-bit** runtime behavior.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+## Folder layout
 
----
+- `repository_before/` original implementation (empty/failing state)
+- `repository_after/` mechanically refactored implementation (working solution)
+- `tests/` equivalence + invariants tests
+- `patches/` diff between before/after
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+## Run with Docker
 
-### Setup Steps
-
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+### Build image
+```bash
+docker compose build
 ```
 
-### Report Schema
-
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+### Run tests (before – expected some failures)
+```bash
+# We point ts-node to the before configuration
+docker compose run --rm -e TS_NODE_PROJECT=tsconfig.before.json app npm test
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+**Expected behavior:**
+- Functional tests: ❌ FAIL (expected - no implementation)
 
----
+### Run tests (after – expected all pass)
+```bash
+# Default configuration points to repository_after
+docker compose run --rm app npm test
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+**Expected behavior:**
+- Functional tests: ✅ PASS (implementation complete)
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+## Run locally
+
+### Install dependencies
+```bash
+npm install
+```
+
+### Run all tests
+```bash
+# Run against repository_after (default)
+npm test
+
+# Run against repository_before
+# On Windows/Bash:
+cross-env TS_NODE_PROJECT=tsconfig.before.json npm test
+# Or if you don't have cross-env installed globally, just set the env var:
+# Windows PowerShell:
+# $env:TS_NODE_PROJECT="tsconfig.before.json"; npm test
+# Bash:
+# TS_NODE_PROJECT=tsconfig.before.json npm test
+```
