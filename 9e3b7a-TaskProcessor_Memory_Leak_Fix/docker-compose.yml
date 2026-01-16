@@ -1,0 +1,32 @@
+services:
+  app-before:
+    build: .
+    working_dir: /app
+    command: npm test
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - REPO=repository_before
+      - NODE_ENV=test
+
+  app-after:
+    build: .
+    working_dir: /app
+    command: npm test
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - REPO=repository_after
+      - NODE_ENV=test
+
+  evaluation:
+    build: .
+    working_dir: /app
+    command: npm run evaluation
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test

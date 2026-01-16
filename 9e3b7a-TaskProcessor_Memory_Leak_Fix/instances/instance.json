@@ -1,0 +1,20 @@
+{
+  "instance_id": "9e3b7a",
+  "problem_statement": "TaskProcessor class used in long-running Node.js service has memory leaks causing memory usage to grow over time until process crashes. The class manages async task processing with pending tasks, completed results, callbacks, cached data, external event subscriptions, periodic health checks and cleanup routines. At ~100 tasks/second, even small leaks compound quickly over days/weeks of runtime.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/9e3b7a-TaskProcessor_Memory_Leak_Fix",
+  "environment_setup": "Dockerfile",
+  "FAIL_TO_PASS": [
+    "tests/memory-leaks.test.js::Requirement 1: Clear health check interval in destroy()",
+    "tests/memory-leaks.test.js::Requirement 2: Clear cleanup interval in destroy()",
+    "tests/memory-leaks.test.js::Requirement 3: Remove external source event listeners",
+    "tests/memory-leaks.test.js::Requirement 4: Clear callbacks Map after task completion",
+    "tests/memory-leaks.test.js::Requirement 5: Clear cache Map in destroy()",
+    "tests/memory-leaks.test.js::Requirement 6: Implement cache eviction when exceeds limit",
+    "tests/memory-leaks.test.js::Requirement 7: Clear subscribers array in destroy()",
+    "tests/memory-leaks.test.js::Requirement 8: Remove full task arrays from lastError",
+    "tests/memory-leaks.test.js::Requirement 9: Clear timeout timer on task completion"
+  ],
+  "PASS_TO_PASS": []
+}
