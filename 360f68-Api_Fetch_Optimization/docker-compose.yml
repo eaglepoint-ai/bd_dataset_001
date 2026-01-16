@@ -1,6 +1,60 @@
 services:
-  app:
+  evaluation:
     build: .
-    command: pytest -q tests
     volumes:
       - .:/app
+    working_dir: /app
+    command: >
+      bash -c "
+      javac -cp .:junit-platform-console-standalone.jar evaluation/Evaluation.java -d /tmp/classes &&
+      java  -cp /tmp/classes:junit-platform-console-standalone.jar Evaluation
+      "
+
+  test-before:
+    build: .
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      bash -c "
+      mkdir -p /tmp/before_wrapper &&
+      cat > /tmp/before_wrapper/FetchOptimization.java << 'EOF'
+      import java.util.*;
+      public class FetchOptimization {
+          public static List<Object> fetchItems(List<Object> items) {
+              List<Object> result = new ArrayList<>();
+              for (Object i : items) if (!result.contains(i)) result.add(i);
+              return result;
+          }
+          public static List<Object> fetchItems(List<Object> items, Integer p, Integer s) {
+              throw new UnsupportedOperationException();
+          }
+      }
+      EOF
+      &&
+      javac -cp .:junit-platform-console-standalone.jar \
+            /tmp/before_wrapper/FetchOptimization.java \
+            tests/FetchOptimizationTest.java \
+            -d /tmp/classes
+      &&
+      java -cp /tmp/classes:junit-platform-console-standalone.jar \
+           org.junit.platform.console.ConsoleLauncher \
+           --select-class FetchOptimizationTest
+      "
+
+  test-after:
+    build: .
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      bash -c "
+      javac -cp .:junit-platform-console-standalone.jar \
+            repository_after/fetchOptimization.java \
+            tests/FetchOptimizationTest.java \
+            -d /tmp/classes
+      &&
+      java -cp /tmp/classes:junit-platform-console-standalone.jar \
+           org.junit.platform.console.ConsoleLauncher \
+           --select-class FetchOptimizationTest
+      "
