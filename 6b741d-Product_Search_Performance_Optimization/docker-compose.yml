@@ -1,26 +1,22 @@
-
 services:
-  before:
+  run_before:
     build: .
-    command: sh -c "echo '--- /app at runtime (compose) ---' && ls -l /app && echo '--- /app/tests at runtime (compose) ---' && ls -l /app/tests || echo 'No /app/tests directory' && npx mocha tests/productSearch.before.test.js"
+    command: npx mocha tests/productSearch.before.test.js
     volumes:
-      - .:/app:Z
+      - .:/app:z
     working_dir: /app
-    tty: true
 
-  after:
+  run_after:
     build: .
     command: npx mocha tests/productSearch.after.test.js
     volumes:
-      - .:/app:Z
+      - .:/app:z
     working_dir: /app
-    tty: true
 
   evaluation:
     build: .
     command: node evaluation/evaluation.js
     volumes:
-      - .:/app:Z
+      - .:/app:z
     working_dir: /app
-    tty: true
 
