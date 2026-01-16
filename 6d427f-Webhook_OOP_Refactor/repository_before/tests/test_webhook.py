@@ -148,7 +148,3 @@ class WebhookTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 500)
         self.assertIn(
                 'Database error occurred', json.loads(response.data)['erro'])
-
-
-if __name__ == "__main__":
-    unittest.main()

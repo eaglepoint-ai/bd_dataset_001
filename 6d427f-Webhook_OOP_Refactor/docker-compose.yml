@@ -1,7 +1,7 @@
 services:
   test-before:
     build: .
-    command: pytest repository_before/tests -v
+    command: pytest repository_before/tests -v --tb=no
     environment:
       - PYTHONPATH=repository_before
     volumes:
