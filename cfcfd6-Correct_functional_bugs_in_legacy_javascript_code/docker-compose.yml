@@ -1,6 +1,18 @@
 services:
-  app:
+  test-before:
     build: .
-    command: node repository_before/utils.js
+    environment:
+      - TEST_MODULE=../repository_before/utils.js
+    command: npm test --prefix tests
+
+  test-after:
+    build: .
+    environment:
+      - TEST_MODULE=../repository_after/utils.js
+    command: npm test --prefix tests
+
+  evaluation:
+    build: .
+    command: node evaluation/evaluation.js
     volumes:
-      - .:/app
+      - ./evaluation/reports:/app/evaluation/reports
