@@ -1,0 +1,182 @@
+#!/usr/bin/env python3
+import sys
+import json
+import time
+import uuid
+import platform
+import os
+import subprocess
+import re
+from pathlib import Path
+from datetime import datetime
+
+ROOT = Path(__file__).resolve().parent.parent
+REPORTS = ROOT / "evaluation" / "reports"
+
+def environment_info():
+    return {
+        "python_version": platform.python_version(),
+        "platform": platform.platform()
+    }
+
+def run_tests(context_path=None):
+    env = os.environ.copy()
+    if context_path:
+        env["PYTHONPATH"] = str(context_path) + os.pathsep + env.get("PYTHONPATH", "")
+        
+    try:
+        proc = subprocess.run(
+            ["pytest", "tests", "-v", "--tb=no"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=120,
+            env=env
+        )
+        return {
+            "passed": proc.returncode == 0,
+            "return_code": proc.returncode,
+            "output": (proc.stdout + proc.stderr)[:8000]
+        }
+    except subprocess.TimeoutExpired:
+        return {
+            "passed": False,
+            "return_code": -1,
+            "output": "pytest timeout"
+        }
+
+def run_metrics(repo_path: Path):
+    metrics = {
+        "py_file_count": 0,
+        "lines_of_code": 0,
+        "class_count_approx": 0
+    }
+    
+    if not repo_path.exists():
+        return metrics
+
+    try:
+        for file_path in repo_path.rglob("*.py"):
+            metrics["py_file_count"] += 1
+            try:
+                content = file_path.read_text(encoding="utf-8", errors="ignore")
+                lines = content.splitlines()
+                metrics["lines_of_code"] += len(lines)
+                # Simple heuristic to count classes
+                metrics["class_count_approx"] += sum(1 for line in lines if line.strip().startswith("class "))
+            except Exception:
+                pass
+    except Exception as e:
+        metrics["error"] = str(e)
+        
+    return metrics
+
+def evaluate(repo_name: str):
+    repo_path = ROOT / repo_name
+    tests = run_tests(repo_path)
+    metrics = run_metrics(repo_path)
+    return {
+        "tests": tests,
+        "metrics": metrics
+    }
+
+def run_evaluation():
+    run_id = str(uuid.uuid4())
+    start = datetime.utcnow()
+    
+    before = evaluate("repository_before")
+    after = evaluate("repository_after")
+    
+    comparison = {
+        "passed_gate": after["tests"]["passed"],
+        "improvement_summary": "After implementation passed correctness checks"
+    }
+    
+    end = datetime.utcnow()
+    
+    return {
+        "run_id": run_id,
+        "started_at": start.isoformat() + "Z",
+        "finished_at": end.isoformat() + "Z",
+        "duration_seconds": (end - start).total_seconds(),
+        "environment": environment_info(),
+        "before": before,
+        "after": after,
+        "comparison": comparison,
+        "success": comparison["passed_gate"],
+        "error": None
+    }
+
+def parse_test_results(output):
+    passed = 0
+    failed = 0
+    try:
+        lines = output.strip().splitlines()
+        # Find the line that looks like a summary
+        for line in reversed(lines):
+            if "passed" in line or "failed" in line:
+                # Regex for "X passed, Y failed" or "X passed" or "Y failed"
+                p = re.search(r'(\d+) passed', line)
+                f = re.search(r'(\d+) failed', line)
+                
+                if p: passed = int(p.group(1))
+                if f: failed = int(f.group(1))
+                
+                if p or f:
+                    return passed, failed
+    except Exception:
+        pass
+    return passed, failed
+
+def print_summary(report, report_path):
+    print("=" * 60)
+    print("EVALUATION RESULTS")
+    print("=" * 60)
+    print()
+    print(f"Run ID: {report['run_id']}")
+    print(f"Duration: {report['duration_seconds']:.2f} seconds")
+    print()
+    
+    for stage, label in [("before", "BEFORE (repository_before)"), ("after", "AFTER (repository_after)")]:
+        tests = report[stage]["tests"]
+        passed_count, failed_count = parse_test_results(tests["output"])
+        total = passed_count + failed_count
+        
+        print(f"{label}:")
+        print(f"  Tests passed: {tests['passed']}")
+        print(f"  Passed: {passed_count} | Failed: {failed_count}")
+        if total > 0:
+            print(f"  Requirements covered: {passed_count}/{total}")
+        else:
+            print(f"  Requirements covered: 0/0")
+        print()
+
+    print("COMPARISON:")
+    print(f"  Passed gate: {report['comparison']['passed_gate']}")
+    print(f"  Summary: {report['comparison']['improvement_summary']}")
+    print()
+    print("=" * 60)
+    print(f"SUCCESS: {report['success']}")
+    print("=" * 60)
+    print()
+    print(f"Report written to {report_path}")
+
+def main():
+    report = run_evaluation()
+    
+    # Generate report path: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
+    now = datetime.strptime(report["started_at"].replace("Z", ""), "%Y-%m-%dT%H:%M:%S.%f")
+    date_str = now.strftime("%Y-%m-%d")
+    time_str = now.strftime("%H-%M-%S")
+    
+    report_dir = REPORTS / date_str / time_str
+    report_dir.mkdir(parents=True, exist_ok=True)
+    
+    path = report_dir / "report.json"
+    path.write_text(json.dumps(report, indent=2))
+    
+    print_summary(report, path)
+    return 0 if report["success"] else 1
+
+if __name__ == "__main__":
+    sys.exit(main())

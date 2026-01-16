@@ -1,0 +1,4 @@
+# Add your Python dependencies here
+pytest
+pytest-django
+

@@ -1,0 +1,9 @@
+{
+    "instance_id": "5g27e7",
+    "problem_statement": "The task is to design and implement a full-featured backend for a file sharing platform using Django REST Framework, similar to Google Drive. The system must support user registration and JWT-based authentication, allowing users to securely upload, manage, and organize files into bundles that can be shared privately or publicly via unique share links. Users should only access their own content or bundles shared with them, with automatic author assignment and proper permission enforcement. The backend should provide structured API endpoints for posts, files, bundles, and users, handle file uploads and in-memory ZIP downloads, and be built following best practices with serializers, ViewSets, routers, and environment-based configuration. The project must be fully modular, maintainable, and production-read",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/a475d1-Build-Django-File-Sharing-Bundle-API/a475d1-Build-Django-File-Sharing-Bundle-API",
+    "environment_setup": "Dockerfile"
+  }
+  
