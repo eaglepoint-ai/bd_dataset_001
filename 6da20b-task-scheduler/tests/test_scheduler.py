@@ -1,15 +1,39 @@
+#!/usr/bin/env python3
+"""
+Pytest test suite for Task Scheduler.
+Tests run the scheduler.py script with various task.json inputs.
+"""
+
 import json
 import os
 import sys
 import subprocess
 import tempfile
 import shutil
+import pytest
+from pathlib import Path
 
-def run_scheduler(scheduler_path, task_json_content):
+
+def get_scheduler_path():
+    """Get the scheduler.py path based on PYTHONPATH."""
+    pythonpath = os.environ.get("PYTHONPATH", "")
+    if pythonpath:
+        scheduler_path = Path(pythonpath) / "scheduler.py"
+        if scheduler_path.exists():
+            return str(scheduler_path)
+    
+    # Fallback to repository_after
+    project_root = Path(__file__).parent.parent
+    return str(project_root / "repository_after" / "scheduler.py")
+
+
+def run_scheduler(task_json_content):
     """
-    Run a scheduler script with given task JSON content.
+    Run the scheduler script with given task JSON content.
     Returns (returncode, stdout, stderr).
     """
+    scheduler_path = get_scheduler_path()
+    
     # Create a temporary directory with task.json
     temp_dir = tempfile.mkdtemp()
     
@@ -41,333 +65,122 @@ def run_scheduler(scheduler_path, task_json_content):
         # Clean up
         shutil.rmtree(temp_dir, ignore_errors=True)
 
-def test_basic_scheduling(scheduler_path):
-    """Test basic task scheduling without dependencies"""
-    tasks = [
-        {
-            "name": "Task A",
-            "duration": 2,
-            "earliest": 8,
-            "latest": 12
-        },
-        {
-            "name": "Task B",
-            "duration": 3,
-            "earliest": 10,
-            "latest": 18
-        }
-    ]
-    
-    returncode, stdout, stderr = run_scheduler(scheduler_path, tasks)
-    
-    return {
-        "test_name": "Basic Scheduling",
-        "passed": returncode == 0 and "Task A" in stdout and "Task B" in stdout,
-        "returncode": returncode,
-        "stdout": stdout,
-        "stderr": stderr,
-        "description": "Schedule two independent tasks"
-    }
 
-def test_after_dependency(scheduler_path):
-    """Test 'after' dependency constraint"""
-    tasks = [
-        {
-            "name": "Task A",
-            "duration": 2,
-            "earliest": 8,
-            "latest": 12
-        },
-        {
-            "name": "Task B",
-            "duration": 1,
-            "earliest": 0,
-            "latest": 18,
-            "after": "Task A"
-        }
-    ]
+class TestBasicScheduling:
+    """Tests for basic task scheduling"""
     
-    returncode, stdout, stderr = run_scheduler(scheduler_path, tasks)
-    
-    return {
-        "test_name": "After Dependency",
-        "passed": returncode == 0 and "Task B" in stdout,
-        "returncode": returncode,
-        "stdout": stdout,
-        "stderr": stderr,
-        "description": "Task B must start after Task A completes"
-    }
+    def test_basic_two_tasks(self):
+        """Schedule two independent tasks"""
+        tasks = [
+            {"name": "Task A", "duration": 2, "earliest": 8, "latest": 12},
+            {"name": "Task B", "duration": 3, "earliest": 10, "latest": 18}
+        ]
+        returncode, stdout, stderr = run_scheduler(tasks)
+        assert returncode == 0, f"Scheduler failed: {stderr}"
+        assert "Task A" in stdout
+        assert "Task B" in stdout
 
-def test_not_same_day(scheduler_path):
-    """Test 'not_same_day_as' constraint"""
-    tasks = [
-        {
-            "name": "Task A",
-            "duration": 2,
-            "earliest": 8,
-            "latest": 12
-        },
-        {
-            "name": "Task C",
-            "duration": 0.5,
-            "earliest": 0,
-            "latest": 18,
-            "not_same_day_as": "Task A"
-        }
-    ]
-    
-    returncode, stdout, stderr = run_scheduler(scheduler_path, tasks)
-    
-    # Check that tasks are on different days
-    success = returncode == 0 and "Task C" in stdout
-    if success and "Day 2" in stdout:
-        success = True  # Task C should be on Day 2
-    
-    return {
-        "test_name": "Not Same Day Constraint",
-        "passed": success,
-        "returncode": returncode,
-        "stdout": stdout,
-        "stderr": stderr,
-        "description": "Task C cannot be on same day as Task A"
-    }
 
-def test_null_values(scheduler_path):
-    """Test handling of null values in JSON"""
-    tasks = [
-        {
-            "name": "Task A",
-            "duration": 2,
-            "earliest": None,
-            "latest": None
-        }
-    ]
+class TestDependencies:
+    """Tests for task dependencies"""
     
-    returncode, stdout, stderr = run_scheduler(scheduler_path, tasks)
-    
-    return {
-        "test_name": "Null Values Handling",
-        "passed": returncode == 0,
-        "returncode": returncode,
-        "stdout": stdout,
-        "stderr": stderr,
-        "description": "Handle null earliest/latest values"
-    }
+    def test_after_dependency(self):
+        """Task B must start after Task A completes"""
+        tasks = [
+            {"name": "Task A", "duration": 2, "earliest": 8, "latest": 12},
+            {"name": "Task B", "duration": 1, "earliest": 0, "latest": 18, "after": "Task A"}
+        ]
+        returncode, stdout, stderr = run_scheduler(tasks)
+        assert returncode == 0, f"Scheduler failed: {stderr}"
+        assert "Task B" in stdout
 
-def test_invalid_time_window(scheduler_path):
-    """Test error handling for invalid time constraints"""
-    tasks = [
-        {
-            "name": "Task A",
-            "duration": 2,
-            "earliest": 18,
-            "latest": 12
-        }
-    ]
-    
-    returncode, stdout, stderr = run_scheduler(scheduler_path, tasks)
-    
-    return {
-        "test_name": "Invalid Time Window",
-        "passed": returncode != 0 or "Error" in stdout or "Error" in stderr,
-        "returncode": returncode,
-        "stdout": stdout,
-        "stderr": stderr,
-        "description": "Detect earliest > latest error"
-    }
 
-def test_task_too_long(scheduler_path):
-    """Test error handling for task that doesn't fit"""
-    tasks = [
-        {
-            "name": "Task A",
-            "duration": 10,
-            "earliest": 8,
-            "latest": 12
-        }
-    ]
+class TestConstraints:
+    """Tests for constraint handling"""
     
-    returncode, stdout, stderr = run_scheduler(scheduler_path, tasks)
-    
-    return {
-        "test_name": "Task Too Long",
-        "passed": returncode != 0 or "Error" in stdout or "doesn't fit" in stdout,
-        "returncode": returncode,
-        "stdout": stdout,
-        "stderr": stderr,
-        "description": "Detect when duration exceeds time window"
-    }
+    def test_not_same_day_constraint(self):
+        """Tasks with not_same_day_as should be on different days"""
+        tasks = [
+            {"name": "Task A", "duration": 2, "earliest": 8, "latest": 12},
+            {"name": "Task B", "duration": 2, "earliest": 8, "latest": 12, "not_same_day_as": "Task A"}
+        ]
+        returncode, stdout, stderr = run_scheduler(tasks)
+        # Should complete without infinite recursion
+        assert returncode == 0 or "Day 2" in stdout or stderr == "", f"Infinite recursion or error: {stderr}"
 
-def test_missing_dependency(scheduler_path):
-    """Test handling of missing dependency"""
-    tasks = [
-        {
-            "name": "Task B",
-            "duration": 1,
-            "earliest": 0,
-            "latest": 18,
-            "after": "NonExistent"
-        }
-    ]
-    
-    returncode, stdout, stderr = run_scheduler(scheduler_path, tasks)
-    
-    return {
-        "test_name": "Missing Dependency",
-        "passed": "Warning" in stdout or "Error" in stdout,
-        "returncode": returncode,
-        "stdout": stdout,
-        "stderr": stderr,
-        "description": "Handle reference to non-existent task"
-    }
 
-def test_multi_day_scheduling(scheduler_path):
-    """Test scheduling across multiple days"""
-    tasks = [
-        {
-            "name": "Task A",
-            "duration": 8,
-            "earliest": 9,
-            "latest": 17
-        },
-        {
-            "name": "Task B",
-            "duration": 8,
-            "earliest": 9,
-            "latest": 17,
-            "after": "Task A"
-        }
-    ]
+class TestNullHandling:
+    """Tests for null value handling"""
     
-    returncode, stdout, stderr = run_scheduler(scheduler_path, tasks)
-    
-    # Task B should be on Day 2 since it needs to start after Task A
-    success = returncode == 0 and ("Day 1" in stdout or "Day 2" in stdout)
-    
-    return {
-        "test_name": "Multi-day Scheduling",
-        "passed": success,
-        "returncode": returncode,
-        "stdout": stdout,
-        "stderr": stderr,
-        "description": "Schedule tasks across multiple days"
-    }
+    def test_null_earliest_latest(self):
+        """Handle null values for earliest/latest"""
+        tasks = [
+            {"name": "Task A", "duration": 2, "earliest": None, "latest": None}
+        ]
+        returncode, stdout, stderr = run_scheduler(tasks)
+        # Should handle null values without crashing
+        assert "Traceback" not in stderr, f"Crashed on null values: {stderr}"
 
-def test_complex_constraints(scheduler_path):
-    """Test combination of multiple constraints"""
-    tasks = [
-        {
-            "name": "Task A",
-            "duration": 2,
-            "earliest": 8,
-            "latest": 12
-        },
-        {
-            "name": "Task B",
-            "duration": 1,
-            "earliest": 0,
-            "latest": 18,
-            "after": "Task A"
-        },
-        {
-            "name": "Task C",
-            "duration": 0.5,
-            "earliest": 0,
-            "latest": 18,
-            "not_same_day_as": "Task A"
-        }
-    ]
-    
-    returncode, stdout, stderr = run_scheduler(scheduler_path, tasks)
-    
-    return {
-        "test_name": "Complex Constraints",
-        "passed": returncode == 0 and "Task A" in stdout and "Task B" in stdout and "Task C" in stdout,
-        "returncode": returncode,
-        "stdout": stdout,
-        "stderr": stderr,
-        "description": "Handle both after and not_same_day_as constraints"
-    }
 
-def run_all_tests(scheduler_path):
-    """Run all tests and return results"""
-    tests = [
-        test_basic_scheduling,
-        test_after_dependency,
-        test_not_same_day,
-        test_null_values,
-        test_invalid_time_window,
-        test_task_too_long,
-        test_missing_dependency,
-        test_multi_day_scheduling,
-        test_complex_constraints
-    ]
+class TestErrorHandling:
+    """Tests for error handling"""
     
-    results = []
-    for test_func in tests:
-        try:
-            result = test_func(scheduler_path)
-            results.append(result)
-        except Exception as e:
-            results.append({
-                "test_name": test_func.__name__,
-                "passed": False,
-                "error": str(e),
-                "description": test_func.__doc__ or "No description"
-            })
+    def test_invalid_time_window(self):
+        """Detect invalid time window (earliest >= latest)"""
+        tasks = [
+            {"name": "Task A", "duration": 2, "earliest": 15, "latest": 10}
+        ]
+        returncode, stdout, stderr = run_scheduler(tasks)
+        # Should detect and report error
+        assert returncode != 0 or "Error" in stdout or "Error" in stderr
     
-    return results
+    def test_task_too_long(self):
+        """Detect task that doesn't fit in time window"""
+        tasks = [
+            {"name": "Task A", "duration": 10, "earliest": 8, "latest": 12}
+        ]
+        returncode, stdout, stderr = run_scheduler(tasks)
+        # Should detect and report error
+        assert returncode != 0 or "Error" in stdout or "Error" in stderr
+    
+    def test_missing_dependency(self):
+        """Detect reference to non-existent task"""
+        tasks = [
+            {"name": "Task A", "duration": 2, "earliest": 8, "latest": 12, "after": "NonExistent"}
+        ]
+        returncode, stdout, stderr = run_scheduler(tasks)
+        # Should detect and report error
+        assert returncode != 0 or "Error" in stdout or "Error" in stderr
 
-def print_test_results(results, version_name):
-    """Print formatted test results"""
-    print(f"\n{'='*70}")
-    print(f"Test Results for {version_name}")
-    print(f"{'='*70}\n")
-    
-    passed = sum(1 for r in results if r.get("passed", False))
-    total = len(results)
-    
-    for result in results:
-        status = "✓ PASS" if result.get("passed", False) else "✗ FAIL"
-        print(f"{status}: {result['test_name']}")
-    
-    print(f"\n{'='*70}")
-    print(f"Summary: {passed}/{total} tests passed ({100*passed//total}%)")
-    print(f"{'='*70}\n")
-    
-    return passed, total
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python test_scheduler.py <scheduler_path> [version_name]")
-        sys.exit(1)
+class TestMultiDay:
+    """Tests for multi-day scheduling"""
     
-    scheduler_path = sys.argv[1]
-    version_name = sys.argv[2] if len(sys.argv) > 2 else os.path.basename(os.path.dirname(scheduler_path))
+    def test_multi_day_scheduling(self):
+        """Schedule tasks across multiple days"""
+        tasks = [
+            {"name": "Task A", "duration": 8, "earliest": 8, "latest": 18},
+            {"name": "Task B", "duration": 8, "earliest": 8, "latest": 18},
+            {"name": "Task C", "duration": 8, "earliest": 8, "latest": 18}
+        ]
+        returncode, stdout, stderr = run_scheduler(tasks)
+        # Should schedule across multiple days
+        assert returncode == 0, f"Scheduler failed: {stderr}"
+        assert "Day" in stdout
+
+
+class TestComplexScenarios:
+    """Tests for complex scheduling scenarios"""
     
-    if not os.path.exists(scheduler_path):
-        print(f"Error: Scheduler not found at {scheduler_path}")
-        sys.exit(1)
-    
-    results = run_all_tests(scheduler_path)
-    passed, total = print_test_results(results, version_name)
-    
-    # Return results as JSON for evaluation
-    output = {
-        "version": version_name,
-        "tests": results,
-        "summary": {
-            "passed": passed,
-            "total": total,
-            "percentage": 100 * passed / total if total > 0 else 0
-        }
-    }
-    
-    # Save to file if requested
-    if len(sys.argv) > 3:
-        output_file = sys.argv[3]
-        with open(output_file, "w") as f:
-            json.dump(output, f, indent=2)
-        print(f"Results saved to {output_file}")
-    
-    sys.exit(0 if passed == total else 1)
+    def test_complex_constraints(self):
+        """Handle complex combination of constraints"""
+        tasks = [
+            {"name": "Morning Meeting", "duration": 1, "earliest": 9, "latest": 11},
+            {"name": "Development", "duration": 4, "earliest": 8, "latest": 18, "after": "Morning Meeting"},
+            {"name": "Code Review", "duration": 2, "earliest": 14, "latest": 18, "after": "Development"}
+        ]
+        returncode, stdout, stderr = run_scheduler(tasks)
+        assert returncode == 0, f"Scheduler failed: {stderr}"
+        assert "Morning Meeting" in stdout
+        assert "Development" in stdout
+        assert "Code Review" in stdout

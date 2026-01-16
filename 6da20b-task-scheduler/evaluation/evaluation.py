@@ -1,335 +1,383 @@
 #!/usr/bin/env python3
 """
-Evaluation script for task scheduler.
-Runs tests on both before and after versions and generates a comparative report.
+Evaluation runner for Task Scheduler.
+This evaluation script:
+- Runs pytest tests on the tests/ folder for both before and after implementations
+- Collects individual test results with pass/fail status
+- Generates structured reports with environment metadata
+
+Run with:
+    python evaluation/evaluation.py [options]
 """
 
-import json
 import os
 import sys
+import json
+import uuid
+import platform
 import subprocess
 from datetime import datetime
-import tempfile
-import shutil
+from pathlib import Path
 
-def get_project_root():
-    """Get the project root directory"""
-    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-def create_report_directory():
-    """Create timestamped report directory"""
-    project_root = get_project_root()
-    reports_dir = os.path.join(project_root, "evaluation", "reports")
-    
-    # Create directory with current timestamp
-    now = datetime.now()
-    date_dir = now.strftime("%Y-%m-%d")
-    time_dir = now.strftime("%H-%M-%S")
-    
-    report_path = os.path.join(reports_dir, date_dir, time_dir)
-    os.makedirs(report_path, exist_ok=True)
-    
-    return report_path
+def generate_run_id():
+    """Generate a short unique run ID."""
+    return uuid.uuid4().hex[:8]
 
-def run_tests_for_version(version_path, version_name, output_file):
-    """Run tests for a specific version and save results"""
-    project_root = get_project_root()
-    test_script = os.path.join(project_root, "tests", "test_scheduler.py")
-    scheduler_path = os.path.join(version_path, "scheduler.py")
-    
-    if not os.path.exists(scheduler_path):
-        print(f"Warning: Scheduler not found at {scheduler_path}")
-        return None
-    
+
+def get_git_info():
+    """Get git commit and branch information."""
+    git_info = {"git_commit": "unknown", "git_branch": "unknown"}
     try:
         result = subprocess.run(
-            [sys.executable, test_script, scheduler_path, version_name, output_file],
+            ["git", "rev-parse", "HEAD"],
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=5,
+            stderr=subprocess.DEVNULL
         )
-        
-        # Load the results
-        if os.path.exists(output_file):
-            with open(output_file, "r") as f:
-                return json.load(f)
-        else:
-            return {
-                "version": version_name,
-                "error": "No output file generated",
-                "stdout": result.stdout,
-                "stderr": result.stderr
-            }
-    except subprocess.TimeoutExpired:
+        if result.returncode == 0:
+            git_info["git_commit"] = result.stdout.strip()[:8]
+    except Exception:
+        pass
+
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            stderr=subprocess.DEVNULL
+        )
+        if result.returncode == 0:
+            git_info["git_branch"] = result.stdout.strip()
+    except Exception:
+        pass
+
+    return git_info
+
+
+def get_environment_info():
+    """Collect environment information for the report."""
+    git_info = get_git_info()
+
+    return {
+        "python_version": platform.python_version(),
+        "platform": platform.platform(),
+        "os": platform.system(),
+        "os_release": platform.release(),
+        "architecture": platform.machine(),
+        "hostname": platform.node(),
+        "git_commit": git_info["git_commit"],
+        "git_branch": git_info["git_branch"],
+    }
+
+
+def run_pytest_with_pythonpath(pythonpath, tests_dir, label):
+    """
+    Run pytest on the tests/ folder with specific PYTHONPATH.
+    
+    Args:
+        pythonpath: The PYTHONPATH to use for the tests
+        tests_dir: Path to the tests directory
+        label: Label for this test run (e.g., "before", "after")
+    
+    Returns:
+        dict with test results
+    """
+    print(f"\n{'=' * 60}")
+    print(f"RUNNING TESTS: {label.upper()}")
+    print(f"{'=' * 60}")
+
+    # Build pytest command
+    cmd = [
+        sys.executable, "-m", "pytest",
+        str(tests_dir),
+        "-v",
+        "--tb=short",
+    ]
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = pythonpath
+
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            cwd=str(Path(tests_dir).parent),
+            env=env,
+            timeout=300
+        )
+
+        stdout = result.stdout
+        stderr = result.stderr
+
+        # Parse verbose output to get test results
+        tests = parse_pytest_verbose_output(stdout)
+
+        # Count results
+        passed = sum(1 for t in tests if t.get("outcome") == "passed")
+        failed = sum(1 for t in tests if t.get("outcome") == "failed")
+        errors = sum(1 for t in tests if t.get("outcome") == "error")
+        skipped = sum(1 for t in tests if t.get("outcome") == "skipped")
+        total = len(tests)
+
+        print(f"\nResults: {passed} passed, {failed} failed, {errors} errors, {skipped} skipped (total: {total})")
+
+        # Print individual test results
+        for test in tests:
+            status_icon = {
+                "passed": "✓ PASS",
+                "failed": "✗ FAIL",
+                "error": "✗ ERROR",
+                "skipped": "⊘ SKIP"
+            }.get(test.get("outcome"), "?")
+            print(f"  [{status_icon}] {test.get('name', 'unknown')}")
+
         return {
-            "version": version_name,
-            "error": "Tests timed out (possible infinite loop)",
-            "tests": []
+            "success": result.returncode == 0,
+            "exit_code": result.returncode,
+            "tests": tests,
+            "summary": {
+                "total": total,
+                "passed": passed,
+                "failed": failed,
+                "errors": errors,
+                "skipped": skipped,
+            },
+            "stdout": stdout[-3000:] if len(stdout) > 3000 else stdout,
+            "stderr": stderr[-1000:] if len(stderr) > 1000 else stderr,
+        }
+
+    except subprocess.TimeoutExpired:
+        print("TIMEOUT: Test execution timed out")
+        return {
+            "success": False,
+            "exit_code": -1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0, "error": "Test execution timed out"},
+            "stdout": "",
+            "stderr": "",
         }
     except Exception as e:
+        print(f"ERROR running tests: {e}")
         return {
-            "version": version_name,
-            "error": str(e),
-            "tests": []
+            "success": False,
+            "exit_code": -1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0, "error": str(e)},
+            "stdout": "",
+            "stderr": "",
         }
 
-def analyze_improvements(before_results, after_results):
-    """Analyze improvements between before and after versions"""
-    improvements = []
-    regressions = []
-    
-    # Create dict for easy lookup
-    before_tests = {t["test_name"]: t for t in before_results.get("tests", [])}
-    after_tests = {t["test_name"]: t for t in after_results.get("tests", [])}
-    
-    for test_name in after_tests:
-        after_test = after_tests[test_name]
-        before_test = before_tests.get(test_name, {})
-        
-        before_passed = before_test.get("passed", False)
-        after_passed = after_test.get("passed", False)
-        
-        if not before_passed and after_passed:
-            improvements.append({
-                "test_name": test_name,
-                "description": after_test.get("description", ""),
-                "before": "Failed",
-                "after": "Passed"
-            })
-        elif before_passed and not after_passed:
-            regressions.append({
-                "test_name": test_name,
-                "description": after_test.get("description", ""),
-                "before": "Passed",
-                "after": "Failed"
-            })
-    
-    return improvements, regressions
 
-def generate_report(before_results, after_results, report_path):
-    """Generate comprehensive evaluation report"""
+def parse_pytest_verbose_output(output):
+    """Parse pytest verbose output to extract test results."""
+    tests = []
+    lines = output.split('\n')
+
+    for line in lines:
+        line_stripped = line.strip()
+
+        # Match lines like: tests/test_scheduler.py::TestClass::test_name PASSED
+        if '::' in line_stripped:
+            outcome = None
+            if ' PASSED' in line_stripped:
+                outcome = "passed"
+            elif ' FAILED' in line_stripped:
+                outcome = "failed"
+            elif ' ERROR' in line_stripped:
+                outcome = "error"
+            elif ' SKIPPED' in line_stripped:
+                outcome = "skipped"
+
+            if outcome:
+                # Extract nodeid (everything before the status)
+                for status_word in [' PASSED', ' FAILED', ' ERROR', ' SKIPPED']:
+                    if status_word in line_stripped:
+                        nodeid = line_stripped.split(status_word)[0].strip()
+                        break
+
+                tests.append({
+                    "nodeid": nodeid,
+                    "name": nodeid.split("::")[-1] if "::" in nodeid else nodeid,
+                    "outcome": outcome,
+                })
+
+    return tests
+
+
+def run_evaluation():
+    """
+    Run complete evaluation for both implementations.
     
-    # Analyze improvements
-    improvements, regressions = analyze_improvements(before_results, after_results)
-    
-    # Calculate metrics
-    before_passed = before_results.get("summary", {}).get("passed", 0)
-    before_total = before_results.get("summary", {}).get("total", 0)
-    after_passed = after_results.get("summary", {}).get("passed", 0)
-    after_total = after_results.get("summary", {}).get("total", 0)
-    
-    # Determine success: after tests should all pass
-    all_after_passed = after_passed == after_total and after_total > 0
-    before_all_passed = before_passed == before_total and before_total > 0
-    
-    # Create report data - match the format expected by Aquila
-    report = {
-        "timestamp": datetime.now().isoformat(),
-        "success": all_after_passed,
-        "error": None if all_after_passed else "Some tests failed or evaluation incomplete",
-        "results": {
-            "before": {
-                "success": before_all_passed,
-                "exit_code": 0 if before_all_passed else 1,
-                "tests": [{"name": t["test_name"], "outcome": "passed" if t.get("passed") else "failed"} 
-                         for t in before_results.get("tests", [])],
-                "summary": {
-                    "total": before_total,
-                    "passed": before_passed,
-                    "failed": before_total - before_passed
-                }
-            },
-            "after": {
-                "success": all_after_passed,
-                "exit_code": 0 if all_after_passed else 1,
-                "tests": [{"name": t["test_name"], "outcome": "passed" if t.get("passed") else "failed"} 
-                         for t in after_results.get("tests", [])],
-                "summary": {
-                    "total": after_total,
-                    "passed": after_passed,
-                    "failed": after_total - after_passed
-                }
-            }
-        },
-        "before_version": {
-            "name": "repository_before",
-            "tests_passed": before_passed,
-            "tests_total": before_total,
-            "pass_rate": before_results.get("summary", {}).get("percentage", 0),
-            "tests": before_results.get("tests", [])
-        },
-        "after_version": {
-            "name": "repository_after",
-            "tests_passed": after_passed,
-            "tests_total": after_total,
-            "pass_rate": after_results.get("summary", {}).get("percentage", 0),
-            "tests": after_results.get("tests", [])
-        },
-        "analysis": {
-            "improvements": improvements,
-            "regressions": regressions,
-            "tests_fixed": len(improvements),
-            "tests_broken": len(regressions),
-            "net_improvement": len(improvements) - len(regressions),
-            "pass_rate_change": after_results.get("summary", {}).get("percentage", 0) - 
-                                before_results.get("summary", {}).get("percentage", 0)
-        },
-        "issues_fixed": [
-            "File path handling - uses path relative to script location",
-            "Null value handling - properly handles None values from JSON",
-            "Infinite recursion - fixed not_same_day_as constraint",
-            "Multi-day scheduling - proper day tracking logic",
-            "Input validation - validates time constraints and dependencies",
-            "Error handling - comprehensive error detection and reporting",
-            "Global state - removed global variables, better encapsulation",
-            "Documentation - added comments explaining logic"
-        ]
+    Returns dict with test results from both before and after implementations.
+    """
+    print(f"\n{'=' * 60}")
+    print("TASK SCHEDULER EVALUATION")
+    print(f"{'=' * 60}")
+
+    project_root = Path(__file__).parent.parent
+    tests_dir = project_root / "tests"
+
+    # PYTHONPATH for before implementation
+    before_pythonpath = str(project_root / "repository_before")
+
+    # PYTHONPATH for after implementation  
+    after_pythonpath = str(project_root / "repository_after")
+
+    # Run tests with BEFORE implementation
+    before_results = run_pytest_with_pythonpath(
+        before_pythonpath,
+        tests_dir,
+        "before (repository_before)"
+    )
+
+    # Run tests with AFTER implementation
+    after_results = run_pytest_with_pythonpath(
+        after_pythonpath,
+        tests_dir,
+        "after (repository_after)"
+    )
+
+    # Build comparison
+    comparison = {
+        "before_tests_passed": before_results.get("success", False),
+        "after_tests_passed": after_results.get("success", False),
+        "before_total": before_results.get("summary", {}).get("total", 0),
+        "before_passed": before_results.get("summary", {}).get("passed", 0),
+        "before_failed": before_results.get("summary", {}).get("failed", 0),
+        "after_total": after_results.get("summary", {}).get("total", 0),
+        "after_passed": after_results.get("summary", {}).get("passed", 0),
+        "after_failed": after_results.get("summary", {}).get("failed", 0),
     }
-    
-    # Save JSON report
-    json_file = os.path.join(report_path, "report.json")
-    with open(json_file, "w") as f:
-        json.dump(report, f, indent=2)
-    
-    # Generate human-readable report
-    txt_file = os.path.join(report_path, "report.txt")
-    with open(txt_file, "w") as f:
-        f.write("="*80 + "\n")
-        f.write("TASK SCHEDULER EVALUATION REPORT\n")
-        f.write("="*80 + "\n\n")
-        f.write(f"Generated: {report['timestamp']}\n\n")
-        
-        f.write("-"*80 + "\n")
-        f.write("SUMMARY\n")
-        f.write("-"*80 + "\n\n")
-        
-        f.write(f"Before Version (repository_before):\n")
-        f.write(f"  Tests Passed: {before_passed}/{before_total} ({before_results.get('summary', {}).get('percentage', 0):.1f}%)\n\n")
-        
-        f.write(f"After Version (repository_after):\n")
-        f.write(f"  Tests Passed: {after_passed}/{after_total} ({after_results.get('summary', {}).get('percentage', 0):.1f}%)\n\n")
-        
-        f.write(f"Net Improvement: {report['analysis']['net_improvement']} tests fixed\n")
-        f.write(f"Pass Rate Change: {report['analysis']['pass_rate_change']:+.1f}%\n\n")
-        
-        if improvements:
-            f.write("-"*80 + "\n")
-            f.write("IMPROVEMENTS\n")
-            f.write("-"*80 + "\n\n")
-            for imp in improvements:
-                f.write(f"✓ {imp['test_name']}\n")
-                f.write(f"  {imp['description']}\n")
-                f.write(f"  Status: {imp['before']} → {imp['after']}\n\n")
-        
-        if regressions:
-            f.write("-"*80 + "\n")
-            f.write("REGRESSIONS\n")
-            f.write("-"*80 + "\n\n")
-            for reg in regressions:
-                f.write(f"✗ {reg['test_name']}\n")
-                f.write(f"  {reg['description']}\n")
-                f.write(f"  Status: {reg['before']} → {reg['after']}\n\n")
-        
-        f.write("-"*80 + "\n")
-        f.write("ISSUES FIXED\n")
-        f.write("-"*80 + "\n\n")
-        for i, issue in enumerate(report["issues_fixed"], 1):
-            f.write(f"{i}. {issue}\n")
-        
-        f.write("\n" + "-"*80 + "\n")
-        f.write("DETAILED TEST RESULTS\n")
-        f.write("-"*80 + "\n\n")
-        
-        f.write("BEFORE VERSION:\n\n")
-        for test in before_results.get("tests", []):
-            status = "PASS" if test.get("passed", False) else "FAIL"
-            f.write(f"  [{status}] {test['test_name']}\n")
-            if not test.get("passed", False) and "returncode" in test:
-                f.write(f"        Return code: {test['returncode']}\n")
-        
-        f.write("\nAFTER VERSION:\n\n")
-        for test in after_results.get("tests", []):
-            status = "PASS" if test.get("passed", False) else "FAIL"
-            f.write(f"  [{status}] {test['test_name']}\n")
-            if not test.get("passed", False) and "returncode" in test:
-                f.write(f"        Return code: {test['returncode']}\n")
-        
-        f.write("\n" + "="*80 + "\n")
-    
-    return json_file, txt_file
+
+    # Print summary
+    print(f"\n{'=' * 60}")
+    print("EVALUATION SUMMARY")
+    print(f"{'=' * 60}")
+
+    print(f"\nBefore Implementation (repository_before):")
+    print(f"  Overall: {'PASSED' if before_results.get('success') else 'FAILED'}")
+    print(f"  Tests: {comparison['before_passed']}/{comparison['before_total']} passed")
+
+    print(f"\nAfter Implementation (repository_after):")
+    print(f"  Overall: {'PASSED' if after_results.get('success') else 'FAILED'}")
+    print(f"  Tests: {comparison['after_passed']}/{comparison['after_total']} passed")
+
+    # Determine expected behavior
+    print(f"\n{'=' * 60}")
+    print("EXPECTED BEHAVIOR CHECK")
+    print(f"{'=' * 60}")
+
+    if after_results.get("success"):
+        print("[✓ OK] After implementation: All tests passed (expected)")
+    else:
+        print("[✗ FAIL] After implementation: Some tests failed (unexpected - should pass all)")
+
+    # Check before implementation behavior
+    before_failed = comparison['before_failed']
+    if before_failed > 0:
+        print(f"[✓ OK] Before implementation: {before_failed} tests failed (expected for FAIL_TO_PASS tests)")
+    else:
+        print("[⚠ WARN] Before implementation: No tests failed (unexpected)")
+
+    return {
+        "before": before_results,
+        "after": after_results,
+        "comparison": comparison,
+    }
+
+
+def generate_output_path():
+    """Generate output path in format: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json"""
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d")
+    time_str = now.strftime("%H-%M-%S")
+
+    project_root = Path(__file__).parent.parent
+    output_dir = project_root / "evaluation" / "reports" / date_str / time_str
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    return output_dir / "report.json"
+
 
 def main():
-    """Main evaluation function"""
-    print("="*80)
-    print("Task Scheduler Evaluation")
-    print("="*80)
-    print()
-    
-    project_root = get_project_root()
-    
-    # Create report directory
-    report_path = create_report_directory()
-    print(f"Report directory: {report_path}\n")
-    
-    # Test before version
-    print("Running tests on repository_before...")
-    before_path = os.path.join(project_root, "repository_before")
-    before_output = os.path.join(report_path, "before_results.json")
-    before_results = run_tests_for_version(before_path, "repository_before", before_output)
-    
-    if before_results:
-        before_passed = before_results.get("summary", {}).get("passed", 0)
-        before_total = before_results.get("summary", {}).get("total", 0)
-        print(f"  Results: {before_passed}/{before_total} tests passed\n")
+    """Main entry point for evaluation."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run Task Scheduler evaluation")
+    parser.add_argument(
+        "--output", 
+        type=str, 
+        default=None, 
+        help="Output JSON file path (default: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json)"
+    )
+
+    args = parser.parse_args()
+
+    # Generate run ID and timestamps
+    run_id = generate_run_id()
+    started_at = datetime.now()
+
+    print(f"Run ID: {run_id}")
+    print(f"Started at: {started_at.isoformat()}")
+
+    try:
+        results = run_evaluation()
+
+        # Success if after implementation passes all tests
+        success = results["after"].get("success", False)
+        error_message = None if success else "After implementation tests failed"
+
+    except Exception as e:
+        import traceback
+        print(f"\nERROR: {str(e)}")
+        traceback.print_exc()
+        results = None
+        success = False
+        error_message = str(e)
+
+    finished_at = datetime.now()
+    duration = (finished_at - started_at).total_seconds()
+
+    # Collect environment information
+    environment = get_environment_info()
+
+    # Build report
+    report = {
+        "run_id": run_id,
+        "started_at": started_at.isoformat(),
+        "finished_at": finished_at.isoformat(),
+        "duration_seconds": round(duration, 6),
+        "success": success,
+        "error": error_message,
+        "environment": environment,
+        "results": results,
+    }
+
+    # Determine output path
+    if args.output:
+        output_path = Path(args.output)
     else:
-        print("  Error running tests\n")
-        before_results = {"version": "repository_before", "tests": [], "summary": {"passed": 0, "total": 0, "percentage": 0}}
-    
-    # Test after version
-    print("Running tests on repository_after...")
-    after_path = os.path.join(project_root, "repository_after")
-    after_output = os.path.join(report_path, "after_results.json")
-    after_results = run_tests_for_version(after_path, "repository_after", after_output)
-    
-    if after_results:
-        after_passed = after_results.get("summary", {}).get("passed", 0)
-        after_total = after_results.get("summary", {}).get("total", 0)
-        print(f"  Results: {after_passed}/{after_total} tests passed\n")
-    else:
-        print("  Error running tests\n")
-        after_results = {"version": "repository_after", "tests": [], "summary": {"passed": 0, "total": 0, "percentage": 0}}
-    
-    # Generate report
-    print("Generating evaluation report...")
-    json_file, txt_file = generate_report(before_results, after_results, report_path)
-    
-    print(f"\n✓ Report generated successfully!")
-    print(f"  JSON: {json_file}")
-    print(f"  Text: {txt_file}")
-    
-    # Print summary
-    print("\n" + "="*80)
-    print("SUMMARY")
-    print("="*80)
-    
-    with open(json_file, "r") as f:
-        report = json.load(f)
-    
-    print(f"\nBefore: {report['before_version']['tests_passed']}/{report['before_version']['tests_total']} tests passed")
-    print(f"After:  {report['after_version']['tests_passed']}/{report['after_version']['tests_total']} tests passed")
-    print(f"\nNet Improvement: {report['analysis']['net_improvement']} tests")
-    print(f"Pass Rate Change: {report['analysis']['pass_rate_change']:+.1f}%")
-    
-    if report['analysis']['improvements']:
-        print(f"\n✓ {len(report['analysis']['improvements'])} tests fixed")
-    
-    if report['analysis']['regressions']:
-        print(f"✗ {len(report['analysis']['regressions'])} tests regressed")
-    
-    print("\n" + "="*80)
-    
-    # Return 0 only if after tests all passed
-    return 0 if report.get('success', False) else 1
+        output_path = generate_output_path()
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_path, "w") as f:
+        json.dump(report, f, indent=2)
+    print(f"\nReport saved to: {output_path}")
+
+    print(f"\n{'=' * 60}")
+    print(f"EVALUATION COMPLETE")
+    print(f"{'=' * 60}")
+    print(f"Run ID: {run_id}")
+    print(f"Duration: {duration:.2f}s")
+    print(f"Success: {'YES' if success else 'NO'}")
+
+    return 0 if success else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

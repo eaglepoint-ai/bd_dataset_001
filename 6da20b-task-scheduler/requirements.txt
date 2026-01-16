@@ -1,2 +1,2 @@
 # Python dependencies for task scheduler project
-# No external dependencies needed - uses only standard library
+pytest>=7.0.0
