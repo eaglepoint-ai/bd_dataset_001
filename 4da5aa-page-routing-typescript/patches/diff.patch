@@ -1,0 +1,225 @@
+diff -ruN -x node_modules -x dist -x .git -x package-lock.json repository_before/package.json repository_after/package.json
+--- repository_before/package.json	1970-01-01 00:00:00.000000000 +0000
++++ repository_after/package.json	2026-01-16 14:46:42.954262600 +0000
+@@ -0,0 +1,18 @@
++{
++    "name": "page-routing-system",
++    "version": "1.0.0",
++    "description": "Minimal page-based routing system",
++    "main": "dist/index.js",
++    "scripts": {
++        "test": "ts-node tests/router.test.ts",
++        "build": "tsc"
++    },
++    "dependencies": {
++        "ts-node": "^10.9.1",
++        "typescript": "^5.0.0"
++    },
++    "devDependencies": {
++        "@types/node": "^25.0.9",
++        "tsconfig-paths": "^4.2.0"
++    }
++}
+diff -ruN -x node_modules -x dist -x .git -x package-lock.json repository_before/src/matcher.ts repository_after/src/matcher.ts
+--- repository_before/src/matcher.ts	1970-01-01 00:00:00.000000000 +0000
++++ repository_after/src/matcher.ts	2026-01-16 14:30:33.230085300 +0000
+@@ -0,0 +1,83 @@
++import { RouteNode, MatchResult } from './types';
++
++export function matchUrl(url: string, root: RouteNode): MatchResult | null {
++    // Normalize URL: remove leading/trailing slashes, split
++    const urlPath = url.split('?')[0]; // Ignore query params for now
++    const segments = urlPath.split('/').filter(Boolean);
++
++    const matchedParams: Record<string, string> = {};
++    const componentStack: { componentPath: string; type: 'layout' | 'page' }[] = [];
++
++    // Helper to collect layouts from root down to current node
++    function collectLayouts(node: RouteNode) {
++        const stack: { componentPath: string; type: 'layout' | 'page' }[] = [];
++        let current: RouteNode | undefined = node;
++        while (current) {
++            if (current.layoutComponent) {
++                stack.unshift({ componentPath: current.layoutComponent, type: 'layout' });
++            }
++            current = current.parent;
++        }
++        return stack;
++    }
++
++    // Recursive match function
++    function findMatch(node: RouteNode, segmentIndex: number): MatchResult | null {
++        // Determine if we are at the end of the URL
++        if (segmentIndex >= segments.length) {
++            // If we are at the end, checks if this node has a page.
++            if (node.pageComponent) {
++                // Success!
++                const stack = collectLayouts(node);
++                stack.push({ componentPath: node.pageComponent!, type: 'page' });
++
++                return {
++                    url,
++                    params: { ...matchedParams },
++                    components: stack
++                };
++            }
++            return null;
++        }
++
++        const currentSegment = segments[segmentIndex];
++
++        // Priority 1: Static Match
++        const staticChild = node.children.find(child => !child.isDynamic && child.segment === currentSegment);
++        if (staticChild) {
++            return findMatch(staticChild, segmentIndex + 1);
++        }
++
++        // Priority 2: Dynamic Match
++        const dynamicChild = node.children.find(child => child.isDynamic);
++        if (dynamicChild) {
++            if (dynamicChild.dynamicParam) {
++                matchedParams[dynamicChild.dynamicParam] = currentSegment;
++            }
++            const result = findMatch(dynamicChild, segmentIndex + 1);
++            if (result) return result;
++            // If backtracking, remove param
++            if (dynamicChild.dynamicParam) {
++                delete matchedParams[dynamicChild.dynamicParam];
++            }
++        }
++
++        return null;
++    }
++
++    // Handle root route specially
++    if (segments.length === 0) {
++        if (root.pageComponent) {
++            const stack = collectLayouts(root);
++            stack.push({ componentPath: root.pageComponent!, type: 'page' });
++            return {
++                url,
++                params: {},
++                components: stack
++            };
++        }
++        return null;
++    }
++
++    return findMatch(root, 0);
++}
+diff -ruN -x node_modules -x dist -x .git -x package-lock.json repository_before/src/router.ts repository_after/src/router.ts
+--- repository_before/src/router.ts	1970-01-01 00:00:00.000000000 +0000
++++ repository_after/src/router.ts	2026-01-16 14:30:34.816608500 +0000
+@@ -0,0 +1,19 @@
++import { buildRouteTree } from './scanner';
++import { matchUrl } from './matcher';
++import { RouteNode, MatchResult } from './types';
++
++export class Router {
++    private root: RouteNode;
++
++    constructor(private pagesDir: string) {
++        this.root = buildRouteTree(pagesDir);
++    }
++
++    public resolve(url: string): MatchResult | null {
++        return matchUrl(url, this.root);
++    }
++
++    public getRouteTree(): RouteNode {
++        return this.root;
++    }
++}
+diff -ruN -x node_modules -x dist -x .git -x package-lock.json repository_before/src/scanner.ts repository_after/src/scanner.ts
+--- repository_before/src/scanner.ts	1970-01-01 00:00:00.000000000 +0000
++++ repository_after/src/scanner.ts	2026-01-16 14:30:14.165677600 +0000
+@@ -0,0 +1,39 @@
++import * as fs from 'fs';
++import * as path from 'path';
++import { RouteNode } from './types';
++
++export function buildRouteTree(rootDir: string, segment: string = '', parent?: RouteNode): RouteNode {
++    const node: RouteNode = {
++        segment,
++        isDynamic: segment.startsWith('[') && segment.endsWith(']'),
++        dynamicParam: segment.startsWith('[') && segment.endsWith(']') ? segment.slice(1, -1) : undefined,
++        children: [],
++        parent
++    };
++
++    // Check for special files
++    const layoutPath = path.join(rootDir, 'layout.tsx');
++    if (fs.existsSync(layoutPath)) {
++        node.layoutComponent = layoutPath;
++    }
++
++    const pagePath = path.join(rootDir, 'page.tsx');
++    if (fs.existsSync(pagePath)) {
++        node.pageComponent = pagePath;
++    }
++
++    // Scan for subdirectories
++    if (fs.existsSync(rootDir)) {
++        const items = fs.readdirSync(rootDir, { withFileTypes: true });
++        for (const item of items) {
++            if (item.isDirectory()) {
++                const childNode = buildRouteTree(path.join(rootDir, item.name), item.name, node);
++                // Only add if it has some meaningful content (or children)
++                // For simplicity, we add all directories as potential segments
++                node.children.push(childNode);
++            }
++        }
++    }
++
++    return node;
++}
+diff -ruN -x node_modules -x dist -x .git -x package-lock.json repository_before/src/types.ts repository_after/src/types.ts
+--- repository_before/src/types.ts	1970-01-01 00:00:00.000000000 +0000
++++ repository_after/src/types.ts	2026-01-16 14:30:13.218969800 +0000
+@@ -0,0 +1,26 @@
++export type ComponentType = any; // Placeholder for React Component
++
++export interface RouteNode {
++    segment: string;
++    isDynamic: boolean;
++    dynamicParam?: string; // e.g., 'slug' for [slug]
++
++    // File paths for components at this level
++    layoutComponent?: string;
++    pageComponent?: string;
++
++    children: RouteNode[];
++    parent?: RouteNode;
++}
++
++export interface MatchResult {
++    url: string;
++    params: Record<string, string>;
++
++    // The stack of components to render, from root to leaf
++    // structured as [RootLayout, NestedLayout, ..., Page]
++    components: {
++        componentPath: string;
++        type: 'layout' | 'page';
++    }[];
++}
+diff -ruN -x node_modules -x dist -x .git -x package-lock.json repository_before/tsconfig.json repository_after/tsconfig.json
+--- repository_before/tsconfig.json	1970-01-01 00:00:00.000000000 +0000
++++ repository_after/tsconfig.json	2026-01-16 14:38:29.448435100 +0000
+@@ -0,0 +1,15 @@
++{
++    "compilerOptions": {
++        "target": "ES2020",
++        "module": "commonjs",
++        "strict": true,
++        "esModuleInterop": true,
++        "skipLibCheck": true,
++        "forceConsistentCasingInFileNames": true,
++        "outDir": "./dist"
++    },
++    "include": [
++        "src/**/*",
++        "../tests/**/*"
++    ]
++}
+\ No newline at end of file

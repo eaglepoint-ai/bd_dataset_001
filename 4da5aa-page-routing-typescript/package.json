@@ -1,0 +1,15 @@
+{
+    "name": "page-routing-system-root",
+    "version": "1.0.0",
+    "description": "Root project for running validation tests",
+    "scripts": {
+        "test": "ts-node tests/run_all.ts"
+    },
+    "dependencies": {
+        "typescript": "^5.0.0",
+        "ts-node": "^10.9.1",
+        "tsconfig-paths": "^4.2.0",
+        "glob": "^10.0.0",
+        "@types/node": "^20.0.0"
+    }
+}
