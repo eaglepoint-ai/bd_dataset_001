@@ -219,7 +219,7 @@ def run_evaluation():
     Returns dict with test results from both before and after implementations.
     """
     print(f"\n{'=' * 60}")
-    print("MECHANICAL REFACTOR EVALUATION")
+    print("FLASK_Webhook_Performance_Hardening EVALUATION")
     print(f"{'=' * 60}")
     
     project_root = Path(__file__).parent.parent
