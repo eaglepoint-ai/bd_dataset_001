@@ -1,2 +1,16 @@
-evaluation/reports/**
+# Dependencies
+node_modules/
+__pycache__/
+
+# Logs
+*.log
+verification_results.log
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# Evaluation Reports
+evaluation/reports/latest.json
 evaluation/reports/*
+
