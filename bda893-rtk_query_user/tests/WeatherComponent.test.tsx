@@ -34,7 +34,9 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 
   // React will call this when a child throws (e.g., use() rejects)
-  componentDidCatch() {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Log error to console.error for test assertions
+    console.error(error, errorInfo);
     this.setState({ hasError: true });
   }
 
