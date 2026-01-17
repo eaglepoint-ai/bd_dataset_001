@@ -1,0 +1,29 @@
+{
+  "posts": [
+    {
+      "id": "1",
+      "title": "Hello World",
+      "body": "This is the first post."
+    },
+    {
+      "id": "2",
+      "title": "Redux Toolkit Query",
+      "body": "RTK Query makes data fetching easy."
+    },
+    {
+      "id": "7c02",
+      "title": "new new",
+      "body": "test"
+    },
+    {
+      "id": "4cf4",
+      "title": "hello ",
+      "body": "again"
+    },
+    {
+      "id": "760a",
+      "title": "sdaasdfasdfasdfasdfasdfasdf",
+      "body": ""
+    }
+  ]
+}
