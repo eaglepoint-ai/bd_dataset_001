@@ -34,6 +34,56 @@ def environment_info():
     }
 
 
+def analyze_structure(repo_name: str):
+    """Analyze repository structure for metrics."""
+    repo_path = ROOT / repo_name
+    
+    # For repository_before (HTML/JS)
+    if repo_name == "repository_before":
+        main_file = repo_path / "Resources" / "js" / "formgenerator.js"
+        if main_file.exists():
+            lines = len(main_file.read_text().splitlines())
+            file_path = str(main_file.relative_to(ROOT))
+        else:
+            lines = 0
+            file_path = ""
+        
+        return {
+            "file_path": file_path,
+            "lines": lines,
+            "files_count": len(list(repo_path.rglob("*.*"))),
+            "js_files": len(list(repo_path.rglob("*.js"))),
+            "html_files": len(list(repo_path.rglob("*.html")))
+        }
+    
+    # For repository_after (Next.js/TypeScript)
+    else:
+        ts_files = list(repo_path.rglob("*.ts")) + list(repo_path.rglob("*.tsx"))
+        total_lines = 0
+        main_file_path = ""
+        
+        for f in ts_files:
+            try:
+                if "node_modules" not in str(f) and "__tests__" not in str(f):
+                    file_lines = len(f.read_text().splitlines())
+                    total_lines += file_lines
+                    if not main_file_path and "page.tsx" in str(f):
+                        main_file_path = str(f.relative_to(ROOT))
+            except:
+                pass
+        
+        if not main_file_path:
+            main_file_path = str(repo_path.relative_to(ROOT))
+        
+        return {
+            "file_path": main_file_path,
+            "lines": total_lines,
+            "typescript_files": len([f for f in ts_files if "node_modules" not in str(f)]),
+            "component_files": len(list((repo_path / "components").rglob("*.tsx"))) if (repo_path / "components").exists() else 0,
+            "test_files": len(list((repo_path / "__tests__").rglob("*.test.ts"))) if (repo_path / "__tests__").exists() else 0
+        }
+
+
 def parse_jest_output(output):
     """Parse Jest test output to extract individual test results (pytest-style)."""
     tests = []
@@ -315,13 +365,17 @@ def run_evaluation():
         # Success rule: after tests must pass
         success = after_passed
         
+        # Analyze structure for metrics format
+        before_structure = analyze_structure("repository_before")
+        after_structure = analyze_structure("repository_after")
+        
         # Convert to metrics format (for evaluator)
         before_test_results = {
             "success": before_passed,
             "exit_code": before_tests.get("exit_code", 0),
             "tests": before_tests.get("tests", []),
             "summary": {
-                "raw_output": before_tests.get("stdout", "")[:1000]
+                "raw_output": before_tests.get("stdout", "")[:1000] if before_tests.get("stdout") else "File verification completed"
             },
             "duration": 0
         }
@@ -331,7 +385,7 @@ def run_evaluation():
             "exit_code": after_tests.get("exit_code", 0),
             "tests": after_tests.get("tests", []),
             "summary": {
-                "raw_output": (after_tests.get("stdout", "") + after_tests.get("stderr", ""))[:1000]
+                "raw_output": (after_tests.get("stdout", "") + after_tests.get("stderr", ""))[:1000] if (after_tests.get("stdout") or after_tests.get("stderr")) else "Tests completed"
             },
             "duration": 0
         }
@@ -386,9 +440,11 @@ def run_evaluation():
             "parameters": {},
             "metrics": {
                 "before": {
+                    "structure": before_structure,
                     "test_results": before_test_results
                 },
                 "after": {
+                    "structure": after_structure,
                     "test_results": after_test_results
                 },
                 "structure_tests": structure_tests,
@@ -451,9 +507,11 @@ def run_evaluation():
             "parameters": {},
             "metrics": {
                 "before": {
+                    "structure": {},
                     "test_results": error_test_results
                 },
                 "after": {
+                    "structure": {},
                     "test_results": error_test_results
                 },
                 "structure_tests": error_test_results,
