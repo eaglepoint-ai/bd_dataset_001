@@ -1,0 +1,428 @@
+diff --git a/repository_before/__pycache__/__init__.cpython-311.pyc b/repository_after/__pycache__/__init__.cpython-311.pyc
+index d15c247..5da6f9c 100644
+Binary files a/repository_before/__pycache__/__init__.cpython-311.pyc and b/repository_after/__pycache__/__init__.cpython-311.pyc differ
+diff --git a/repository_before/__pycache__/message_scraper.cpython-311.pyc b/repository_before/__pycache__/message_scraper.cpython-311.pyc
+deleted file mode 100644
+index fd8bf80..0000000
+Binary files a/repository_before/__pycache__/message_scraper.cpython-311.pyc and /dev/null differ
+diff --git a/repository_after/__pycache__/test_message_scraper.cpython-311-pytest-9.0.2.pyc b/repository_after/__pycache__/test_message_scraper.cpython-311-pytest-9.0.2.pyc
+new file mode 100644
+index 0000000..8450780
+Binary files /dev/null and b/repository_after/__pycache__/test_message_scraper.cpython-311-pytest-9.0.2.pyc differ
+diff --git a/repository_before/message_scraper.py b/repository_before/message_scraper.py
+deleted file mode 100644
+index 77e932e..0000000
+--- a/repository_before/message_scraper.py
++++ /dev/null
+@@ -1,150 +0,0 @@
+-#!/usr/bin/python3
+-"""
+-Telegram Message Scraper
+-
+-This script connects to Telegram channels using Telethon API, retrieves
+-messages from specified channels,
+-and writes the data into a CSV file for analysis.
+-
+-Requirements:
+-- Python 3.7 or higher
+-- Telethon library (install via `pip install telethon`)
+-
+-Usage:
+-1. Replace 'YOUR_API_ID' and 'YOUR_API_HASH' with your own Telegram
+-API ID and hash obtained from https://my.telegram.org.
+-2. Modify the 'channels' list with the usernames of the channels
+-you want to scrape.
+-3. Ensure the 'csv_file' variable points to the desired output CSV file path.
+-4. Run the script. It will connect to Telegram, fetch messages from each
+-channel specified in 'channels', and write message details
+-(message ID, date, sender ID, content, views, comments, reactions) to the CSV
+-file.
+-
+-CSV File Format:
+-- 'Channel': Username of the channel from which the message was extracted.
+-- 'Message ID': Unique ID of the message.
+-- 'Date': Date and time when the message was sent
+-(format: 'YYYY-MM-DD HH:MM:SS').
+-- 'Sender ID': Telegram ID of the sender.
+-- 'Message Content': Text content of the message.
+-- 'Views': Number of views of the message (if available).
+-- 'Comments': Number of replies/comments to the message (if available).
+-- 'Reactions': Number of reactions (like, love, etc.) to the message
+-(if available).
+-
+-Exceptions:
+-- Handles 'ChannelInvalidError' if a channel username is incorrect or
+-inaccessible.
+-- Handles 'FloodWaitError' gracefully by waiting for the specified number
+-of seconds before retrying.
+-- Logs other unexpected exceptions for debugging purposes.
+-"""
+-from datetime import datetime
+-import csv
+-import logging
+-import os
+-from telethon import TelegramClient, errors
+-from telethon.tl.types import PeerChannel
+-import asyncio
+-from datetime import datetime
+-
+-# Telegram API credentials
+-api_id = os.getenv('API_ID')
+-api_hash = os.getenv('API_HASH')
+-
+-# List of channel usernames to scrape data from
+-channels = [
+-    'DoctorsET',
+-    'lobelia4cosmetics',
+-    'yetenaweg',
+-    'EAHCI'
+-]
+-
+-# CSV file to store the extracted data
+-csv_file = '../data/telegram_data_2024.csv'
+-
+-# Initialize the Telegram client
+-client = TelegramClient('session_name', api_id, api_hash)
+-
+-
+-async def extract_messages():
+-    """
+-    Asynchronously iterates over messages from specified channels, extracts
+-    relevant information,
+-    and writes them to a CSV file.
+-
+-    This function uses Telethon's client to connect to Telegram, iterates
+-    through each specified channel, and retrieves messages sent in the year
+-    2024. It extracts message details such as ID, date, sender ID,
+-    message content, views, comments, and reactions (if available), then
+-    writes them to a CSV file.
+-
+-    Exceptions handled:
+-    - ChannelInvalidError: Raised when a channel username is incorrect or
+-    inaccessible.
+-    - FloodWaitError: Raised when API rate limits are exceeded; the
+-    function waits for the specified seconds.
+-    - Any other exceptions are logged for debugging purposes.
+-    """
+-    with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
+-        writer = csv.writer(file)
+-        writer.writerow(
+-            [
+-                'Channel', 'Message ID',
+-                'Date', 'Sender ID', 'Message Content',
+-                'Views', 'Comments', 'Reactions'
+-            ])
+-
+-        for channel in channels:
+-            try:
+-                async for message in client.iter_messages(
+-                        channel, offset_date=None, reverse=True):
+-                    # Only process messages from the year 2024
+-                    if message.date.year == 2024:
+-                        views = message.views if hasattr(
+-                            message, 'views') else None
+-                        comments = message.replies.replies if message.replies \
+-                            else None
+-                        reactions = sum(reaction.count
+-                                        for reaction in
+-                                        message.reactions.results) if message.reactions else None
+-
+-                        writer.writerow([
+-                            channel,
+-                            message.id,
+-                            message.date.strftime('%Y-%m-%d %H:%M:%S'),
+-                            message.sender_id,
+-                            message.text,
+-                            views,
+-                            comments,
+-                            reactions
+-                        ])
+-            except errors.ChannelInvalidError:
+-                logging.error(f"Invalid channel: {channel}")
+-            except errors.FloodWaitError as e:
+-                logging.warning(
+-                    f"Rate limited. Sleeping for {e.seconds} seconds.")
+-                await asyncio.sleep(e.seconds)
+-            except Exception as e:
+-                logging.error(f"An error occurred: {str(e)}")
+-
+-
+-def main():
+-    """
+-    Sets up the Telegram client session and runs the message
+-    extraction process.
+-
+-    This function initializes the Telegram client session using the
+-    provided API ID and hash, then calls the 'extract_messages' function
+-    to start retrieving and processing messages from Telegram channels.
+-    """
+-    with client:
+-        client.loop.run_until_complete(extract_messages())
+-
+-
+-if __name__ == "__main__":
+-    # Enable logging
+-    logging.basicConfig(level=logging.WARNING)
+-    main()
+-
+diff --git a/repository_after/test_message_scraper.py b/repository_after/test_message_scraper.py
+new file mode 100644
+index 0000000..16a7406
+--- /dev/null
++++ b/repository_after/test_message_scraper.py
+@@ -0,0 +1,254 @@
++import pytest
++import asyncio
++import os
++import sys
++from unittest.mock import MagicMock, patch, mock_open, AsyncMock, ANY
++from datetime import datetime
++from telethon import errors
++
++# CRITICAL SETUP: Mock Environment Variables BEFORE Import
++os.environ['API_ID'] = '12345'
++os.environ['API_HASH'] = '0123456789abcdef0123456789abcdef'
++
++from repository_before import message_scraper
++
++@pytest.fixture
++def mock_message_factory():
++    """Creates a mock message object with configurable attributes."""
++    def _create_message(
++        msg_id=1,
++        date=datetime(2024, 1, 1, 12, 0, 0),
++        sender_id=12345,
++        text="Hello World",
++        views=None,
++        replies_count=None,
++        reactions_list=None
++    ):
++        msg = MagicMock()
++        msg.id = msg_id
++        msg.date = date
++        msg.sender_id = sender_id
++        msg.text = text
++
++        if views is not None:
++            msg.views = views
++        else:
++            del msg.views
++
++        if replies_count is not None:
++            msg.replies = MagicMock()
++            msg.replies.replies = replies_count
++        else:
++            msg.replies = None
++
++        if reactions_list is not None:
++            msg.reactions = MagicMock()
++            results = []
++            for count in reactions_list:
++                r = MagicMock()
++                r.count = count
++                results.append(r)
++            msg.reactions.results = results
++        else:
++            msg.reactions = None
++
++        return msg
++    return _create_message
++
++
++@pytest.fixture
++def mock_client():
++    """Patches the global 'client' object."""
++    with patch("repository_before.message_scraper.client") as mock:
++        yield mock
++
++
++@pytest.fixture
++def mock_file_system():
++    """Patches 'open' and 'csv.writer'."""
++    mock_f = mock_open()
++    with patch("builtins.open", mock_f) as mocked_open, \
++         patch("csv.writer") as mocked_writer:
++        writer_instance = MagicMock()
++        mocked_writer.return_value = writer_instance
++        yield mocked_open, writer_instance
++
++
++@pytest.fixture
++def mock_sleep():
++    """Patches asyncio.sleep."""
++    with patch("asyncio.sleep", new_callable=AsyncMock) as mock:
++        yield mock
++
++
++@pytest.fixture
++def mock_logging():
++    """Patches the logging module."""
++    with patch("repository_before.message_scraper.logging") as mock:
++        yield mock
++
++@pytest.mark.asyncio
++async def test_happy_path_2024_message(
++    mock_client, mock_file_system, mock_message_factory
++):
++    """
++    Covers Requirements:
++    #3 (Process 2024), #5 (Extract details), #6 (Write CSV),
++    #7 (Create file), #8 (Header row).
++    """
++    mock_open_func, mock_csv_writer = mock_file_system
++    msg = mock_message_factory(
++        date=datetime(2024, 5, 20, 10, 30, 0),
++        views=100, replies_count=5, reactions_list=[10, 2]
++    )
++
++    async def async_gen(*args, **kwargs):
++        yield msg
++    mock_client.iter_messages.side_effect = async_gen
++
++    await message_scraper.extract_messages()
++
++    mock_open_func.assert_called_with(message_scraper.csv_file, mode='w', newline='', encoding='utf-8')
++
++    mock_csv_writer.writerow.assert_any_call([
++        'Channel', 'Message ID', 'Date', 'Sender ID',
++        'Message Content', 'Views', 'Comments', 'Reactions'
++    ])
++
++    expected_row = [
++        message_scraper.channels[0], msg.id, '2024-05-20 10:30:00',
++        msg.sender_id, msg.text, 100, 5, 12
++    ]
++    mock_csv_writer.writerow.assert_any_call(expected_row)
++
++
++@pytest.mark.asyncio
++async def test_ignore_messages_outside_2024(
++    mock_client, mock_file_system, mock_message_factory
++):
++    """
++    Covers Requirement: #4 (Ignore messages from other years).
++    """
++    _, mock_csv_writer = mock_file_system
++    msg_2023 = mock_message_factory(date=datetime(2023, 12, 31))
++    msg_2025 = mock_message_factory(date=datetime(2025, 1, 1))
++
++    async def async_gen(*args, **kwargs):
++        yield msg_2023
++        yield msg_2025
++    mock_client.iter_messages.side_effect = async_gen
++
++    await message_scraper.extract_messages()
++
++    # Only header written
++    assert mock_csv_writer.writerow.call_count == 1
++
++
++@pytest.mark.asyncio
++async def test_missing_optional_fields(
++    mock_client, mock_file_system, mock_message_factory
++):
++    """
++    Covers Requirement: #9 (Handle missing message fields gracefully).
++    """
++    _, mock_csv_writer = mock_file_system
++    msg = mock_message_factory(
++        date=datetime(2024, 1, 1),
++        views=None, replies_count=None, reactions_list=None
++    )
++
++    async def async_gen(*args, **kwargs):
++        yield msg
++    mock_client.iter_messages.side_effect = async_gen
++
++    await message_scraper.extract_messages()
++
++    expected_row = [
++        message_scraper.channels[0], msg.id, '2024-01-01 00:00:00',
++        msg.sender_id, msg.text, None, None, None
++    ]
++    mock_csv_writer.writerow.assert_any_call(expected_row)
++
++
++@pytest.mark.asyncio
++async def test_channel_invalid_error(
++    mock_client, mock_file_system, mock_logging
++):
++    """
++    Covers Requirements: #10 (Log errors for invalid channels), #13 (Continue processing).
++    """
++    # Simulate error
++    mock_client.iter_messages.side_effect = errors.ChannelInvalidError("Invalid")
++
++    await message_scraper.extract_messages()
++
++    # Check logging
++    assert mock_logging.error.call_count >= len(message_scraper.channels)
++    mock_logging.error.assert_any_call(f"Invalid channel: {message_scraper.channels[0]}")
++
++
++@pytest.mark.asyncio
++async def test_flood_wait_error(
++    mock_client, mock_file_system, mock_logging, mock_sleep
++):
++    """
++    Covers Requirements: #11 (Handle rate limits), #12 (Wait/Retry).
++    """
++    # FIX: Pass explicit integer to capture
++    flood_error = errors.FloodWaitError(request=None, capture=15)
++    mock_client.iter_messages.side_effect = flood_error
++
++    await message_scraper.extract_messages()
++
++    mock_logging.warning.assert_any_call("Rate limited. Sleeping for 15 seconds.")
++    mock_sleep.assert_called_with(15)
++
++
++@pytest.mark.asyncio
++async def test_generic_unexpected_exception(
++    mock_client, mock_file_system, mock_logging
++):
++    """
++    Covers Requirement: #13 (Continue/Handle non-critical errors).
++    """
++    mock_client.iter_messages.side_effect = ValueError("Unexpected Error")
++    await message_scraper.extract_messages()
++    mock_logging.error.assert_any_call("An error occurred: Unexpected Error")
++
++
++@pytest.mark.asyncio
++async def test_multiple_channels_processing(
++    mock_client, mock_file_system, mock_message_factory
++):
++    """
++    Covers Requirement: #2 (Retrieve messages from specified channels).
++    """
++    msg1 = mock_message_factory(text="Msg 1")
++
++    # Create an iterator that yields one message
++    async def async_gen(*args, **kwargs):
++        yield msg1
++
++    # Apply this iterator to every call
++    mock_client.iter_messages.side_effect = lambda *args, **kwargs: async_gen()
++
++    await message_scraper.extract_messages()
++
++    # Verify iter_messages called for every channel
++    assert mock_client.iter_messages.call_count == len(message_scraper.channels)
++
++    # Verify calls were made with different channel names
++    calls = mock_client.iter_messages.call_args_list
++    assert calls[0][0][0] == message_scraper.channels[0]
++    assert calls[1][0][0] == message_scraper.channels[1]
++
++
++def test_main_execution(mock_client):
++    """
++    Covers Requirements: #1 (Connect with valid creds), #14 (Async support), #15 (Testable).
++    """
++    with patch("repository_before.message_scraper.extract_messages", new_callable=AsyncMock):
++        mock_client.loop.run_until_complete = MagicMock()
++        message_scraper.main()
++        mock_client.__enter__.assert_called()
++        mock_client.loop.run_until_complete.assert_called_once()
+\ No newline at end of file
