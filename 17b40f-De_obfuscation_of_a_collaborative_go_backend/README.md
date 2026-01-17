@@ -47,6 +47,25 @@ Run the evaluation to compare both implementations and generate a report:
 docker compose run --rm tests sh -c "cd ../evaluation && go mod download && go run evaluation.go"
 ```
 
+**Alternative - Use the provided scripts:**
+
+**Linux/macOS:**
+```bash
+chmod +x generate_report.sh
+./generate_report.sh
+```
+
+**Windows PowerShell:**
+```powershell
+.\run_evaluation.ps1
+```
+
+**Full evaluation with cleanup:**
+```bash
+chmod +x run_evaluation.sh
+./run_evaluation.sh
+```
+
 ## Quick Start
 
 ### 1. Run Tests for `repository_before` (Obfuscated Code)
