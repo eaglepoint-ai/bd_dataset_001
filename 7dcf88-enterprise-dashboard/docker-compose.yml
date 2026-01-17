@@ -1,0 +1,25 @@
+services:
+  evaluate:
+    build: .
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: python3 evaluation/evaluation.py
+
+  verify-before:
+    build: .
+    environment:
+      - TARGET=before
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: node tests/verify_refactor.js
+
+  verify-after:
+    build: .
+    environment:
+      - TARGET=after
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: node tests/verify_refactor.js
