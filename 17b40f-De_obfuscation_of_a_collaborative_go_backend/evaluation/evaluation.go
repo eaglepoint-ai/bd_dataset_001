@@ -290,6 +290,16 @@ func main() {
 		// Don't exit on this error, it's not critical
 	}
 	
+	// Write report.json to root level for CI/CD pipeline
+	rootReportPath := "report.json"
+	err = os.WriteFile(rootReportPath, reportJSON, 0644)
+	if err != nil {
+		fmt.Printf("Error writing root report.json: %v\n", err)
+		// Don't exit on this error, but warn about it
+	} else {
+		fmt.Printf("Report written to %s for CI/CD pipeline\n", rootReportPath)
+	}
+	
 	fmt.Printf("Report written to %s\n", latestPath)
 	
 	// Print summary
