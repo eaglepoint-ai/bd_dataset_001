@@ -1,0 +1,8 @@
+{
+  "instance_id": "633825",
+  "problem_statement": "The current C++ implementation of the 'Numerical Integrity Engine' is over-engineered and suffers from severe performance issues. It uses unnecessary design patterns (Strategy/Proxy), heavy data structures (std::deque<bool>), and manual loops to perform a simple bitwise validation.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/633825-Refactoring_and_optimizing_the_numerical_validator",
+  "environment_setup": "Dockerfile"
+}

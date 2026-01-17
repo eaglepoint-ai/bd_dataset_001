@@ -1,0 +1,18 @@
+services:
+  test_original:
+    build: .
+    command: sh -c "g++ -std=c++17 -o test.exe ./tests/main.cpp && ./test.exe test_original"
+    volumes:
+      - .:/app
+
+  test_optimized:
+    build: .
+    command: sh -c "g++ -std=c++17 -o test.exe ./tests/main.cpp && ./test.exe test_optimized"
+    volumes:
+      - .:/app
+
+  evaluation:
+    build: .
+    command: sh -c "g++ -std=c++17 -o evaluation.exe ./evaluation/evaluation.cpp && ./evaluation.exe"
+    volumes:
+      - .:/app
