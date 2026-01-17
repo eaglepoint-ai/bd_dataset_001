@@ -1,11 +1,21 @@
-version: '3.8'
-
 services:
-  rust-log-analyzer:
+  app-after:
     build:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./repository_before:/app
+      - ./repository_after:/app
+    working_dir: /app
     command: cargo test --release
+
+  evaluation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./repository_after:/app
+      - ./tests:/tests
+      - ./evaluation:/app/evaluation
+    working_dir: /app
+    command: cargo run --manifest-path=/app/evaluation/Cargo.toml --release
 
