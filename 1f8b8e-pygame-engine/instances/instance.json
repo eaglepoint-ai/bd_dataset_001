@@ -1,0 +1,21 @@
+{
+  "instance_id": "1f8b8e",
+  "problem_statement": "Design and implement a self-contained 2D arcade-style mini-game using Python and Pygame, demonstrating foundational game development principles through a fully procedural, single-file implementation. The game must not rely on any external assets (images, sounds, data files) or third-party game frameworks/engines; all visual elements must be generated programmatically using Pygame's built-in drawing primitives",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/1f8b8e-pygame-engine",
+  "environment_setup": "Dockerfile",
+  "FAIL_TO_PASS": [
+    "tests/test_game.py::TestGame::test_game_exists",
+    "tests/test_game.py::TestGame::test_initial_state",
+    "tests/test_game.py::TestGame::test_player_movement",
+    "tests/test_game.py::TestGame::test_enemy_collision",
+    "tests/test_game.py::TestGame::test_coin_collection",
+    "tests/test_game.py::TestGame::test_win_condition",
+    "tests/test_game.py::TestGame::test_enemy_movement_bounce",
+    "tests/test_game.py::TestGame::test_difficulty_progression",
+    "tests/test_game.py::TestGame::test_player_boundary_check",
+    "tests/test_game.py::TestGame::test_reset_game"
+  ],
+  "PASS_TO_PASS": []
+}

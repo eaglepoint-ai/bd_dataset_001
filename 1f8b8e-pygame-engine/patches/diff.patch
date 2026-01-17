@@ -1,0 +1,193 @@
+diff --git a/repository_after/game.py b/repository_after/game.py
+new file mode 100644
+index 0000000..e69de29
+--- /dev/null
++++ b/repository_after/game.py
+@@ -0,0 +1,188 @@
++import pygame
++import random
++import sys
++import os
++
++# Constants
++SCREEN_WIDTH = 800
++SCREEN_HEIGHT = 600
++FPS = 60
++PLAYER_SIZE = 30
++ENEMY_SIZE = 30
++COIN_SIZE = 20
++PLAYER_SPEED = 5
++ENEMY_SPEED_INITIAL = 3
++
++# Colors
++WHITE = (255, 255, 255)
++BLACK = (0, 0, 0)
++RED = (255, 0, 0)
++GREEN = (0, 255, 0)
++BLUE = (0, 0, 255)
++
++class GameObject:
++    def __init__(self, x, y, size, color):
++        self.rect = pygame.Rect(x, y, size, size)
++        self.color = color
++
++    def draw(self, surface):
++        pygame.draw.rect(surface, self.color, self.rect)
++
++class Player(GameObject):
++    def __init__(self):
++        super().__init__(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, PLAYER_SIZE, BLUE)
++        self.speed = PLAYER_SPEED
++
++    def move(self, keys):
++        if keys[pygame.K_LEFT]:
++            self.rect.x -= self.speed
++        if keys[pygame.K_RIGHT]:
++            self.rect.x += self.speed
++        if keys[pygame.K_UP]:
++            self.rect.y -= self.speed
++        if keys[pygame.K_DOWN]:
++            self.rect.y += self.speed
++
++        # Boundary checks
++        self.rect.clamp_ip(pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
++
++class Enemy(GameObject):
++    def __init__(self):
++        x = random.randint(0, SCREEN_WIDTH - ENEMY_SIZE)
++        y = random.randint(0, SCREEN_HEIGHT - ENEMY_SIZE)
++        super().__init__(x, y, ENEMY_SIZE, RED)
++        self.dx = random.choice([-1, 1]) * ENEMY_SPEED_INITIAL
++        self.dy = random.choice([-1, 1]) * ENEMY_SPEED_INITIAL
++
++    def move(self):
++        self.rect.x += self.dx
++        self.rect.y += self.dy
++
++        # Bounce off walls
++        if self.rect.left <= 0 or self.rect.right >= SCREEN_WIDTH:
++            self.dx *= -1
++        if self.rect.top <= 0 or self.rect.bottom >= SCREEN_HEIGHT:
++            self.dy *= -1
++
++    def increase_speed(self):
++        self.dx *= 1.1
++        self.dy *= 1.1
++
++class Coin(GameObject):
++    def __init__(self):
++        x = random.randint(0, SCREEN_WIDTH - COIN_SIZE)
++        y = random.randint(0, SCREEN_HEIGHT - COIN_SIZE)
++        super().__init__(x, y, COIN_SIZE, GREEN)
++
++    def respawn(self):
++        self.rect.x = random.randint(0, SCREEN_WIDTH - COIN_SIZE)
++        self.rect.y = random.randint(0, SCREEN_HEIGHT - COIN_SIZE)
++
++class Game:
++    def __init__(self):
++        pygame.init()
++        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
++        pygame.display.set_caption("Square Survivor")
++        self.clock = pygame.time.Clock()
++        self.font = pygame.font.SysFont("Arial", 24)
++        self.reset_game()
++
++    def reset_game(self):
++        self.player = Player()
++        self.enemies = [Enemy()]
++        self.coin = Coin()
++        self.score = 0
++        self.game_over = False
++        self.won = False
++        self.running = True
++
++    def handle_input(self):
++        for event in pygame.event.get():
++            if event.type == pygame.QUIT:
++                self.running = False
++            if event.type == pygame.KEYDOWN:
++                if event.key == pygame.K_r and (self.game_over or self.won):
++                    self.reset_game()
++                if event.key == pygame.K_q:
++                     self.running = False
++
++    def update(self):
++        if self.game_over or self.won:
++            return
++
++        keys = pygame.key.get_pressed()
++        self.player.move(keys)
++
++        # Move enemies and check collisions
++        for enemy in self.enemies:
++            enemy.move()
++            if self.player.rect.colliderect(enemy.rect):
++                self.game_over = True
++
++        # Check coin collection
++        if self.player.rect.colliderect(self.coin.rect):
++            self.score += 1
++            self.coin.respawn()
++            # Increase difficulty
++            if self.score % 2 == 0:
++                self.enemies.append(Enemy())
++            for enemy in self.enemies:
++                enemy.increase_speed()
++            
++            if self.score >= 10:
++                self.won = True
++
++    def draw(self):
++        self.screen.fill(BLACK)
++        
++        self.player.draw(self.screen)
++        for enemy in self.enemies:
++            enemy.draw(self.screen)
++        self.coin.draw(self.screen)
++
++        # UI
++        score_text = self.font.render(f"Score: {self.score}/10", True, WHITE)
++        self.screen.blit(score_text, (10, 10))
++
++        if self.game_over:
++            game_over_text = self.font.render("GAME OVER - Press R to Restart", True, RED)
++            center = game_over_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
++            self.screen.blit(game_over_text, center)
++        
++        if self.won:
++            win_text = self.font.render("YOU WIN! - Press R to Restart", True, GREEN)
++            center = win_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
++            self.screen.blit(win_text, center)
++
++        pygame.display.flip()
++
++    def run(self):
++        headless = os.environ.get("HEADLESS_TESTING") == "1"
++        frames = 0
++        print("Game started! Press Q to quit.")
++        
++        while self.running:
++            self.handle_input()
++            self.update()
++            
++            # In headless mode (or normal), we might not want to draw if there's no video device, 
++            # but we set SDL_VIDEODRIVER=dummy so draw() handles it fine internally.
++            self.draw()
++            
++            self.clock.tick(FPS)
++            frames += 1
++            
++            if headless:
++                 if frames % 60 == 0:
++                     print(f"Running... Frame {frames}, Score: {self.score}")
++                 if frames >= 300: # specific termination for automated verification
++                     print("Headless test duration reached. Exiting.")
++                     self.running = False
++        
++        pygame.quit()
++        sys.exit()
++
++if __name__ == "__main__":
++    game = Game()
++    game.run()

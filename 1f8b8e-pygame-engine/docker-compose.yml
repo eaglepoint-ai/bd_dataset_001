@@ -1,0 +1,22 @@
+services:
+
+  run_solution:
+    build: .
+    command: python3 -m pytest tests -v --tb=short
+    environment:
+      - PYTHONPATH=/app/repository_after
+      - SDL_VIDEODRIVER=dummy
+      - SDL_AUDIODRIVER=dummy
+
+  evaluate:
+    build: .
+    command: python3 evaluation/evaluation.py
+    volumes:
+      - ./evaluation/reports:/app/evaluation/reports
+
+  run_game:
+    build: .
+    command: python3 repository_after/game.py
+    environment:
+      - PYTHONPATH=/app/repository_after
+      - HEADLESS_TESTING=1
