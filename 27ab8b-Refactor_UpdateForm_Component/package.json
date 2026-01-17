@@ -1,0 +1,59 @@
+{
+    "name": "song-management-app",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "test:before": "jest tests/songUpdate.before.test.ts",
+        "test:after": "jest tests/songUpdate.after.test.tsx",
+        "test:all": "jest tests/",
+        "evaluate": "ts-node evaluation/evaluation.ts"
+    },
+    "dependencies": {
+        "axios": "^1.6.5",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-scripts": "5.0.1",
+        "web-vitals": "^3.5.1"
+    },
+    "devDependencies": {
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^14.3.1",
+        "@testing-library/user-event": "^14.6.1",
+        "@types/jest": "^29.5.14",
+        "@types/node": "^20.10.6",
+        "@types/react": "^18.2.46",
+        "@types/react-dom": "^18.2.18",
+        "@typescript-eslint/eslint-plugin": "^6.17.0",
+        "@typescript-eslint/parser": "^6.17.0",
+        "eslint": "^8.56.0",
+        "eslint-config-react-app": "^7.0.1",
+        "jest": "^29.7.0",
+        "jest-environment-jsdom": "^29.7.0",
+        "ts-jest": "^29.4.6",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
+}

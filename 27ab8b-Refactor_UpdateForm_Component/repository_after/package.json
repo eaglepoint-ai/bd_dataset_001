@@ -1,0 +1,16 @@
+{
+    "dependencies": {
+        "react": "^18.x",
+        "react-dom": "^18.x",
+        "axios": "^1.x",
+        "typescript": "^5.x"
+    },
+    "devDependencies": {
+        "@testing-library/react": "^14.x",
+        "@testing-library/jest-dom": "^6.x",
+        "@testing-library/user-event": "^14.x",
+        "jest": "^29.x",
+        "@types/react": "^18.x",
+        "@types/react-dom": "^18.x"
+    }
+}
