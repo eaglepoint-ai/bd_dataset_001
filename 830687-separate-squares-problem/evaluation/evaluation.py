@@ -1,14 +1,7 @@
 #!/usr/bin/env python3
 """
 Evaluation runner for Square Split Line Problem.
-
-This evaluation script:
-- Runs pytest tests on the tests/ folder for both before and after implementations
-- Collects individual test results with pass/fail status
-- Generates structured reports with environment metadata
-
-Run with:
-    docker-compose run --rm evaluate
+Runs pytest on both repository_before and repository_after.
 """
 import os
 import sys
@@ -21,18 +14,12 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-
-# Constants for paths
 ROOT = Path(__file__).resolve().parent.parent
 REPORTS = ROOT / "evaluation" / "reports"
 
 
 def environment_info():
-    """
-    Collect environment information for the report.
-    
-    Extended format with OS details and git info.
-    """
+    """Collect environment information."""
     try:
         hostname = socket.gethostname()
     except Exception:
@@ -41,10 +28,7 @@ def environment_info():
     try:
         git_commit = subprocess.run(
             ["git", "rev-parse", "--short", "HEAD"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            timeout=5
+            cwd=ROOT, capture_output=True, text=True, timeout=5
         ).stdout.strip() or "unknown"
     except Exception:
         git_commit = "unknown"
@@ -52,16 +36,12 @@ def environment_info():
     try:
         git_branch = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            timeout=5
+            cwd=ROOT, capture_output=True, text=True, timeout=5
         ).stdout.strip() or "unknown"
     except Exception:
         git_branch = "unknown"
     
     uname = platform.uname()
-    
     return {
         "python_version": platform.python_version(),
         "platform": platform.platform(),
@@ -74,380 +54,114 @@ def environment_info():
     }
 
 
-def parse_pytest_output(output: str) -> tuple:
-    """
-    Parse pytest output to extract individual test results.
-    
-    Returns:
-        (tests_list, summary_dict)
-    """
+def parse_pytest_output(output):
+    """Parse pytest output to extract test results."""
     tests = []
-    summary = {
-        "total": 0,
-        "passed": 0,
-        "failed": 0,
-        "errors": 0,
-        "skipped": 0
-    }
+    summary = {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0}
     
-    lines = output.split('\n')
-    
-    # Pattern to match test lines
     test_pattern = r'(tests/[\w/]+\.py::[\w:]+::?(\w+))\s+(PASSED|FAILED|ERROR|SKIPPED)'
+    for match in re.finditer(test_pattern, output):
+        nodeid, name, outcome = match.group(1), match.group(2), match.group(3).lower()
+        tests.append({"nodeid": nodeid, "name": name, "outcome": outcome})
+        summary[outcome if outcome != "error" else "errors"] = summary.get(outcome, 0) + 1
     
-    for line in lines:
-        match = re.search(test_pattern, line)
+    # Get counts from summary line
+    for pattern, key in [(r'(\d+)\s+passed', 'passed'), (r'(\d+)\s+failed', 'failed')]:
+        match = re.search(pattern, output.lower())
         if match:
-            nodeid = match.group(1)
-            test_name = match.group(2)
-            outcome = match.group(3).lower()
-            
-            tests.append({
-                "nodeid": nodeid,
-                "name": test_name,
-                "outcome": outcome
-            })
-            
-            if outcome == "passed":
-                summary["passed"] += 1
-            elif outcome == "failed":
-                summary["failed"] += 1
-            elif outcome == "error":
-                summary["errors"] += 1
-            elif outcome == "skipped":
-                summary["skipped"] += 1
+            summary[key] = int(match.group(1))
     
-    # Extract summary from final line
-    summary_line = None
-    for line in reversed(lines):
-        if "passed" in line.lower() or "failed" in line.lower():
-            summary_line = line
-            break
-    
-    if summary_line:
-        passed_match = re.search(r'(\d+)\s+passed', summary_line.lower())
-        failed_match = re.search(r'(\d+)\s+failed', summary_line.lower())
-        error_match = re.search(r'(\d+)\s+error', summary_line.lower())
-        skipped_match = re.search(r'(\d+)\s+skipped', summary_line.lower())
-        
-        if passed_match:
-            summary["passed"] = int(passed_match.group(1))
-        if failed_match:
-            summary["failed"] = int(failed_match.group(1))
-        if error_match:
-            summary["errors"] = int(error_match.group(1))
-        if skipped_match:
-            summary["skipped"] = int(skipped_match.group(1))
-        
-        summary["total"] = summary["passed"] + summary["failed"] + summary["errors"] + summary["skipped"]
-    else:
-        summary["total"] = len(tests)
-    
+    summary["total"] = summary["passed"] + summary["failed"] + summary["errors"] + summary["skipped"]
     return tests, summary
 
 
-def run_tests(repo_name: str):
-    """
-    Run pytest on the specified repository.
-    
-    Args:
-        repo_name: "repository_before" or "repository_after"
-    
-    Returns:
-        dict with test results
-    """
+def run_tests(repo_name):
+    """Run pytest for a repository."""
     repo_path = ROOT / repo_name
-    tests_dir = ROOT / "tests"
-    
-    print(f"\n{'=' * 60}")
-    print(f"RUNNING TESTS: {repo_name.upper()}")
-    print(f"{'=' * 60}")
-    print(f"Repository: {repo_path}")
-    print(f"Tests: {tests_dir}")
-    
     env = os.environ.copy()
     env["PYTHONPATH"] = str(repo_path)
     
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pytest", str(tests_dir), "-v", "--tb=short"],
-            capture_output=True,
-            text=True,
-            cwd=str(ROOT),
-            env=env,
-            timeout=120
+            [sys.executable, "-m", "pytest", str(ROOT / "tests"), "-v", "--tb=short"],
+            capture_output=True, text=True, cwd=str(ROOT), env=env, timeout=120
         )
-        
-        # Parse pytest output
-        full_output = result.stdout + result.stderr
-        tests_list, summary_dict = parse_pytest_output(full_output)
-        
-        success = result.returncode == 0
-        
-        if success:
-            print(f"[PASS] Tests PASSED ({summary_dict['passed']}/{summary_dict['total']})")
-        else:
-            print(f"[FAIL] Tests FAILED ({summary_dict['passed']}/{summary_dict['total']})")
-        
+        output = result.stdout + result.stderr
+        tests, summary = parse_pytest_output(output)
         return {
-            "success": success,
+            "success": result.returncode == 0,
             "exit_code": result.returncode,
-            "tests": tests_list,
-            "summary": summary_dict,
-            "stdout": full_output[:8000],
+            "tests": tests,
+            "summary": summary,
+            "stdout": output[:8000],
             "stderr": ""
         }
-        
-    except subprocess.TimeoutExpired:
-        print("[TIMEOUT] Test execution timed out")
+    except Exception as e:
         return {
             "success": False,
             "exit_code": -1,
             "tests": [],
             "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
-            "stdout": "pytest timeout after 120 seconds",
+            "stdout": str(e),
             "stderr": ""
         }
-    except Exception as e:
-        print(f"[ERROR] Error running tests: {e}")
-        return {
-            "success": False,
-            "exit_code": -1,
-            "tests": [],
-            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
-            "stdout": f"Error running tests: {str(e)}",
-            "stderr": ""
-        }
-
-
-def evaluate(repo_name: str):
-    """
-    Evaluate a single repository.
-    
-    Args:
-        repo_name: "repository_before" or "repository_after"
-    
-    Returns:
-        dict with test results
-    """
-    return run_tests(repo_name)
-
-
-def run_evaluation():
-    """
-    Run complete evaluation for both implementations.
-    
-    Returns:
-        dict with evaluation results
-    """
-    print(f"\n{'=' * 60}")
-    print("SQUARE SPLIT LINE EVALUATION")
-    print(f"{'=' * 60}")
-    
-    # Evaluate both repositories
-    before = evaluate("repository_before")
-    after = evaluate("repository_after")
-    
-    # Build comparison
-    comparison = {
-        "before_tests_passed": before["success"],
-        "after_tests_passed": after["success"],
-        "before_total": before["summary"]["total"],
-        "before_passed": before["summary"]["passed"],
-        "before_failed": before["summary"]["failed"],
-        "after_total": after["summary"]["total"],
-        "after_passed": after["summary"]["passed"],
-        "after_failed": after["summary"]["failed"]
-    }
-    
-    return {
-        "before": before,
-        "after": after,
-        "comparison": comparison
-    }
-
-
-def write_error_report(run_id, start_time, error_msg):
-    """
-    Write a minimal error report when evaluation fails catastrophically.
-    
-    This ensures report.json always exists, even if evaluation crashes.
-    """
-    try:
-        REPORTS.mkdir(parents=True, exist_ok=True)
-        end_time = datetime.utcnow()
-        
-        error_report = {
-            "run_id": run_id,
-            "started_at": start_time.strftime("%Y-%m-%dT%H:%M:%S.%f"),
-            "finished_at": end_time.strftime("%Y-%m-%dT%H:%M:%S.%f"),
-            "duration_seconds": (end_time - start_time).total_seconds(),
-            "success": False,
-            "error": str(error_msg),
-            "environment": environment_info(),
-            "results": {
-                "before": {
-                    "success": False,
-                    "exit_code": -1,
-                    "tests": [],
-                    "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
-                    "stdout": "",
-                    "stderr": ""
-                },
-                "after": {
-                    "success": False,
-                    "exit_code": -1,
-                    "tests": [],
-                    "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
-                    "stdout": "",
-                    "stderr": ""
-                },
-                "comparison": {
-                    "before_tests_passed": False,
-                    "after_tests_passed": False,
-                    "before_total": 0,
-                    "before_passed": 0,
-                    "before_failed": 0,
-                    "after_total": 0,
-                    "after_passed": 0,
-                    "after_failed": 0
-                }
-            }
-        }
-        
-        output_path = REPORTS / "report.json"
-        output_path.write_text(json.dumps(error_report, indent=2))
-        print(f"[ERROR_REPORT] Written to {output_path}")
-    except Exception as e:
-        print(f"[CRITICAL] Failed to write error report: {e}")
 
 
 def main():
-    """
-    Main entry point for evaluation.
-    
-    Returns:
-        int: 0 for success, 1 for failure
-    """
-    # Ensure reports directory exists
+    """Main entry point."""
     REPORTS.mkdir(parents=True, exist_ok=True)
     
-    # Generate run ID (short format like "15fd1300")
     run_id = str(uuid.uuid4())[:8]
-    
-    # Use UTC timestamps
     start = datetime.utcnow()
     
     print(f"Run ID: {run_id}")
-    print(f"Started at: {start.isoformat()}")
+    print(f"Started: {start.isoformat()}")
     
-    evaluation_results = None
-    success = False
-    error_message = None
+    # Run tests
+    print("\n[BEFORE] Running tests on repository_before...")
+    before = run_tests("repository_before")
+    print(f"[BEFORE] Result: {'PASS' if before['success'] else 'FAIL'}")
     
-    # Wrap everything in try-except to ensure report is always written
-    try:
-        # Run evaluation
-        evaluation_results = run_evaluation()
-        
-        # Success is determined by after.tests.success
-        success = evaluation_results["after"]["success"]
-        error_message = None if success else "Some tests failed or evaluation incomplete"
-        
-    except Exception as e:
-        import traceback
-        print(f"\n[ERROR] Evaluation failed: {str(e)}")
-        traceback.print_exc()
-        success = False
-        error_message = str(e)
-        # Create minimal results structure
-        evaluation_results = {
-            "before": {
-                "success": False,
-                "exit_code": -1,
-                "tests": [],
-                "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
-                "stdout": "",
-                "stderr": ""
-            },
-            "after": {
-                "success": False,
-                "exit_code": -1,
-                "tests": [],
-                "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
-                "stdout": "",
-                "stderr": ""
-            },
-            "comparison": {
-                "before_tests_passed": False,
-                "after_tests_passed": False,
-                "before_total": 0,
-                "before_passed": 0,
-                "before_failed": 0,
-                "after_total": 0,
-                "after_passed": 0,
-                "after_failed": 0
-            }
-        }
+    print("\n[AFTER] Running tests on repository_after...")
+    after = run_tests("repository_after")
+    print(f"[AFTER] Result: {'PASS' if after['success'] else 'FAIL'}")
     
     end = datetime.utcnow()
-    duration = (end - start).total_seconds()
+    success = after["success"]
     
-    # Build report in standard format
+    # Build report
     report = {
         "run_id": run_id,
         "started_at": start.strftime("%Y-%m-%dT%H:%M:%S.%f"),
         "finished_at": end.strftime("%Y-%m-%dT%H:%M:%S.%f"),
-        "duration_seconds": round(duration, 6),
+        "duration_seconds": round((end - start).total_seconds(), 6),
         "success": success,
-        "error": error_message,
+        "error": None if success else "Tests failed",
         "environment": environment_info(),
-        "results": evaluation_results
+        "results": {
+            "before": before,
+            "after": after,
+            "comparison": {
+                "before_tests_passed": before["success"],
+                "after_tests_passed": after["success"],
+                "before_total": before["summary"]["total"],
+                "before_passed": before["summary"]["passed"],
+                "before_failed": before["summary"]["failed"],
+                "after_total": after["summary"]["total"],
+                "after_passed": after["summary"]["passed"],
+                "after_failed": after["summary"]["failed"]
+            }
+        }
     }
     
-    # Write report to FIXED location (required by internal tool)
-    output_path = REPORTS / "report.json"
-    output_path.write_text(json.dumps(report, indent=2))
-    print(f"\n[SUCCESS] Report written to {output_path}")
+    # Write report
+    report_path = REPORTS / "report.json"
+    report_path.write_text(json.dumps(report, indent=2))
+    print(f"\n[DONE] Report: {report_path}")
+    print(f"[DONE] Success: {success}")
     
-    # Print summary
-    print(f"\n{'=' * 60}")
-    print("EVALUATION SUMMARY")
-    print(f"{'=' * 60}")
-    
-    if evaluation_results:
-        before = evaluation_results["before"]
-        after = evaluation_results["after"]
-        comp = evaluation_results["comparison"]
-        
-        print(f"Before Tests: {'PASSED' if before['success'] else 'FAILED'} ({comp['before_passed']}/{comp['before_total']})")
-        print(f"After Tests:  {'PASSED' if after['success'] else 'FAILED'} ({comp['after_passed']}/{comp['after_total']})")
-    
-    print(f"\nSuccess: {'YES' if success else 'NO'}")
-    print(f"Duration: {duration:.2f}s")
-    print("=" * 60)
-    
-    # Return exit code
     return 0 if success else 1
 
 
 if __name__ == "__main__":
-    try:
-        sys.exit(main())
-    except Exception as e:
-        # Last resort error handling
-        print(f"[FATAL] Uncaught exception: {e}")
-        import traceback
-        traceback.print_exc()
-        
-        # Try to write error report
-        try:
-            write_error_report(
-                str(uuid.uuid4())[:8],
-                datetime.utcnow(),
-                f"Fatal error: {str(e)}"
-            )
-        except Exception:
-            pass
-        
-        sys.exit(1)
+    sys.exit(main())

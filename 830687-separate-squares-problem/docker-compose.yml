@@ -1,44 +1,6 @@
-version: '3.8'
-
 services:
-  # Run tests on repository_before
-  test-before:
+  app:
     build: .
-    container_name: square-split-test-before
-    environment:
-      - PYTHONPATH=/app/repository_before
-    command: pytest tests -v --tb=short
-    volumes:
-      - ./:/app
-
-  # Run tests on repository_after
-  test-after:
-    build: .
-    container_name: square-split-test-after
-    environment:
-      - PYTHONPATH=/app/repository_after
-    command: pytest tests -v --tb=short
-    volumes:
-      - ./:/app
-
-  # Run full evaluation (main service)
-  evaluate:
-    build: .
-    container_name: square-split-evaluate
     command: python evaluation/evaluation.py
     volumes:
-      - ./:/app
-    environment:
-      - PYTHONPATH=/app
-
-  # Interactive development environment
-  dev:
-    build: .
-    container_name: square-split-dev
-    command: bash
-    stdin_open: true
-    tty: true
-    volumes:
-      - ./:/app
-    environment:
-      - PYTHONPATH=/app/repository_after:/app/repository_before
+      - .:/app
