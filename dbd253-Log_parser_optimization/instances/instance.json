@@ -1,0 +1,8 @@
+{
+    "instance_id": "dbd253",
+    "problem_statement": "The existing Java log-parsing method is intended to identify error-related information from application logs but is unsuitable for real-world or large-scale usage due to inefficient processing, lack of structured error aggregation, and fragile handling of malformed input. In practical systems, log files can be large, noisy, and partially corrupted, requiring parsing logic that is both performant and resilient. Additionally, meaningful analysis depends on aggregating and counting distinct error types rather than collecting redundant raw log entries, while maintaining low memory overhead. This task aims to improve the method so it can efficiently process large volumes of log data in a single pass, accurately extract and count distinct error types, gracefully handle corrupted log lines without failing, and do so using minimal additional memory and only standard Java libraries.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/dbd253-Log_parser_optimization",
+    "environment_setup": "Dockerfile"
+}  
