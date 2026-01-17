@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test outputs
+coverage/
+test-results.json
+*.lcov
+
+# Evaluation reports
+evaluation/reports/
+
+# Logs
+logs/
+*.log
+
+# Runtime files
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

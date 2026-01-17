@@ -1,0 +1,31 @@
+{
+  "instance_id": "99cd28-Eliminating_ghost_state_in_asynchronous_react_upload_flow",
+  "problem_statement": "The component suffers from a ghost state bug caused by asynchronous side effects and independent boolean flags. When an upload fails and the user retries quickly, stale timers or outdated async completions can clear errors or trigger success for a previous attempt, resulting in incorrect UI state.",
+  "requirements": [
+    "1. Refactor the component to prevent ghost or stale state updates",
+    "2. Ensure each upload attempt is isolated and cannot affect later attempts", 
+    "3. Eliminate race conditions caused by async operations and timers",
+    "4. Maintain correct loading, error, and success state consistency",
+    "5. Keep the component under 50 lines of code",
+    "6. Improve architectural reliability without changing external behavior"
+  ],
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/sample-dataset/tree/main/99cd28-Eliminating_ghost_state_in_asynchronous_react_upload_flow",
+  "environment_setup": "Dockerfile",
+  "FAIL_TO_PASS": [
+    "test_failed_0",
+    "test_failed_1", 
+    "test_failed_2",
+    "test_failed_3"
+  ],
+  "PASS_TO_PASS": [
+    "test_passed_0",
+    "test_passed_1",
+    "test_passed_2",
+    "test_passed_3",
+    "test_passed_4",
+    "test_passed_5",
+    "test_passed_6"
+  ]
+}
