@@ -1,12 +1,18 @@
-# project template
+# Weather Component - React 19 use() Hook Refactoring
 
-Starter scaffold for bd dataset task.
+## Commands
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+### Run tests for repository-before
+```bash
+docker-compose run --rm test-before
+```
+
+### Run tests for repository-after
+```bash
+docker-compose run --rm test-after
+```
+
+### Run evaluation
+```bash
+docker-compose run --rm evaluate
+```
