@@ -1,0 +1,12 @@
+{
+  "name": "express-refactor-evaluation",
+  "version": "1.0.0",
+  "description": "Evaluation script for Express.js modular refactor",
+  "main": "evaluation.js",
+  "scripts": {
+    "evaluate": "node evaluation.js"
+  },
+  "bin": {
+    "evaluate": "./evaluation.js"
+  }
+}
