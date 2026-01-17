@@ -81,13 +81,15 @@ If you are unfamiliar with Node.js database operations:
 ### Repository Before
 
 ```bash
-docker compose run --rm -e TEST_TARGET="../repository_before/order.service.js" app node tests/test-suite.js
+docker compose run --rm -e TEST_TARGET="/app/repository_before/order.service.js" app
+
 ```
 
 ### Repository After
 
 ```bash
-docker compose run --rm -e TEST_TARGET="../repository_after/order.service.js" app node tests/test-suite.js
+docker compose run --rm -e TEST_TARGET="/app/repository_after/order.service.js" app
+
 ```
 
 ### Evaluation
