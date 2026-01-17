@@ -4,3 +4,5 @@ services:
     command: make -C tests run
     volumes:
       - .:/app
+    environment:
+      - REPO_PATH=repository_after
