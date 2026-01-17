@@ -6,7 +6,6 @@ Runs pytest on both repository_before and repository_after.
 import os
 import sys
 import json
-import time
 import uuid
 import platform
 import subprocess
@@ -18,7 +17,9 @@ REPORTS = ROOT / "evaluation" / "reports"
 
 
 def environment_info():
+
     """Collect environment information."""
+    
     return {
         "python_version": platform.python_version(),
         "platform": platform.platform()
@@ -26,7 +27,9 @@ def environment_info():
 
 
 def run_tests(repo_path: Path):
+
     """Run pytest for a repository."""
+    
     env = os.environ.copy()
     env["PYTHONPATH"] = str(repo_path)
     
@@ -60,13 +63,10 @@ def run_tests(repo_path: Path):
 
 
 def run_metrics(repo_path: Path):
-    """Optional – trainers implement if needed."""
-    # This task doesn't require metrics, so return empty dict
     return {}
 
 
 def evaluate(repo_name: str):
-    """Evaluate a repository by running tests and collecting metrics."""
     repo_path = ROOT / repo_name
     tests = run_tests(repo_path)
     metrics = run_metrics(repo_path)
@@ -77,7 +77,9 @@ def evaluate(repo_name: str):
 
 
 def run_evaluation():
+
     """Run the complete evaluation and return report dict."""
+    
     run_id = str(uuid.uuid4())
     start = datetime.utcnow()
     
@@ -85,7 +87,6 @@ def run_evaluation():
         before = evaluate("repository_before")
         after = evaluate("repository_after")
         
-        # Build comparison
         passed_gate = after["tests"]["passed"]
         if passed_gate:
             improvement_summary = "After implementation passed correctness tests"
@@ -148,7 +149,6 @@ def main():
     
     try:
         report = run_evaluation()
-        # Write both latest.json (standard) and report.json (for compatibility)
         latest_path = REPORTS / "latest.json"
         report_path = REPORTS / "report.json"
         

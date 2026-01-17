@@ -1,17 +1,17 @@
 {
-  "run_id": "f6461594-14ec-4e5c-86f4-72222fe8bf61",
-  "started_at": "2026-01-17T09:11:25.690773Z",
-  "finished_at": "2026-01-17T09:11:28.279847Z",
-  "duration_seconds": 2.589074,
+  "run_id": "b72426f8-cbcf-4d05-8830-b8c8c9e1fe42",
+  "started_at": "2026-01-17T09:40:39.776819Z",
+  "finished_at": "2026-01-17T09:40:41.929890Z",
+  "duration_seconds": 2.153071,
   "environment": {
-    "python_version": "3.11.14",
-    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.41"
+    "python_version": "3.10.11",
+    "platform": "Windows-10-10.0.26100-SP0"
   },
   "before": {
     "tests": {
       "passed": true,
       "return_code": 0,
-      "output": ".................                                                        [100%]\n17 passed in 0.32s\n"
+      "output": ".................                                                        [100%]\n17 passed in 0.06s\n"
     },
     "metrics": {}
   },
@@ -19,7 +19,7 @@
     "tests": {
       "passed": true,
       "return_code": 0,
-      "output": ".................                                                        [100%]\n17 passed in 0.31s\n"
+      "output": ".................                                                        [100%]\n17 passed in 0.04s\n"
     },
     "metrics": {}
   },
