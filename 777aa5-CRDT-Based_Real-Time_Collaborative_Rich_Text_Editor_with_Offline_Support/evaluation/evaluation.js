@@ -156,7 +156,9 @@ function main() {
         const reportPath = path.join(reportDir, 'report.json');
         fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
         
-        console.log(`\n📄 Report written to ${reportPath}`);
+        // Show relative path in logs
+        const relativePath = path.join('evaluation', 'reports', dateStr, timeStr, 'report.json');
+        console.log(`\n📄 Report written to ${relativePath}`);
         
         // Print summary
         console.log('\n' + '='.repeat(60));
@@ -195,7 +197,9 @@ function main() {
             const reportPath = path.join(reportDir, 'report.json');
             fs.writeFileSync(reportPath, JSON.stringify(errorReport, null, 2));
             
-            console.log(`\n📄 Error report written to ${reportPath}`);
+            // Show relative path in logs
+            const relativePath = path.join('evaluation', 'reports', dateStr, timeStr, 'report.json');
+            console.log(`\n📄 Error report written to ${relativePath}`);
         } catch (writeError) {
             console.error(`Failed to write error report: ${writeError.message}`);
         }
