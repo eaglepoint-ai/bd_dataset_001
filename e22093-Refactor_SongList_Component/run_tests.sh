@@ -1,3 +1,3 @@
 #!/bin/sh
-cd repository_after
+cd /workspace/repository_after
 npm test
