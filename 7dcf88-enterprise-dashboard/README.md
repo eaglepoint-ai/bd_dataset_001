@@ -1,92 +1,90 @@
-# project template
+# Enterprise Dashboard Data-Fetching 
 
-Starter scaffold for bd dataset task.
+## Prompt
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+You are a **Senior Full-Stack Engineer** at a **Series C SaaS company** providing project management software to **Fortune 500 clients** with **50,000+ daily active users**.  
+The dashboard has become critically slow, threatening customer retention.
 
----
+Your task is to **refactor the dashboard data-fetching architecture** to eliminate the **N+1 sequential request pattern** causing **8+ second page loads**.  
+The solution must reduce **9 sequential HTTP requests to ≤3 parallel requests**, while:
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
-
-### Setup Steps
-
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
+- Preserving **complete component independence**
+- Maintaining **zero breaking changes** to existing component interfaces used across **15+ features**
 
 ---
 
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
+## Problem Statement
 
-When the evaluation command is run, it should generate reports in the following structure:
+The dashboard currently suffers from severe performance degradation due to an architectural flaw in data fetching. Each dashboard component independently initiates its own API requests during mount, resulting in a **sequential HTTP waterfall**.
 
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
-```
+As the number of projects grows, request count scales linearly (`2N + 3`), leading to unacceptable page load times (up to **8.2s**) despite a well-optimized backend. This degradation has caused a **33% drop in customer satisfaction**, **15% at-risk renewals**, and **$2.3M in lost Q4 revenue**.
 
-### Report Schema
-
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
-```
-
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+The challenge is to **eliminate redundant sequential requests** while ensuring that all components continue to function **unchanged** both inside and outside the dashboard context.
 
 ---
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+## Requirements
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+### Functional Requirements
+- Reduce total dashboard requests to **≤3**
+- Execute requests **in parallel** (same event loop tick)
+- Preserve **exact component behavior**
+- Components must:
+  - Use prefetched data when rendered in dashboard
+  - Fetch their own data when rendered standalone
+- No prop interface changes (200+ callsites)
+- No backend or API changes
+
+### Performance Targets
+| Metric | Current | Target |
+|------|--------|--------|
+| Page Load | 8.2s | < 1.5s |
+| Requests (3 projects) | 9 | ≤ 3 |
+| Request Pattern | Sequential | Parallel |
+| Scalability | 2N + 3 | Constant (≤3) |
+| Bundle Size Increase | N/A | < 5KB |
+
+### Hard Constraints
+**Forbidden:**
+- Third-party libraries (Redux, React Query, SWR, Zustand, Apollo, etc.)
+- Component merging or monolithic redesigns
+- Backend API changes or new endpoints
+- Changing component props
+- Context-dependent API utilities
+
+---
+
+## Tech Stack
+
+### Frontend
+- **React 18.2**
+  - Functional components
+  - Hooks
+  - Context API
+- **Vanilla TypeScript / JavaScript**
+- **Standard Fetch API**
+
+### Architecture Constraints
+- No external state or data-fetching libraries
+- Components reused across:
+  - Dashboard
+  - Search
+  - Reports
+  - Emails / PDFs
+  - Mobile headers
+- APIs must remain **individually callable**
+
+---
+
+## Definition of Done
+
+- Dashboard mount triggers **≤3 HTTP requests**
+- Requests fire **in parallel** (<50ms variance)
+- Page loads in **<1.5s**
+- `<ProjectCard />` works:
+  - Optimized in dashboard
+  - Independently when isolated
+- Zero breaking changes to component props
+- No external libraries added
+- Bundle size increase <5KB
+- Clear inline architectural documentation
