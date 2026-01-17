@@ -1,0 +1,15 @@
+{
+  "instance_id": "0048ef-Expression_Parser_Calculator_Fix",
+  "problem_statement": "Fix the mathematical expression parser to properly handle operator precedence (PEMDAS), parentheses, negative numbers, division by zero, and input validation while maintaining the same public API.",
+  "language": "python",
+  "difficulty": "medium",
+  "tags": [
+    "parsing",
+    "shunting-yard",
+    "expression-evaluation",
+    "operator-precedence",
+    "error-handling"
+  ],
+  "created_at": "2026-01-14"
+}
+
