@@ -1,0 +1,34 @@
+# Dockerfile for running Redux tests
+FROM node:20-alpine
+
+# Install Python for evaluation script
+RUN apk add --no-cache python3 py3-pip
+
+WORKDIR /app
+
+# Copy package files first for better layer caching
+COPY repository_before/package*.json ./repository_before/
+COPY repository_after/package*.json ./repository_after/
+
+# Install dependencies for both repositories
+WORKDIR /app/repository_before
+RUN npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+WORKDIR /app/repository_after
+RUN npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+
+# Copy all source files and tests
+WORKDIR /app
+COPY repository_before/ ./repository_before/
+COPY repository_after/ ./repository_after/
+COPY tests/ ./tests/
+COPY evaluation/ ./evaluation/
+
+# Make test scripts executable
+RUN chmod +x tests/run_tests.sh 2>/dev/null || true
+
+# Set working directory back to app root
+WORKDIR /app
+
+# Default command - run compliance tests
+CMD ["node", "tests/test_compliance.js"]

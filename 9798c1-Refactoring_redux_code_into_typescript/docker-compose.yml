@@ -1,6 +1,26 @@
+version: '3.8'
+
 services:
-  app:
+  evaluation:
     build: .
-    command: pytest -q tests
     volumes:
-      - .:/app
+      - ./evaluation/reports:/app/evaluation/reports
+      # Write mandatory artifact to host workspace without overriding /app
+      - .:/app_host
+      # Also write artifact at dataset-repo root (one level up)
+      - ..:/workspace
+    command: node evaluation/evaluation.js
+
+  test-before:
+    build: .
+    environment:
+      - TEST_REPO_PATH=/app/repository_before
+      - TARGET=before
+    command: sh -c "cd tests && npm test"
+
+  test-after:
+    build: .
+    environment:
+      - TEST_REPO_PATH=/app/repository_after
+      - TARGET=after
+    command: sh -c "cd tests && npm test"

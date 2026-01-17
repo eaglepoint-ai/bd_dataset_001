@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  test_compliance_before:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - TARGET=before
+    command: ["node", "tests/test_compliance.js"]
+    volumes:
+      - ./tests:/app/tests:ro
+      - ./repository_before:/app/repository_before:ro
+      - ./repository_after:/app/repository_after:ro
+
+  test_compliance_after:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - TARGET=after
+    command: ["node", "tests/test_compliance.js"]
+    volumes:
+      - ./tests:/app/tests:ro
+      - ./repository_before:/app/repository_before:ro
+      - ./repository_after:/app/repository_after:ro
+
+  test_smoke_before:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - TARGET=before
+    command: ["node", "tests/test_simple.js"]
+
+  test_smoke_after:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      - TARGET=after
+    command: ["node", "tests/test_simple.js"]
+
+  test_evaluation:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    volumes:
+      - .:/app:ro
+    command: ["sh", "-c", "python3 evaluation/evaluation.py || python evaluation/evaluation.py"]
