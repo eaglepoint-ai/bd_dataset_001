@@ -153,8 +153,13 @@ function generateOutputPath() {
     .split(".")[0]
     .replace(/:/g, "-");
 
-  const projectRoot = path.resolve(__dirname, "..");
-  const outputDir = path.join(projectRoot, "evaluation", dateStr, timeStr);
+  let outputDir;
+  if (process.env.RUNNING_IN_DOCKER) {
+    outputDir = path.join("/app/evaluation", dateStr, timeStr);
+  } else {
+    const projectRoot = path.resolve(__dirname, "..");
+    outputDir = path.join(projectRoot, "evaluation", dateStr, timeStr);
+  }
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });

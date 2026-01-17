@@ -21,5 +21,5 @@ CMD ["bun", "run", "test", "--run"]
 
 FROM tests AS evaluation
 ENV RUNNING_IN_DOCKER=true
-COPY evaluation/ evaluation/
-CMD ["bun", "run", "evaluation/evaluation.js"]
+COPY evaluation/ evaluation_script/
+CMD ["bun", "run", "evaluation_script/evaluation.js"]
