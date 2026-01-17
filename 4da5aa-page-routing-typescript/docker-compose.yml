@@ -1,6 +1,16 @@
 services:
-  app:
+  app-after:
     build: .
     volumes:
       - .:/app
+    environment:
+      - TS_NODE_PROJECT=tsconfig.after.json
+    command: npm test
+
+  app-before:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      - TS_NODE_PROJECT=tsconfig.before.json
     command: npm test

@@ -20,7 +20,7 @@ docker compose build
 ### Run tests (before – expected some failures)
 ```bash
 # We point ts-node to the before configuration
-docker compose run --rm -e TS_NODE_PROJECT=tsconfig.before.json app npm test
+docker compose run --rm app-before npm test
 ```
 
 **Expected behavior:**
@@ -28,31 +28,10 @@ docker compose run --rm -e TS_NODE_PROJECT=tsconfig.before.json app npm test
 
 ### Run tests (after – expected all pass)
 ```bash
-# Default configuration points to repository_after
-docker compose run --rm app npm test
+# We point ts-node to the after configuration
+docker compose run --rm app-after npm test
 ```
 
 **Expected behavior:**
 - Functional tests: ✅ PASS (implementation complete)
 
-## Run locally
-
-### Install dependencies
-```bash
-npm install
-```
-
-### Run all tests
-```bash
-# Run against repository_after (default)
-npm test
-
-# Run against repository_before
-# On Windows/Bash:
-cross-env TS_NODE_PROJECT=tsconfig.before.json npm test
-# Or if you don't have cross-env installed globally, just set the env var:
-# Windows PowerShell:
-# $env:TS_NODE_PROJECT="tsconfig.before.json"; npm test
-# Bash:
-# TS_NODE_PROJECT=tsconfig.before.json npm test
-```
