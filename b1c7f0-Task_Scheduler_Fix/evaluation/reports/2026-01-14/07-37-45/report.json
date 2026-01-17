@@ -1,0 +1,33 @@
+{
+  "run_id": "b98a30a7-59ec-4760-bc4c-e12656b62e21",
+  "started_at": "2026-01-14T07:37:45.372Z",
+  "finished_at": "2026-01-14T07:38:12.687Z",
+  "duration_seconds": 27.315,
+  "environment": {
+    "node_version": "v22.20.0",
+    "platform": "win32-x64",
+    "cwd": "C:\\Users\\dell\\Desktop\\eaglepoint-ai\\bd_dataset_001\\b1c7f0-Task_Scheduler_Fix"
+  },
+  "before": {
+    "tests": {
+      "passed": false,
+      "return_code": -1,
+      "output": "\n=== Running repository_before (baseline) ===\n\n(before) cycle detection failed as expected: run_timeout\n(before) concurrency max observed 2\n(before) retry timestamps: 1768376267420, 1768376267523, 1768376267637, 1768376267752\n(before) dependency failure run did not finish: run_timeout\n(before) timeout cleanup: not enforced\n(before) cancel pending:true running:false\n\n=== repository_before complete ===\n\n"
+    },
+    "metrics": {}
+  },
+  "after": {
+    "tests": {
+      "passed": true,
+      "return_code": 0,
+      "output": "\n=== Running repository_after (strict) ===\n\n✅ repository_after cycle detection passed\n✅ repository_after concurrency passed (max 2)\n✅ repository_after retry backoff passed (222/211/417 ms)\n✅ repository_after dependency failure propagation passed\n✅ repository_after timeout cleanup passed\n✅ repository_after cancel pending/running passed\n\n=== repository_after complete ===\n\n✅ Done (after)\n"
+    },
+    "metrics": {}
+  },
+  "comparison": {
+    "passed_gate": true,
+    "improvement_summary": "After implementation passed acceptance tests"
+  },
+  "success": true,
+  "error": null
+}
