@@ -1,8 +1,8 @@
 {
-  "run_id": "4df12baa",
-  "started_at": "2026-01-17T14:28:46.073345+00:00",
-  "finished_at": "2026-01-17T14:28:59.342793+00:00",
-  "duration_seconds": 13.269448,
+  "run_id": "b832cc86",
+  "started_at": "2026-01-17T14:39:36.117405+00:00",
+  "finished_at": "2026-01-17T14:39:49.554093+00:00",
+  "duration_seconds": 13.436688,
   "success": true,
   "error": null,
   "environment": {
@@ -11,7 +11,7 @@
     "os": "Linux",
     "os_release": "6.6.87.2-microsoft-standard-WSL2",
     "architecture": "x86_64",
-    "hostname": "094981951de1",
+    "hostname": "fdee418f1c4a",
     "git_commit": "unknown",
     "git_branch": "unknown"
   },
@@ -74,7 +74,7 @@
         "skipped": 0
       },
       "stdout": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\n",
-      "stderr": "PASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.558 s\nRan all test suites.\n"
+      "stderr": "PASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.966 s\nRan all test suites.\n"
     },
     "comparison": {
       "before_tests_passed": true,
@@ -152,7 +152,7 @@
           }
         ],
         "summary": {
-          "raw_output": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\nPASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.558 s\nRan all test suites.\n"
+          "raw_output": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\nPASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.966 s\nRan all test suites.\n"
         },
         "duration": 0
       }
@@ -173,7 +173,7 @@
         }
       ],
       "summary": {
-        "raw_output": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\nPASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.558 s\nRan all test suites.\n"
+        "raw_output": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\nPASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.966 s\nRan all test suites.\n"
       },
       "duration": 0
     },
