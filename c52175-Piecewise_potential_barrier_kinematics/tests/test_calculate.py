@@ -3,7 +3,6 @@ import pytest
 import sys
 import os
 
-# Add repository_after to path so we can import calculate
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../repository_after')))
 
 from calculate import compute_dual_zone_impact
