@@ -1,8 +1,9 @@
-const { execSync, spawnSync } = require('child_process');
+#!/usr/bin/env node
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
 function runMocha(testFile, nodePath) {
   const env = { ...process.env, NODE_PATH: nodePath };
@@ -40,43 +41,71 @@ function writeReport(report) {
   fs.mkdirSync(fullDir, { recursive: true });
   const reportPath = path.join(fullDir, 'report.json');
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-  // Also write to latest.json for convenience
-  const latest = path.join(reportsDir, 'latest.json');
-  fs.writeFileSync(latest, JSON.stringify(report, null, 2));
-  console.log(`Report written to ${reportPath}`);
+  return reportPath;
 }
 
 function main() {
-  const run_id = uuidv4();
-  const started_at = new Date().toISOString();
-  const before = runMocha(path.join('tests', 'productSearch.before.test.js'), path.join('repository_before'));
-  const after = runMocha(path.join('tests', 'productSearch.after.test.js'), path.join('repository_after'));
-  const finished_at = new Date().toISOString();
-  const duration_seconds = (new Date(finished_at) - new Date(started_at)) / 1000;
-  const environment = getEnvironmentInfo();
+  try {
+    const run_id = crypto.randomUUID();
+    const started_at = new Date().toISOString();
+    const before = runMocha(path.join('tests', 'productSearch.before.test.js'), path.join('repository_before'));
+    const after = runMocha(path.join('tests', 'productSearch.after.test.js'), path.join('repository_after'));
+    const finished_at = new Date().toISOString();
+    const duration_seconds = (new Date(finished_at) - new Date(started_at)) / 1000;
+    const environment = getEnvironmentInfo();
 
-  const comparison = {
-    passed_gate: after.passed,
-    improvement_summary: after.passed && !before.passed
-      ? 'Performance and correctness improved in after version.'
-      : after.passed ? 'All tests pass in after version.' : 'After version did not pass all tests.'
-  };
+    const comparison = {
+      passed_gate: after.passed,
+      improvement_summary: after.passed && !before.passed
+        ? 'Performance and correctness improved in after version.'
+        : after.passed ? 'All tests pass in after version.' : 'After version did not pass all tests.'
+    };
 
-  const report = {
-    run_id,
-    started_at,
-    finished_at,
-    duration_seconds,
-    environment,
-    before,
-    after,
-    comparison,
-    success: comparison.passed_gate,
-    error: null
-  };
+    const report = {
+      run_id,
+      started_at,
+      finished_at,
+      duration_seconds,
+      environment,
+      before,
+      after,
+      comparison,
+      success: comparison.passed_gate,
+      error: null
+    };
 
-  writeReport(report);
-  process.exit(report.success ? 0 : 1);
+    const reportPath = writeReport(report);
+    
+    console.log(`✅ Evaluation complete`);
+    console.log(`📊 Report: ${reportPath}`);
+    console.log(`🎯 Success: ${report.success}`);
+    
+    process.exit(report.success ? 0 : 1);
+  } catch (error) {
+    console.error(`❌ Evaluation failed: ${error.message}`);
+    console.error(error.stack);
+    
+    // Try to write error report
+    try {
+      const errorReport = {
+        run_id: crypto.randomUUID(),
+        started_at: new Date().toISOString(),
+        finished_at: new Date().toISOString(),
+        duration_seconds: 0,
+        environment: getEnvironmentInfo(),
+        before: null,
+        after: null,
+        comparison: null,
+        success: false,
+        error: error.message
+      };
+      writeReport(errorReport);
+    } catch (writeError) {
+      console.error(`Failed to write error report: ${writeError.message}`);
+    }
+    
+    process.exit(1);
+  }
 }
 
 if (require.main === module) {

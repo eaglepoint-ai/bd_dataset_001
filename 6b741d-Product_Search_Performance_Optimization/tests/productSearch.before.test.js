@@ -5,6 +5,15 @@ describe('ProductSearch (BEFORE) - Baseline/Unoptimized', function() {
     this.timeout(5000);
     let products;
     let search;
+    
+    before(() => {
+        console.log('🧪 Running BEFORE tests (baseline/unoptimized)...');
+    });
+    
+    after(() => {
+        console.log('✅ BEFORE tests completed');
+    });
+    
     beforeEach(() => {
         products = [];
         for (let i = 0; i < 100000; i++) {

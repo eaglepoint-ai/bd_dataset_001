@@ -81,5 +81,6 @@ git diff --no-index repository_before repository_after > patches/task.patch
 - Optimize ProductSearch to handle 100,000+ products and 1,000 queries/sec with sub-100ms response.
 - Maintain exact public API and result equivalence.
 - See `instances/instance.json` for requirements and test expectations.
-Reports are generated in evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
+
+- Reports are generated in evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
 
