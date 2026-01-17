@@ -1,7 +1,8 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
 import '../App.css';
-const { API_BASE_URL } = require('../config.js');
+
+export const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
 interface Song {
 	title: string;
