@@ -1,0 +1,9 @@
+{
+    "instance_id": "6b84ee",
+    "problem_statement": "Design a command-line Python application that enables users to construct and navigate memory palace graphs, where rooms (nodes) connected by paths (edges) store information. The system must incorporate cognitive science simulations—including memory decay, spaced repetition, and recall testing—while ensuring local JSON data persistence and efficient, lag-free performance for large-scale structures.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/6b84ee-memory-palace",
+    "environment_setup": "Dockerfile"
+  }
+  
