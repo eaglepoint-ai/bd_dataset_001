@@ -10,6 +10,7 @@ import uuid
 import platform
 import subprocess
 import re
+import socket
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -21,14 +22,18 @@ def environment_info():
     """Collect environment information."""
     return {
         "python_version": platform.python_version(),
-        "platform": platform.platform()
+        "platform": platform.platform(),
+        "os": platform.system(),
+        "os_release": platform.release(),
+        "architecture": platform.machine(),
+        "hostname": socket.gethostname()
     }
 
 
 def parse_jest_output(output):
     """Parse Jest test output to extract individual test results."""
     tests = []
-    summary = {"total": 0, "passed": 0, "failed": 0}
+    summary = {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0}
     
     # Extract test results from Jest output
     test_pattern = r'(PASS|FAIL)\s+([^\s\n]+)'
@@ -51,11 +56,19 @@ def parse_jest_output(output):
         summary["total"] += 1
     
     # Try to extract summary from Jest output
+    # Pattern: "Tests: X passed, Y total" or "Test Suites: X passed, Y total"
     summary_match = re.search(r'Tests:\s+(\d+)\s+passed(?:,\s+(\d+)\s+total)?', output)
     if summary_match:
         summary["passed"] = int(summary_match.group(1))
         if summary_match.group(2):
             summary["total"] = int(summary_match.group(2))
+        summary["failed"] = summary["total"] - summary["passed"]
+    else:
+        # If we have individual tests but no summary, calculate from tests
+        if tests:
+            summary["total"] = len(tests)
+            summary["passed"] = sum(1 for t in tests if t["outcome"] == "passed")
+            summary["failed"] = sum(1 for t in tests if t["outcome"] == "failed")
     
     return tests, summary
 
@@ -66,9 +79,12 @@ def run_tests_before():
     
     if not repo_path.exists():
         return {
-            "passed": False,
-            "return_code": 1,
-            "output": "repository_before directory not found"
+            "success": False,
+            "exit_code": 1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 1, "errors": 0, "skipped": 0},
+            "stdout": "",
+            "stderr": "repository_before directory not found"
         }
     
     required_files = [
@@ -79,21 +95,35 @@ def run_tests_before():
     ]
     
     missing_files = []
+    tests = []
     for file_path in required_files:
-        if not (repo_path / file_path).exists():
+        exists = (repo_path / file_path).exists()
+        test_name = f"check_{file_path.replace('/', '_').replace('.', '_')}"
+        tests.append({
+            "nodeid": f"repository_before::{file_path}",
+            "name": test_name,
+            "outcome": "passed" if exists else "failed"
+        })
+        if not exists:
             missing_files.append(file_path)
     
     if missing_files:
         return {
-            "passed": False,
-            "return_code": 1,
-            "output": f"Missing required files: {', '.join(missing_files)}"
+            "success": False,
+            "exit_code": 1,
+            "tests": tests,
+            "summary": {"total": len(required_files), "passed": len(required_files) - len(missing_files), "failed": len(missing_files), "errors": 0, "skipped": 0},
+            "stdout": f"Missing required files: {', '.join(missing_files)}",
+            "stderr": ""
         }
     
     return {
-        "passed": True,
-        "return_code": 0,
-        "output": "All required files present in repository_before"
+        "success": True,
+        "exit_code": 0,
+        "tests": tests,
+        "summary": {"total": len(required_files), "passed": len(required_files), "failed": 0, "errors": 0, "skipped": 0},
+        "stdout": "All required files present in repository_before",
+        "stderr": ""
     }
 
 
@@ -103,16 +133,22 @@ def run_tests_after():
     
     if not repo_path.exists():
         return {
-            "passed": False,
-            "return_code": 1,
-            "output": "repository_after directory not found"
+            "success": False,
+            "exit_code": 1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+            "stdout": "",
+            "stderr": "repository_after directory not found"
         }
     
     if not (repo_path / "package.json").exists():
         return {
-            "passed": False,
-            "return_code": 1,
-            "output": "package.json not found in repository_after"
+            "success": False,
+            "exit_code": 1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+            "stdout": "",
+            "stderr": "package.json not found in repository_after"
         }
     
     try:
@@ -126,11 +162,15 @@ def run_tests_after():
         )
         
         if type_check.returncode != 0:
-            output = (type_check.stdout + type_check.stderr)[:8000]
+            stdout = type_check.stdout[:8000] if type_check.stdout else ""
+            stderr = type_check.stderr[:8000] if type_check.stderr else ""
             return {
-                "passed": False,
-                "return_code": type_check.returncode,
-                "output": output
+                "success": False,
+                "exit_code": type_check.returncode,
+                "tests": [],
+                "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+                "stdout": stdout,
+                "stderr": stderr
             }
         
         # Run Jest tests
@@ -145,25 +185,52 @@ def run_tests_after():
             env=env
         )
         
-        output = (test_result.stdout + test_result.stderr)[:8000]
+        stdout = test_result.stdout[:8000] if test_result.stdout else ""
+        stderr = test_result.stderr[:8000] if test_result.stderr else ""
+        full_output = stdout + stderr
+        
+        # Parse Jest output to extract test results
+        tests, summary = parse_jest_output(full_output)
+        
+        # If no tests were parsed but tests passed, create a summary entry
+        if not tests and test_result.returncode == 0:
+            # Try to extract test count from output
+            test_match = re.search(r'Tests:\s+(\d+)\s+passed', full_output)
+            if test_match:
+                passed_count = int(test_match.group(1))
+                summary = {"total": passed_count, "passed": passed_count, "failed": 0}
+                tests = [{
+                    "nodeid": "jest/all_tests",
+                    "name": "all_tests",
+                    "outcome": "passed"
+                }]
         
         return {
-            "passed": test_result.returncode == 0,
-            "return_code": test_result.returncode,
-            "output": output
+            "success": test_result.returncode == 0,
+            "exit_code": test_result.returncode,
+            "tests": tests,
+            "summary": summary,
+            "stdout": stdout,
+            "stderr": stderr
         }
         
     except subprocess.TimeoutExpired:
         return {
-            "passed": False,
-            "return_code": -1,
-            "output": "Test execution timeout"
+            "success": False,
+            "exit_code": -1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+            "stdout": "",
+            "stderr": "Test execution timeout"
         }
     except Exception as e:
         return {
-            "passed": False,
-            "return_code": -1,
-            "output": f"Error running tests: {str(e)}"
+            "success": False,
+            "exit_code": -1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+            "stdout": "",
+            "stderr": f"Error running tests: {str(e)}"
         }
 
 
@@ -198,14 +265,14 @@ def evaluate(repo_name: str):
     repo_path = ROOT / repo_name
     
     if repo_name == "repository_before":
-        tests = run_tests_before()
+        test_results = run_tests_before()
     else:
-        tests = run_tests_after()
+        test_results = run_tests_after()
     
     metrics = run_metrics(repo_path)
     
     return {
-        "tests": tests,
+        "tests": test_results,
         "metrics": metrics
     }
 
@@ -216,11 +283,16 @@ def run_evaluation():
     start = datetime.now(timezone.utc)
     
     try:
-        before = evaluate("repository_before")
-        after = evaluate("repository_after")
+        before_eval = evaluate("repository_before")
+        after_eval = evaluate("repository_after")
         
-        passed_gate = after["tests"]["passed"]
-        if passed_gate:
+        before_tests = before_eval["tests"]
+        after_tests = after_eval["tests"]
+        
+        before_passed = before_tests.get("success", False)
+        after_passed = after_tests.get("success", False)
+        
+        if after_passed:
             improvement_summary = "After implementation passed correctness tests"
         else:
             improvement_summary = "After implementation failed correctness tests"
@@ -229,49 +301,59 @@ def run_evaluation():
         
         return {
             "run_id": run_id,
-            "started_at": start.isoformat() + "Z",
-            "finished_at": end.isoformat() + "Z",
+            "started_at": start.isoformat(),
+            "finished_at": end.isoformat(),
             "duration_seconds": (end - start).total_seconds(),
+            "success": after_passed,
+            "error": None,
             "environment": environment_info(),
-            "before": before,
-            "after": after,
-            "comparison": {
-                "passed_gate": passed_gate,
-                "improvement_summary": improvement_summary
-            },
-            "success": passed_gate,
-            "error": None
+            "results": {
+                "before": before_tests,
+                "after": after_tests,
+                "comparison": {
+                    "before_tests_passed": before_passed,
+                    "after_tests_passed": after_passed,
+                    "before_total": before_tests.get("summary", {}).get("total", 0),
+                    "before_passed": before_tests.get("summary", {}).get("passed", 0),
+                    "before_failed": before_tests.get("summary", {}).get("failed", 0),
+                    "after_total": after_tests.get("summary", {}).get("total", 0),
+                    "after_passed": after_tests.get("summary", {}).get("passed", 0),
+                    "after_failed": after_tests.get("summary", {}).get("failed", 0)
+                }
+            }
         }
     except Exception as e:
         end = datetime.now(timezone.utc)
+        error_result = {
+            "success": False,
+            "exit_code": -1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+            "stdout": "",
+            "stderr": str(e)
+        }
         return {
             "run_id": run_id,
-            "started_at": start.isoformat() + "Z",
-            "finished_at": end.isoformat() + "Z",
+            "started_at": start.isoformat(),
+            "finished_at": end.isoformat(),
             "duration_seconds": (end - start).total_seconds(),
-            "environment": environment_info(),
-            "before": {
-                "tests": {
-                    "passed": False,
-                    "return_code": -1,
-                    "output": ""
-                },
-                "metrics": {}
-            },
-            "after": {
-                "tests": {
-                    "passed": False,
-                    "return_code": -1,
-                    "output": ""
-                },
-                "metrics": {}
-            },
-            "comparison": {
-                "passed_gate": False,
-                "improvement_summary": "Evaluation crashed"
-            },
             "success": False,
-            "error": str(e)
+            "error": str(e),
+            "environment": environment_info(),
+            "results": {
+                "before": error_result,
+                "after": error_result,
+                "comparison": {
+                    "before_tests_passed": False,
+                    "after_tests_passed": False,
+                    "before_total": 0,
+                    "before_passed": 0,
+                    "before_failed": 0,
+                    "after_total": 0,
+                    "after_passed": 0,
+                    "after_failed": 0
+                }
+            }
         }
 
 
