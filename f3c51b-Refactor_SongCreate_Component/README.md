@@ -1,92 +1,113 @@
-# project template
+# Refactor Song Create Component
 
-Starter scaffold for bd dataset task.
+This dataset task contains a refactoring of a React form component (`CreateSongs`). The objective is to implement robust form handling, data validation, and network error management, replacing an unstable implementation with a production-ready, testable component validated by Vitest.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
-
----
-
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
-
-### Setup Steps
-
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
+## Folder layout
 
 ```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+repository_before/    # Original implementation (unstable form)
+repository_after/     # Refactored solution (React + Hono)
+tests/                # (Deleted) Old Cypress tests
+patches/              # Diff between before/after
+evaluation/           # Evaluation runner and generated reports
+trajectory/           # AI reasoning documentation
 ```
 
-### Report Schema
+## Run with Docker
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+### Build image
+
+```bash
+docker-compose build
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+### Run tests
 
----
+```bash
+docker-compose up --build tests --exit-code-from tests
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+### Run application
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+```bash
+docker-compose up --build client
+```
+
+This starts the full stack (Client + Server). Access at http://localhost:5173
+
+### Run evaluation
+
+```bash
+docker-compose up --build evaluation --exit-code-from evaluation
+```
+
+This will:
+
+1. Run the Vitest unit tests inside the container.
+2. Generate a JSON report at `/app/evaluation/YYYY-MM-DD/HH-MM-SS/report.json` (inside container).
+
+See `evaluation/evaluation.js` for details on how the report is generated.
+
+## Run locally
+
+### Prerequisites
+
+- Node.js 18+ or Bun 1.0+
+- Docker (optional, for containerized run)
+
+### Install dependencies
+
+```bash
+cd repository_after/client
+npm install
+# or
+bun install
+```
+
+### Run tests
+
+```bash
+# Run unit tests with Vitest
+npm test
+# or
+bun run test
+```
+
+### Run the app (Client + Server)
+
+```bash
+# Start server
+cd repository_after/server
+bun run dev
+
+# Start client (in separate terminal)
+cd repository_after/client
+bun run dev
+```
+
+## Refactor details
+
+### Form Logic Improvements
+
+| Aspect        | Before           | After                        |
+| ------------- | ---------------- | ---------------------------- |
+| Validation    | None/Server-only | Client-side (Required/Trim)  |
+| Feedback      | Console logs     | UI: Success/Error/Validation |
+| Loading State | None             | Disables submit button       |
+| Testing       | Cypress E2E      | Vitest Unit Tests            |
+
+### Key Behavior
+
+- **Validation**:
+  - `Title` and `Artist` are required.
+  - All fields are trimmed of whitespace before submission.
+  - Submit button only works if validation passes.
+
+- **Network Handling**:
+  - Disables form interaction during submission.
+  - Displays user-friendly error messages from API 400/500 responses.
+  - Handles request cancellation to prevent memory leaks on unmount.
+
+## Testing Strategy shift
+
+We moved from slow, brittle E2E tests (Cypress) to fast, robust Component Unit Tests (Vitest + React Testing Library). This allows for simulating precise edge cases (like network delays or specific error codes) without requiring a running backend server.
