@@ -178,8 +178,9 @@ TestResult run_test(const std::string &test_name, const std::string &label) {
     }
     test_check.close();
 
-    // Run test using system() call
-    std::string cmd = test_exe + " " + test_name;
+    // Create temporary output file
+    std::string temp_file = "temp_output.txt";
+    std::string cmd = test_exe + " " + test_name + " > " + temp_file + " 2>&1";
     std::cout << "Executing: " << cmd << "\n";
     std::cout.flush();
     
@@ -187,19 +188,41 @@ TestResult run_test(const std::string &test_name, const std::string &label) {
     result.exit_code = WEXITSTATUS(exit_code);
     result.success = (result.exit_code == 0);
     
-    // For simplicity, we'll assume the test passed if exit code is 0
-    // In a real implementation, you'd want to capture and parse the output
-    if (result.success) {
-        result.total = 14;  // Based on the "ALL TESTS PASSED (14 tests)" message
-        result.passed = 14;
-        result.failed = 0;
-        result.stdout_output = "All tests passed";
-    } else {
-        result.total = 14;
-        result.passed = 0;
-        result.failed = 14;
-        result.stdout_output = "Tests failed";
+    // Read the output file
+    std::ifstream output_file(temp_file);
+    if (output_file.is_open()) {
+        std::string line;
+        while (std::getline(output_file, line)) {
+            std::cout << line << "\n";
+            result.stdout_output += line + "\n";
+            
+            if (line.find("[PASS]") != std::string::npos) {
+                TestCase tc;
+                size_t pos = line.find("] ");
+                if (pos != std::string::npos) {
+                    tc.name = line.substr(pos + 2);
+                    tc.outcome = "passed";
+                    result.tests.push_back(tc);
+                    result.passed++;
+                    result.total++;
+                }
+            } else if (line.find("[FAIL]") != std::string::npos) {
+                TestCase tc;
+                size_t pos = line.find("] ");
+                if (pos != std::string::npos) {
+                    tc.name = line.substr(pos + 2);
+                    tc.outcome = "failed";
+                    result.tests.push_back(tc);
+                    result.failed++;
+                    result.total++;
+                }
+            }
+        }
+        output_file.close();
     }
+    
+    // Clean up temp file
+    std::remove(temp_file.c_str());
     
     std::cout << "Exit code: " << result.exit_code << "\n";
     std::cout << "Parsed " << result.total << " tests (" << result.passed << " passed, " << result.failed << " failed)\n";
