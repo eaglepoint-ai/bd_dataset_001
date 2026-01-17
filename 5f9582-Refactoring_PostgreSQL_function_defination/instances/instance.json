@@ -1,1 +1,8 @@
-{}
+{
+    "instance_id": "5f9582",
+    "problem_statement": "The current PostgreSQL trigger function responsible for validating and formatting student names in the students table is not production-safe. Although it attempts to enforce basic validation and normalization, it relies on ASCII-only assumptions, unsupported PostgreSQL constructs, and fragile string-processing logic. This causes valid Unicode and internationalized names to be rejected, introduces compatibility and runtime risks, and may result in silent data corruption. Because the trigger executes on every insert and update, these issues pose a systemic data integrity risk, particularly for multilingual applications.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/5f9582-Refactoring_PostgreSQL_function_defination",
+    "environment_setup": "Dockerfile"
+}

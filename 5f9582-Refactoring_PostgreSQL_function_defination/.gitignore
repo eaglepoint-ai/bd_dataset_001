@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Docker
+*.log
+
+# Evaluation outputs (generated)
+evaluation/reports
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Misc
+*.tmp
