@@ -15,7 +15,6 @@ async function runTests() {
   // Test 1: getMessagesByConversationId should handle large conversations without loading all into memory
   try {
     console.log('Test 1: SHOULD FAIL - getMessagesByConversationId handles large conversations...');
-    console.log('Test 1: SHOULD FAIL - getMessagesByConversationId handles large conversations...');
     
     const conv = await prisma.conversation.create({
       data: { title: 'Large Conv', userId: 'user1' }
@@ -30,13 +29,17 @@ async function runTests() {
     await prisma.message.createMany({ data: messages });
 
     const service = new MessageService();
-    const result = await service.getMessagesByConversationId(conv.id, { page: 2, limit: 10 });
     
-    assert.strictEqual(result.messages.length, 10, 'Should return 10 messages');
+    // Check if the implementation uses database-level pagination (skip/take)
+    // The buggy version loads ALL messages then slices in memory
+    const messageServiceCode = (service as any).getMessagesByConversationId.toString();
+    const usesSkipTake = messageServiceCode.includes('skip') && messageServiceCode.includes('take');
+    
+    assert.strictEqual(usesSkipTake, true, 'Should use database-level pagination (skip/take), not in-memory slicing');
     console.log('✅ Test 1 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 1 failed: ${error.message}\n`);
+    console.log(`❌ Test 1 failed\n`);
     testsFailed++;
   }
 
@@ -45,33 +48,25 @@ async function runTests() {
     console.log('Test 2: SHOULD FAIL - getMessageById should NOT over-fetch...');
     
     const conv = await prisma.conversation.create({
-      data: {
-        title: 'Overfetch Conv',
-        userId: 'user2',
-        messages: {
-          create: [
-            { content: 'target', isFromUser: true },
-            { content: 'extra1', isFromUser: false },
-            { content: 'extra2', isFromUser: true }
-          ]
-        }
-      },
-      include: { messages: true }
+      data: { title: 'Overfetch Conv', userId: 'user2' }
     });
+    
+    await prisma.message.create({ data: { content: 'target', isFromUser: true, conversationId: conv.id } });
+    await prisma.message.create({ data: { content: 'extra1', isFromUser: false, conversationId: conv.id } });
+    await prisma.message.create({ data: { content: 'extra2', isFromUser: true, conversationId: conv.id } });
 
-    const targetMsg = conv.messages.find((m: any) => m.content === 'target');
+    const targetMsg = await prisma.message.findFirst({ where: { conversationId: conv.id } });
     if (!targetMsg) throw new Error("Setup failed: target message not found");
 
     const service = new MessageService();
     const result = await service.getMessageById(targetMsg.id);
 
     assert.ok(result.conversation, 'Conversation should exist');
-    assert.ok((result.conversation as any).messages, 'Messages array should exist (over-fetching)');
-    assert.ok((result.conversation as any).messages.length > 0, 'Messages array should not be empty');
+    assert.strictEqual((result.conversation as any).messages, undefined, 'Messages should NOT be over-fetched');
     console.log('✅ Test 2 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 2 failed: ${error.message}\n`);
+    console.log(`❌ Test 2 failed\n`);
     testsFailed++;
   }
 
@@ -80,24 +75,25 @@ async function runTests() {
     console.log('Test 3: SHOULD FAIL - n+1 query problem...');
     
     for (let i = 0; i < 5; i++) {
-      await prisma.conversation.create({
-        data: {
-          title: `Batch Conv ${i}`,
-          userId: 'user_batch',
-          messages: { create: { content: 'hi', isFromUser: true } }
-        }
+      const conv = await prisma.conversation.create({
+        data: { title: `Batch Conv ${i}`, userId: 'user_batch' }
+      });
+      await prisma.message.create({ 
+        data: { content: 'hi', isFromUser: true, conversationId: conv.id } 
       });
     }
 
     const service = new MessageService();
-    const result = await service.getRecentMessagesAcrossConversations('user_batch', 10);
     
-    assert.ok(result.length >= 1, 'Should return at least 1 result');
-    assert.ok(result[0].lastMessage, 'Should have lastMessage');
+    // Check if the implementation uses a loop (N+1 problem)
+    const methodCode = (service as any).getRecentMessagesAcrossConversations.toString();
+    const hasLoop = methodCode.includes('for (') || methodCode.includes('for(');
+    
+    assert.strictEqual(hasLoop, false, 'Should NOT use a loop (N+1 problem), should use include');
     console.log('✅ Test 3 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 3 failed: ${error.message}\n`);
+    console.log(`❌ Test 3 failed\n`);
     testsFailed++;
   }
 
@@ -110,17 +106,16 @@ async function runTests() {
     });
     
     const service = new MessageService();
-    const msg = await service.createMessage({
-      conversationId: conv.id,
-      content: 'Test Message',
-      isFromUser: true
-    });
     
-    assert.ok(msg, 'Message should be created');
+    // Check if the implementation uses transactions
+    const methodCode = (service as any).createMessage.toString();
+    const usesTransaction = methodCode.includes('$transaction');
+    
+    assert.strictEqual(usesTransaction, true, 'Should use $transaction for atomicity');
     console.log('✅ Test 4 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 4 failed: ${error.message}\n`);
+    console.log(`❌ Test 4 failed\n`);
     testsFailed++;
   }
 
@@ -138,7 +133,7 @@ async function runTests() {
     console.log('✅ Test 5 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 5 failed: ${error.message}\n`);
+    console.log(`❌ Test 5 failed\n`);
     testsFailed++;
   }
 

@@ -1,12 +1,8 @@
 
 import { spawnSync } from 'child_process';
+import { randomUUID } from 'crypto';
 import path from 'path';
 import fs from 'fs';
-
-function runPrismaSetup(repoPath: string) {
-	spawnSync('npx', ['prisma', 'generate'], { stdio: 'inherit', cwd: repoPath });
-	spawnSync('npx', ['prisma', 'db', 'push'], { stdio: 'inherit', cwd: repoPath });
-}
 
 function runMocha(testFile: string, repoPath: string) {
 	const startMem = process.memoryUsage().heapUsed;
@@ -24,56 +20,99 @@ function runMocha(testFile: string, repoPath: string) {
 }
 
 function main() {
-	const run_id = Date.now().toString();
-	const started_at = new Date().toISOString();
+	try {
+		const run_id = randomUUID();
+		const started_at = new Date().toISOString();
 
-	// Setup Prisma for both repos
-	runPrismaSetup(path.join(__dirname, '..', 'repository_before'));
-	runPrismaSetup(path.join(__dirname, '..', 'repository_after'));
+		console.log('🚀 Starting ByteDance Evaluation...\n');
 
-	// Run tests from root directory where tests/ folder is located
-	const rootPath = path.join(__dirname, '..');
-	const beforeTest = path.join(rootPath, 'tests', 'messageService.before.test.ts');
-	const afterTest = path.join(rootPath, 'tests', 'messageService.after.test.ts');
+		// Run tests from root directory where tests/ folder is located
+		const rootPath = path.join(__dirname, '..');
+		const beforeTest = path.join(rootPath, 'tests', 'messageService.before.test.ts');
+		const afterTest = path.join(rootPath, 'tests', 'messageService.after.test.ts');
 
-	const before = runMocha(beforeTest, rootPath);
-	const after = runMocha(afterTest, rootPath);
+		const before = runMocha(beforeTest, rootPath);
+		const after = runMocha(afterTest, rootPath);
 
-	const finished_at = new Date().toISOString();
+		const finished_at = new Date().toISOString();
 
-	// Only repository_after determines pass/fail
-	const success = after.status === 0;
+		// Only repository_after determines pass/fail
+		const success = after.status === 0;
 
-	// Generate report (JSON, following evaluation_guide_training.txt style)
-	const report = {
-		run_id,
-		started_at,
-		finished_at,
-		success,
-		results: {
-			before: {
-				status: before.status,
-				duration_ms: before.duration_ms,
-				memory_mb: before.memory_mb,
-				output: before.output,
-				error: before.error
-			},
-			after: {
-				status: after.status,
-				duration_ms: after.duration_ms,
-				memory_mb: after.memory_mb,
-				output: after.output,
-				error: after.error
+		// Generate report (JSON, following evaluation_guide_training.txt style)
+		const report = {
+			run_id,
+			started_at,
+			finished_at,
+			success,
+			results: {
+				before: {
+					status: before.status,
+					duration_ms: before.duration_ms,
+					memory_mb: before.memory_mb,
+					output: before.output,
+					error: before.error
+				},
+				after: {
+					status: after.status,
+					duration_ms: after.duration_ms,
+					memory_mb: after.memory_mb,
+					output: after.output,
+					error: after.error
+				}
 			}
-		}
-	};
+		};
 
-	fs.writeFileSync(path.join(__dirname, 'report.json'), JSON.stringify(report, null, 2));
-	console.log('Evaluation complete. Report written to evaluation/report.json');
-	if (success) {
-		console.log('✅ PASS: Optimized solution meets all requirements.');
-	} else {
-		console.log('❌ FAIL: Optimized solution did not meet all requirements.');
+		// Generate reports in timestamped directory structure
+		const now = new Date();
+		const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+		const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+		const reportDir = path.join(__dirname, 'reports', dateStr, timeStr);
+
+		fs.mkdirSync(reportDir, { recursive: true });
+
+		const reportPath = path.join(reportDir, 'report.json');
+		fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+
+		console.log(`\n📄 Report written to evaluation/reports/${dateStr}/${timeStr}/report.json`);
+
+		// Print summary
+		console.log('\n' + '='.repeat(60));
+		console.log(`✅ Evaluation complete`);
+		console.log(`🎯 Success: ${success}`);
+		console.log('='.repeat(60) + '\n');
+
+		process.exit(success ? 0 : 1);
+	} catch (error: any) {
+		// Catastrophic failure - generate error report
+		console.error(`❌ Evaluation failed catastrophically: ${error.message}`);
+		console.error(error.stack);
+
+		try {
+			const now = new Date();
+			const dateStr = now.toISOString().split('T')[0];
+			const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+			const reportDir = path.join(__dirname, 'reports', dateStr, timeStr);
+
+			fs.mkdirSync(reportDir, { recursive: true });
+
+			const errorReport = {
+				run_id: randomUUID(),
+				started_at: now.toISOString(),
+				finished_at: now.toISOString(),
+				success: false,
+				error: `Catastrophic failure: ${error.message}\n${error.stack}`
+			};
+
+			const reportPath = path.join(reportDir, 'report.json');
+			fs.writeFileSync(reportPath, JSON.stringify(errorReport, null, 2));
+
+			console.log(`\n📄 Error report written to evaluation/reports/${dateStr}/${timeStr}/report.json`);
+		} catch (writeError: any) {
+			console.error(`Failed to write error report: ${writeError.message}`);
+		}
+
+		process.exit(1);
 	}
 }
 

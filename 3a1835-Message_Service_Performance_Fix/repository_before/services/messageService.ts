@@ -1,7 +1,7 @@
-import prisma from "../lib/database.js";
-import { CreateMessageInput, MessageQuery } from "../lib/validation.js";
-import { createError } from "../middleware/errorHandler.js";
-import { ConversationService } from "./conversationService.js";
+import prisma from "../lib/database";
+import { CreateMessageInput, MessageQuery } from "../lib/validation";
+import { createError } from "../middleware/errorHandler";
+import { ConversationService } from "./conversationService";
 
 export class MessageService {
   private conversationService = new ConversationService();

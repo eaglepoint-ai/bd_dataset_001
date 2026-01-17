@@ -41,7 +41,7 @@ async function runTests() {
     console.log('✅ Test 1 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 1 failed: ${error.message}\n`);
+    console.log(`❌ Test 1 failed\n`);
     testsFailed++;
   }
 
@@ -50,20 +50,13 @@ async function runTests() {
     console.log('Test 2: SHOULD PASS - getMessageById does NOT over-fetch...');
     
     const conv = await prisma.conversation.create({
-      data: {
-        title: 'Overfetch Check',
-        userId: 'user2',
-        messages: {
-          create: [
-            { content: 'target', isFromUser: true },
-            { content: 'extra', isFromUser: false }
-          ]
-        }
-      },
-      include: { messages: true }
+      data: { title: 'Overfetch Check', userId: 'user2' }
     });
+    
+    await prisma.message.create({ data: { content: 'target', isFromUser: true, conversationId: conv.id } });
+    await prisma.message.create({ data: { content: 'extra', isFromUser: false, conversationId: conv.id } });
 
-    const targetMsg = conv.messages.find((m: any) => m.content === 'target');
+    const targetMsg = await prisma.message.findFirst({ where: { conversationId: conv.id } });
     if (!targetMsg) throw new Error("Setup failed: target message not found");
 
     const service = new MessageService();
@@ -74,7 +67,7 @@ async function runTests() {
     console.log('✅ Test 2 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 2 failed: ${error.message}\n`);
+    console.log(`❌ Test 2 failed\n`);
     testsFailed++;
   }
 
@@ -101,7 +94,7 @@ async function runTests() {
     console.log('✅ Test 3 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 3 failed: ${error.message}\n`);
+    console.log(`❌ Test 3 failed\n`);
     testsFailed++;
   }
 
@@ -120,8 +113,9 @@ async function runTests() {
     });
 
     let updatedConv = await prisma.conversation.findUnique({ where: { id: conv.id } });
-    assert.strictEqual(updatedConv?.title, 'This is a very long message that should be sli', 'Title should be sliced to 50 chars');
+    const expectedTitle = 'This is a very long message that should be sliced ';
     assert.strictEqual(updatedConv?.title.length, 50, 'Title length should be 50');
+    assert.strictEqual(updatedConv?.title, expectedTitle, 'Title should be sliced to 50 chars');
 
     await service.createMessage({
       conversationId: conv.id,
@@ -130,11 +124,11 @@ async function runTests() {
     });
 
     updatedConv = await prisma.conversation.findUnique({ where: { id: conv.id } });
-    assert.strictEqual(updatedConv?.title, 'This is a very long message that should be sli', 'Title should remain unchanged');
+    assert.strictEqual(updatedConv?.title, expectedTitle, 'Title should remain unchanged');
     console.log('✅ Test 4 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 4 failed: ${error.message}\n`);
+    console.log(`❌ Test 4 failed\n`);
     testsFailed++;
   }
 
@@ -159,7 +153,7 @@ async function runTests() {
     console.log('✅ Test 5 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 5 failed: ${error.message}\n`);
+    console.log(`❌ Test 5 failed\n`);
     testsFailed++;
   }
 
@@ -168,12 +162,11 @@ async function runTests() {
     console.log('Test 6: SHOULD PASS - no N+1 queries...');
     
     for (let i = 0; i < 5; i++) {
-      await prisma.conversation.create({
-        data: {
-          title: `Recent Conv ${i}`,
-          userId: 'user_recent',
-          messages: { create: { content: `last one ${i}`, isFromUser: true } }
-        }
+      const conv = await prisma.conversation.create({
+        data: { title: `Recent Conv ${i}`, userId: 'user_recent' }
+      });
+      await prisma.message.create({ 
+        data: { content: `last one ${i}`, isFromUser: true, conversationId: conv.id } 
       });
     }
 
@@ -192,7 +185,7 @@ async function runTests() {
     console.log('✅ Test 6 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 6 failed: ${error.message}\n`);
+    console.log(`❌ Test 6 failed\n`);
     testsFailed++;
   }
 
@@ -217,7 +210,7 @@ async function runTests() {
     console.log('✅ Test 7 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 7 failed: ${error.message}\n`);
+    console.log(`❌ Test 7 failed\n`);
     testsFailed++;
   }
 
@@ -248,7 +241,7 @@ async function runTests() {
     console.log('✅ Test 8 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 8 failed: ${error.message}\n`);
+    console.log(`❌ Test 8 failed\n`);
     testsFailed++;
   }
 
@@ -279,7 +272,7 @@ async function runTests() {
     console.log('✅ Test 9 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 9 failed: ${error.message}\n`);
+    console.log(`❌ Test 9 failed\n`);
     testsFailed++;
   }
 
@@ -311,7 +304,7 @@ async function runTests() {
     console.log('✅ Test 10 passed\n');
     testsPassed++;
   } catch (error: any) {
-    console.log(`❌ Test 10 failed: ${error.message}\n`);
+    console.log(`❌ Test 10 failed\n`);
     testsFailed++;
   }
 

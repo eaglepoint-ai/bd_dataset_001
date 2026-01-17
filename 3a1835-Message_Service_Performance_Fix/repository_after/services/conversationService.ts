@@ -1,5 +1,5 @@
-import prisma from "../lib/database.js";
-import { createError } from "../middleware/errorHandler.js";
+import prisma from "../lib/database";
+import { createError } from "../middleware/errorHandler";
 
 export class ConversationService {
   async updateConversationTitleFromFirstMessage(
