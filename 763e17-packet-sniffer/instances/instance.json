@@ -1,0 +1,9 @@
+{
+    "instance_id": "763e17",
+    "problem_statement": "Develop a Python-based packet sniffer that captures network traffic and analyzes packet headers, extracting key information such as source and destination IP addresses, ports, protocols, and timestamps. The application must be capable of real-time monitoring and filtering of traffic based on various criteria, and must provide comprehensive reporting capabilities including packet counts and protocol breakdowns.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/763e17-packet-sniffer",
+    "environment_setup": "Dockerfile"
+  }
+  
