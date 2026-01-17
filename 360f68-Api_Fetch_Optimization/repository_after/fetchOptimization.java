@@ -2,80 +2,53 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-public class FetchOptimization {
+class FetchOptimization {
     
-    /**
-     * Fetches unique items from a list, preserving insertion order.
-     * Optimized to O(n) time complexity using LinkedHashSet.
-     * 
-     * @param items The input list of items
-     * @return A list of unique items preserving insertion order
-     * @throws IllegalArgumentException if items is null
-     */
+    // Problem 1: Optimize performance (O(n²) -> O(n))
+    // Problem 4: Backward compatibility (same behavior as original)
     public static List<Object> fetchItems(List<Object> items) {
-        // Validate input
+        // Problem 3: Input validation
         if (items == null) {
             throw new IllegalArgumentException("Input list cannot be null");
         }
-        
-        // Use LinkedHashSet for O(n) duplicate removal while preserving insertion order
-        LinkedHashSet<Object> uniqueSet = new LinkedHashSet<>(items);
-        return new ArrayList<>(uniqueSet);
+        // Problem 1: O(n) duplicate removal with LinkedHashSet, preserves order
+        return new ArrayList<>(new LinkedHashSet<>(items));
     }
     
-    /**
-     * Fetches unique items from a list with optional pagination support.
-     * Optimized to O(n) time complexity using LinkedHashSet.
-     * 
-     * @param items The input list of items
-     * @param page The 1-based page number (must be positive)
-     * @param pageSize The number of items per page (must be positive)
-     * @return A paginated list of unique items preserving insertion order
-     * @throws IllegalArgumentException if items is null, or if pagination parameters are invalid
-     */
+    // Problem 2: Add pagination support
     public static List<Object> fetchItems(List<Object> items, Integer page, Integer pageSize) {
-        // Validate input list
+        // Problem 3: Input validation - null check
         if (items == null) {
             throw new IllegalArgumentException("Input list cannot be null");
         }
         
-        // Validate pagination parameters
+        // Problem 2: Pagination optional - if both null, return all unique items
         if (page == null && pageSize == null) {
-            // No pagination requested, return all unique items
             return fetchItems(items);
         }
         
-        // Both pagination parameters must be provided together
+        // Problem 3: Input validation - both pagination params required together
         if (page == null || pageSize == null) {
-            throw new IllegalArgumentException("Both page and pageSize must be provided together, or both must be null");
+            throw new IllegalArgumentException("Both page and pageSize must be provided together");
         }
         
-        // Validate pagination parameters are positive integers
-        if (page <= 0) {
-            throw new IllegalArgumentException("Page must be a positive integer (1-based indexing)");
+        // Problem 3: Input validation - positive integers
+        if (page <= 0 || pageSize <= 0) {
+            throw new IllegalArgumentException("Page and pageSize must be positive");
         }
         
-        if (pageSize <= 0) {
-            throw new IllegalArgumentException("Page size must be a positive integer");
-        }
-        
-        // Get unique items preserving insertion order (O(n))
-        LinkedHashSet<Object> uniqueSet = new LinkedHashSet<>(items);
-        List<Object> uniqueList = new ArrayList<>(uniqueSet);
-        
-        // Calculate pagination bounds (1-based indexing)
+        // Problem 1: O(n) duplicate removal, preserves order
+        List<Object> uniqueList = new ArrayList<>(new LinkedHashSet<>(items));
+        // Problem 2: 1-based page indexing
         int startIndex = (page - 1) * pageSize;
-        int endIndex = startIndex + pageSize;
         
-        // Return empty list if page is out of range
+        // Problem 2: Handle out-of-range pages gracefully
         if (startIndex >= uniqueList.size()) {
             return new ArrayList<>();
         }
         
-        // Adjust endIndex to not exceed list size
-        endIndex = Math.min(endIndex, uniqueList.size());
-        
-        // Return paginated sublist
+        // Problem 2: Pagination bounds calculation
+        int endIndex = Math.min(startIndex + pageSize, uniqueList.size());
         return new ArrayList<>(uniqueList.subList(startIndex, endIndex));
     }
 }

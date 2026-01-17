@@ -71,21 +71,34 @@ public class Evaluation {
         if (testOutput.contains("COMPILATION FAILED")) {
             passed = false;
         } else {
-            // JUnit 5 output format: "[ X tests successful ]" or "[ X tests failed ]"
-            // Also check for "containers successful" and "containers failed"
-            boolean hasFailures = testOutput.contains("tests failed") || 
-                                 testOutput.contains("containers failed") ||
-                                 testOutput.contains("Failures:") ||
-                                 testOutput.contains("aborted");
-            boolean hasSuccess = testOutput.contains("tests successful") || 
-                               testOutput.contains("containers successful");
+            // JUnit 5 output format: "[ X tests successful ]" and "[ Y tests failed ]"
+            // Extract actual numbers to determine if tests passed
+            java.util.regex.Pattern successPattern = java.util.regex.Pattern.compile("\\[\\s*(\\d+)\\s+tests\\s+successful\\s*\\]");
+            java.util.regex.Pattern failedPattern = java.util.regex.Pattern.compile("\\[\\s*(\\d+)\\s+tests\\s+failed\\s*\\]");
             
-            // If we see test results, check if all passed
-            if (hasSuccess || hasFailures) {
-                passed = hasSuccess && !hasFailures;
+            java.util.regex.Matcher successMatcher = successPattern.matcher(testOutput);
+            java.util.regex.Matcher failedMatcher = failedPattern.matcher(testOutput);
+            
+            int testsSuccessful = 0;
+            int testsFailed = 0;
+            boolean foundResults = false;
+            
+            if (successMatcher.find()) {
+                testsSuccessful = Integer.parseInt(successMatcher.group(1));
+                foundResults = true;
+            }
+            if (failedMatcher.find()) {
+                testsFailed = Integer.parseInt(failedMatcher.group(1));
+                foundResults = true;
+            }
+            
+            // Pass if we found test results and all passed (or no test output but compilation succeeded)
+            if (foundResults) {
+                passed = testsSuccessful > 0 && testsFailed == 0;
             } else {
                 // Fallback: if no explicit failure indicators and compilation succeeded, assume passed
-                passed = !testOutput.contains("error:") && !testOutput.contains("Exception");
+                passed = !testOutput.contains("error:") && !testOutput.contains("Exception") && 
+                        !testOutput.contains("containers failed");
             }
         }
         
@@ -137,20 +150,13 @@ public class Evaluation {
             Files.write(wrapperFile, wrapperCode.getBytes());
             compileCmd.add(wrapperFile.toString());
         } else {
-            // For repository_after, verify file exists and use absolute path
-            Path sourceFile = Paths.get(PROJECT_ROOT, repository, "FetchOptimization.java");
+            // For repository_after, use lowercase filename (naming convention)
+            Path sourceFile = Paths.get(PROJECT_ROOT, repository, "fetchOptimization.java");
             if (!Files.exists(sourceFile)) {
-                // Try alternative case (in case of case sensitivity issues)
-                Path altFile = Paths.get(PROJECT_ROOT, repository, "fetchOptimization.java");
-                if (Files.exists(altFile)) {
-                    compileCmd.add(altFile.toString());
-                } else {
-                    throw new FileNotFoundException("Source file not found: " + sourceFile + " or " + altFile + 
-                        ". Current directory: " + PROJECT_ROOT);
-                }
-            } else {
-                compileCmd.add(sourceFile.toString());
+                throw new FileNotFoundException("Source file not found: " + sourceFile + 
+                    ". Current directory: " + PROJECT_ROOT);
             }
+            compileCmd.add(sourceFile.toString());
         }
         
         // Add test file with absolute path
