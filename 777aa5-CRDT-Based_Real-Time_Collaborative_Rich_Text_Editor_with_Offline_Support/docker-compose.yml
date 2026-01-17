@@ -1,6 +1,83 @@
 services:
-  app:
-    build: .
-    command: pytest -q tests
+  # No baseline for 0-1 feature generation
+  run_before:
+    image: alpine:latest
+    command: sh -c "echo 'No baseline - this is a 0-1 feature generation task' && exit 0"
+
+  # Run tests on the implementation
+  run_after:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@postgres_after:5432/crdt_editor
+      REDIS_URL: redis://redis_after:6379
+    depends_on:
+      postgres_after:
+        condition: service_healthy
+      redis_after:
+        condition: service_healthy
+    working_dir: /app
+    command: npm test
+
+  postgres_after:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: crdt_editor
     volumes:
-      - .:/app
+      - ./repository_after/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis_after:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Run evaluation script
+  evaluation:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@postgres_eval:5432/crdt_editor
+      REDIS_URL: redis://redis_eval:6379
+    depends_on:
+      postgres_eval:
+        condition: service_healthy
+      redis_eval:
+        condition: service_healthy
+    working_dir: /app
+    command: node evaluation/evaluation.js
+
+  postgres_eval:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: crdt_editor
+    volumes:
+      - ./repository_after/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis_eval:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
