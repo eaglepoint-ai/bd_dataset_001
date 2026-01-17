@@ -1,92 +1,107 @@
-# project template
+# Separate Squares Problem
 
-Starter scaffold for bd dataset task.
+This dataset task contains a geometric algorithm problem for finding the horizontal line that splits overlapping squares into equal areas. The objective is to optimize from a naive O(n²) implementation to an efficient O(n log n) sweep line algorithm while preserving functional correctness.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+## Folder layout
 
----
+- `repository_before/` - naive implementation using coordinate compression
+- `repository_after/` - optimized implementation using sweep line algorithm
+- `tests/` - correctness and equivalence tests
+- `patches/` - diff between before/after
+- `evaluation/` - evaluation scripts and reports
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+## Run with Docker
 
-### Setup Steps
-
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+### Build image
+```bash
+docker compose build
 ```
 
-### Report Schema
+### Run tests (before – expected all pass)
+```bash
+docker compose run --rm test-before
 
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+Expected behavior:
+- Functional tests: ✅ PASS
+- All 17 test cases: ✅ PASS
 
----
+### Run tests (after – expected all pass)
+```bash
+docker compose run --rm test-after
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+Expected behavior:
+- Functional tests: ✅ PASS
+- All 17 test cases: ✅ PASS
+- Optimized algorithm: ✅ O(n log n) complexity
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+### Run evaluation (compares both implementations)
+```bash
+docker compose run --rm evaluate
+
+or
+
+docker compose run --rm app python evaluation/evaluation.py
+```
+
+This will:
+- Run tests for both before and after implementations
+- Generate a report at `evaluation/reports/report.json`
+
+### Run evaluation with custom output file
+```bash
+docker compose run --rm app python evaluation/evaluation.py --output /path/to/custom/report.json
+```
+
+## Run locally
+
+### Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Run tests (before – expected all pass)
+```bash
+# Windows PowerShell
+$env:PYTHONPATH="repository_before"; pytest tests -q
+
+# Linux/Mac
+PYTHONPATH=repository_before pytest tests -q
+```
+
+Expected behavior:
+- Functional tests: ✅ PASS
+- All 17 test cases: ✅ PASS
+
+### Run tests (after – expected all pass)
+```bash
+# Windows PowerShell
+$env:PYTHONPATH="repository_after"; pytest tests -q
+
+# Linux/Mac
+PYTHONPATH=repository_after pytest tests -q
+```
+
+Expected behavior:
+- Functional tests: ✅ PASS
+- All 17 test cases: ✅ PASS
+- Optimized algorithm: ✅ O(n log n) complexity
+
+### Run evaluation (compares both implementations)
+```bash
+python evaluation/evaluation.py
+```
+
+This will:
+- Run tests for both before and after implementations
+- Generate a report at `evaluation/reports/report.json`
+
+## Regenerate patch
+
+From repo root:
+
+```bash
+git diff --no-index repository_before repository_after > patches/diff.patch
+```
