@@ -52,8 +52,6 @@ services:
       NODE_ENV: test
       DATABASE_URL: postgresql://postgres:postgres@postgres_eval:5432/crdt_editor
       REDIS_URL: redis://redis_eval:6379
-    volumes:
-      - ./evaluation:/app/evaluation:z
     depends_on:
       postgres_eval:
         condition: service_healthy
