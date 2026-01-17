@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./repository_after:/app
+      - ./tests:/app/tests
+      - ./tests:/tests
     working_dir: /app
     command: cargo test --release
 
@@ -14,6 +16,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./repository_after:/app
+      - ./tests:/app/tests
       - ./tests:/tests
       - ./evaluation:/app/evaluation
     working_dir: /app
