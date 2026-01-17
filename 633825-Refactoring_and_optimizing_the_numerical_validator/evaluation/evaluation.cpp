@@ -415,5 +415,17 @@ int main(int argc, char *argv[]) {
     std::cout << "Duration: " << std::fixed << std::setprecision(2) << duration << "s\n";
     std::cout << "Success: " << (success ? "YES" : "NO") << "\n";
 
+    // Also output the report content to stdout for Docker capture
+    std::cout << "\n=== REPORT CONTENT ===\n";
+    std::ifstream report_file(output_path);
+    if (report_file.is_open()) {
+        std::string line;
+        while (std::getline(report_file, line)) {
+            std::cout << line << "\n";
+        }
+        report_file.close();
+    }
+    std::cout << "=== END REPORT ===\n";
+
     return success ? 0 : 1;
 }
