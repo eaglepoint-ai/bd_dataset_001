@@ -1,0 +1,34 @@
+{
+  "instance_id": "3a1835",
+  "problem_statement": "Optimize the Message Service to fix performance issues including memory-inefficient pagination, N+1 queries, sequential queries, and over-fetching.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "",
+  "environment_setup": "Dockerfile",
+  "scenario": {
+    "description": "Basic pagination and empty conversation edge case.",
+    "setup": {
+      "conversations": [
+        { "id": "conv1", "title": "Test Conversation", "userId": "user1" }
+      ],
+      "messages": []
+    },
+    "query": {
+      "conversationId": "conv1",
+      "page": 1,
+      "limit": 50
+    },
+    "expected": {
+      "messages": [],
+      "pagination": {
+        "page": 1,
+        "limit": 50,
+        "totalCount": 0,
+        "totalPages": 0,
+        "hasNext": false,
+        "hasPrev": false
+      }
+    }
+  }
+}
+
