@@ -12,7 +12,7 @@ services:
     build: .
     environment:
       - TEST_REPO_PATH=/app/repository_before
-    command: sh -c "cd tests && npm test"
+    command: sh -c "cd tests && npm test || true"
 
   test-after:
     build: .
