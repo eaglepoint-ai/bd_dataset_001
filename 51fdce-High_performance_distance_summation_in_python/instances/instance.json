@@ -1,0 +1,8 @@
+{
+  "instance_id": "51fdce",
+  "problem_statement": "Optimize a Python function that computes the sum of Euclidean distances for a stream of 1,000,000 (x, y) coordinates per second. The current implementation is slow due to redundant calculations and inefficient memory usage.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/51fdce-High_performance_distance_summation_in_python",
+  "environment_setup": "Dockerfile"
+}
