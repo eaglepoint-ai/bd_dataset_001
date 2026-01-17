@@ -14,6 +14,9 @@ COPY repository_after/ ./
 # Copy tests directory from project root to /tests
 COPY tests/ /tests/
 
+# Copy evaluation directory
+COPY evaluation/ ./evaluation/
+
 # Build TypeScript
 RUN npm run build || true
 
