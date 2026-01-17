@@ -1,6 +1,14 @@
 services:
-  app:
+  # Command 1: Build and run tests once, then exit with status code
+  toast-app:
     build: .
-    command: pytest -q tests
+    environment:
+      - NODE_ENV=test
+
+  # Command 2: Build, run the full evaluation, and generate report
+  evaluate:
+    build: .
     volumes:
-      - .:/app
+      - ./evaluation/reports:/app/evaluation/reports
+    # Override CMD to run the evaluation script instead of the app
+    command: python3 ../evaluation/evaluation.py
