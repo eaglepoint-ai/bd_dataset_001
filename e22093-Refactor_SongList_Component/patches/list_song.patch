@@ -1,0 +1,121 @@
+diff --git a/repository_before/SongList.ts b/repository_after/components/SongList.tsx
+index c9d3d5e..7b03505 100644
+--- a/repository_before/SongList.ts
++++ b/repository_after/components/SongList.tsx
+@@ -1,44 +1,83 @@
+-import React, { useEffect, useState } from 'react';
+-import axios from 'axios';
+-import '../App.css';
+-const { API_BASE_URL } = require('../config.js');
+-
+-interface Song {
+-  _id: string;
+-  title: string;
+-  artist: string;
+-  album: string;
+-  genre: string;
+-}
++'use client';
++
++import { useEffect, useState } from 'react';
++import { fetchSongs } from '@/lib/songService';
++import type { Song } from '@/types/song';
+ 
+-const SongList: React.FC = () => {
++export default function SongList() {
+   const [songs, setSongs] = useState<Song[]>([]);
++  const [loading, setLoading] = useState(false);
++  const [error, setError] = useState<string | null>(null);
++
++  const loadSongs = async (signal: AbortSignal) => {
++    setLoading(true);
++    setError(null);
++    try {
++      const data = await fetchSongs(signal);
++      setSongs(data);
++    } catch (err: any) {
++      if (err.name !== 'AbortError' && err.name !== 'CanceledError') {
++        setError(err.message || 'Failed to load songs');
++      }
++    } finally {
++      setLoading(false);
++    }
++  };
+ 
+   useEffect(() => {
+-    // Fetch the list of songs from the backend API
+-    axios.get<Song[]>(`${API_BASE_URL}/songs`)
+-      .then(response => {
+-        setSongs(response.data);
+-      })
+-      .catch(error => {
+-        console.error('Error fetching songs:', error);
+-      });
++    const controller = new AbortController();
++    loadSongs(controller.signal);
++    return () => controller.abort();
+   }, []);
+ 
++  const handleRetry = () => {
++    const controller = new AbortController();
++    loadSongs(controller.signal);
++  };
++
++  if (loading) {
++    return (
++      <div className="song-list-container">
++        <h1 className="song-list-heading">Song List</h1>
++        <p role="status" aria-live="polite">Loading songs...</p>
++      </div>
++    );
++  }
++
++  if (error) {
++    return (
++      <div className="song-list-container">
++        <h1 className="song-list-heading">Song List</h1>
++        <p role="alert">{error}</p>
++        <button onClick={handleRetry}>Retry</button>
++      </div>
++    );
++  }
++
++  if (songs.length === 0) {
++    return (
++      <div className="song-list-container">
++        <h1 className="song-list-heading">Song List</h1>
++        <p>No songs available</p>
++        <button onClick={handleRetry}>Refresh</button>
++      </div>
++    );
++  }
++
+   return (
+     <div className="song-list-container">
+       <h1 className="song-list-heading">Song List</h1>
+-      {songs.map(({ _id, title, artist, album, genre }) => (
+-        <div className="song-item" key={_id}>
+-          <h3 className="song-title">{title}</h3>
+-          <p className="song-info">Artist: {artist}</p>
+-          <p className="song-info">Album: {album}</p>
+-          <p className="song-info">Genre: {genre}</p>
+-          <p className="song-info">Id: {_id}</p>
+-        </div>
+-      ))}
++      <button onClick={handleRetry}>Refresh</button>
++      <ul>
++        {songs.slice(0, 100).map((song) => (
++          <li className="song-item" key={song.id}>
++            <h3 className="song-title">{song.title}</h3>
++            <p className="song-info">Artist: {song.artist}</p>
++            <p className="song-info">Album: {song.album}</p>
++            <p className="song-info">Genre: {song.genre}</p>
++          </li>
++        ))}
++      </ul>
+     </div>
+   );
+-};
+-
+-export default SongList;
++}
