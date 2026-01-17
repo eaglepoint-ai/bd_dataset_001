@@ -149,11 +149,6 @@ function parseVitestJsonOutput(stdout) {
 }
 
 function generateOutputPath() {
-  if (process.env.RUNNING_IN_DOCKER) {
-    return "/app/evaluation/report.json";
-  }
-
-  // For local runs, use dated subdirectories
   const now = new Date();
   const dateStr = now.toISOString().split("T")[0];
   const timeStr = now
@@ -162,8 +157,13 @@ function generateOutputPath() {
     .split(".")[0]
     .replace(/:/g, "-");
 
-  const projectRoot = path.resolve(__dirname, "..");
-  const outputDir = path.join(projectRoot, "evaluation", dateStr, timeStr);
+  let outputDir;
+  if (process.env.RUNNING_IN_DOCKER) {
+    outputDir = path.join("/app/evaluation", dateStr, timeStr);
+  } else {
+    const projectRoot = path.resolve(__dirname, "..");
+    outputDir = path.join(projectRoot, "evaluation", dateStr, timeStr);
+  }
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
@@ -184,10 +184,13 @@ async function main() {
   let cmd, args, cwd;
 
   if (process.env.RUNNING_IN_DOCKER) {
+    // When running inside Docker, use simple commands without paths.
+    // The working directory is set by WORKDIR in Dockerfile.
     cmd = "bun";
     args = ["x", "vitest", "run", "--reporter=json"];
-    cwd = undefined;
+    cwd = undefined; // Rely on Dockerfile's WORKDIR
   } else {
+    // When running locally, use docker-compose
     cmd = "docker-compose";
     args = [
       "run",
