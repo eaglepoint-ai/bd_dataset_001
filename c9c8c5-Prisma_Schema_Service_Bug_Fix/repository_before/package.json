@@ -1,0 +1,22 @@
+{
+  "name": "prisma-schema-service-bug-fix",
+  "version": "1.0.0",
+  "description": "Prisma Schema & Service Bug Fix Task",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node index.ts",
+    "test": "jest",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "prisma": "^5.0.0",
+    "typescript": "^5.0.0"
+  }
+}
+

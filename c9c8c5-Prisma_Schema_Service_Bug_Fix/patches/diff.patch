@@ -1,0 +1,292 @@
+diff -Nur repository_before/chatService.ts repository_after/chatService.ts
+--- repository_before/chatService.ts	2026-01-15 18:55:03.000000000 +0300
++++ repository_after/chatService.ts	2026-01-15 19:09:30.381378681 +0300
+@@ -1,4 +1,5 @@
+ import prisma from "./lib/database";
++import { Prisma } from "@prisma/client";
+ import { createError } from "./middleware/errorHandler";
+ 
+ export class ChatService {
+@@ -18,22 +19,44 @@
+     try {
+       const skip = (page - 1) * limit;
+ 
+-      const messages = await prisma.message.findMany({
+-        where: { conversationId },
+-        orderBy: { createdAt: "desc" },
+-        skip,
+-        take: limit,
+-      });
+-
+-      return messages;
++      const [messages, totalCount] = await Promise.all([
++        prisma.message.findMany({
++          where: { conversationId },
++          orderBy: { createdAt: "desc" },
++          skip,
++          take: limit,
++        }),
++        prisma.message.count({ where: { conversationId } }),
++      ]);
++
++      return {
++        messages,
++        pagination: {
++          page,
++          limit,
++          totalCount,
++          totalPages: Math.ceil(totalCount / limit),
++          hasNext: page * limit < totalCount,
++          hasPrev: page > 1,
++        },
++      };
+     } catch (error) {
+       console.error("Error fetching messages:", error);
+       throw createError("Failed to fetch messages", 500);
+     }
+   }
+ 
+-  async createMessage(conversationId: string, content: string, isFromUser: boolean) {
++  async createMessage(conversationId: string, content: string, isFromUser: boolean = false) {
+     try {
++      // Verify conversation exists
++      const conversation = await prisma.conversation.findUnique({
++        where: { id: conversationId },
++      });
++
++      if (!conversation) {
++        throw createError("Conversation not found", 404);
++      }
++
+       const message = await prisma.message.create({
+         data: {
+           content,
+@@ -43,6 +66,9 @@
+       });
+       return message;
+     } catch (error) {
++      if (error instanceof Error && "statusCode" in error) {
++        throw error;
++      }
+       console.error("Error creating message:", error);
+       throw createError("Failed to create message", 500);
+     }
+@@ -55,9 +81,141 @@
+       });
+       return { message: "Deleted successfully" };
+     } catch (error) {
++      if (error instanceof Prisma.PrismaClientKnownRequestError) {
++        if (error.code === "P2025") {
++          throw createError("Conversation not found", 404);
++        }
++      }
+       console.error("Error deleting conversation:", error);
+       throw createError("Failed to delete conversation", 500);
+     }
+   }
+-}
+ 
++  // Threading feature methods
++  async replyToMessage(parentId: string, content: string, isFromUser: boolean = false) {
++    try {
++      // Fetch parent message
++      const parentMessage = await prisma.message.findUnique({
++        where: { id: parentId },
++        select: { id: true, conversationId: true, parentId: true },
++      });
++
++      if (!parentMessage) {
++        throw createError("Parent message not found", 404);
++      }
++
++      // Validate: Cannot reply to a reply (max depth = 1)
++      if (parentMessage.parentId !== null) {
++        throw createError("Cannot reply to a reply. Threading depth exceeded.", 400);
++      }
++
++      // Create reply
++      const reply = await prisma.message.create({
++        data: {
++          content,
++          isFromUser,
++          conversationId: parentMessage.conversationId,
++          parentId: parentId,
++        },
++      });
++
++      return reply;
++    } catch (error) {
++      if (error instanceof Error && "statusCode" in error) {
++        throw error;
++      }
++      console.error("Error creating reply:", error);
++      throw createError("Failed to create reply", 500);
++    }
++  }
++
++  async getReplies(messageId: string, page = 1, limit = 50) {
++    try {
++      const skip = (page - 1) * limit;
++
++      const [replies, totalCount] = await Promise.all([
++        prisma.message.findMany({
++          where: { parentId: messageId },
++          orderBy: { createdAt: "asc" },
++          skip,
++          take: limit,
++        }),
++        prisma.message.count({ where: { parentId: messageId } }),
++      ]);
++
++      return {
++        replies,
++        pagination: {
++          page,
++          limit,
++          totalCount,
++          totalPages: Math.ceil(totalCount / limit),
++          hasNext: page * limit < totalCount,
++          hasPrev: page > 1,
++        },
++      };
++    } catch (error) {
++      console.error("Error fetching replies:", error);
++      throw createError("Failed to fetch replies", 500);
++    }
++  }
++
++  async getReplyCount(messageId: string): Promise<number> {
++    try {
++      const count = await prisma.message.count({
++        where: { parentId: messageId },
++      });
++      return count;
++    } catch (error) {
++      console.error("Error counting replies:", error);
++      throw createError("Failed to count replies", 500);
++    }
++  }
++
++  async getMessagesWithReplyCount(conversationId: string, page = 1, limit = 50) {
++    try {
++      const skip = (page - 1) * limit;
++
++      const [messages, totalCount] = await Promise.all([
++        prisma.message.findMany({
++          where: {
++            conversationId,
++            parentId: null, // Only top-level messages
++          },
++          orderBy: { createdAt: "desc" },
++          skip,
++          take: limit,
++          include: {
++            _count: {
++              select: { replies: true },
++            },
++          },
++        }),
++        prisma.message.count({
++          where: {
++            conversationId,
++            parentId: null,
++          },
++        }),
++      ]);
++
++      return {
++        messages: messages.map((msg) => ({
++          ...msg,
++          replyCount: msg._count.replies,
++        })),
++        pagination: {
++          page,
++          limit,
++          totalCount,
++          totalPages: Math.ceil(totalCount / limit),
++          hasNext: page * limit < totalCount,
++          hasPrev: page > 1,
++        },
++      };
++    } catch (error) {
++      console.error("Error fetching messages with reply count:", error);
++      throw createError("Failed to fetch messages with reply count", 500);
++    }
++  }
++}
+diff -Nur repository_before/index.ts repository_after/index.ts
+--- repository_before/index.ts	2026-01-15 18:55:03.000000000 +0300
++++ repository_after/index.ts	2026-01-15 19:11:05.093599249 +0300
+@@ -1,2 +1 @@
+ export { ChatService } from "./chatService";
+-
+diff -Nur repository_before/lib/database.ts repository_after/lib/database.ts
+--- repository_before/lib/database.ts	2026-01-15 18:55:03.000000000 +0300
++++ repository_after/lib/database.ts	2026-01-15 19:10:09.442334299 +0300
+@@ -18,4 +18,3 @@
+ }
+ 
+ export default prisma;
+-
+diff -Nur repository_before/middleware/errorHandler.ts repository_after/middleware/errorHandler.ts
+--- repository_before/middleware/errorHandler.ts	2026-01-15 18:55:03.000000000 +0300
++++ repository_after/middleware/errorHandler.ts	2026-01-15 19:10:37.659989250 +0300
+@@ -19,4 +19,3 @@
+     },
+   });
+ }
+-
+diff -Nur repository_before/package.json repository_after/package.json
+--- repository_before/package.json	2026-01-15 18:55:03.000000000 +0300
++++ repository_after/package.json	2026-01-15 19:11:41.165363503 +0300
+@@ -1,7 +1,7 @@
+ {
+   "name": "prisma-schema-service-bug-fix",
+   "version": "1.0.0",
+-  "description": "Prisma Schema & Service Bug Fix Task",
++  "description": "Prisma Schema & Service Bug Fix Task - Fixed Version",
+   "main": "index.ts",
+   "scripts": {
+     "build": "tsc",
+@@ -19,4 +19,3 @@
+     "typescript": "^5.0.0"
+   }
+ }
+-
+diff -Nur repository_before/prisma/schema.prisma repository_after/prisma/schema.prisma
+--- repository_before/prisma/schema.prisma	2026-01-15 18:55:03.000000000 +0300
++++ repository_after/prisma/schema.prisma	2026-01-15 19:08:44.917189300 +0300
+@@ -19,13 +19,21 @@
+ 
+ model Message {
+   id             String       @id @default(cuid())
+-  content        String
+-  isFromUser     Boolean
++  content        String       @db.Text
++  isFromUser     Boolean      @default(false)
+   conversationId String
+-  conversation   Conversation @relation(fields: [conversationId], references: [id])
++  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
++  
++  // Threading support
++  parentId       String?
++  parent         Message?     @relation("MessageReplies", fields: [parentId], references: [id], onDelete: Cascade)
++  replies        Message[]    @relation("MessageReplies")
++  
+   createdAt      DateTime     @default(now())
+   updatedAt      DateTime     @updatedAt
+ 
++  @@index([conversationId])
++  @@index([conversationId, createdAt])
++  @@index([parentId])
+   @@map("messages")
+ }
+-
+diff -Nur repository_before/tsconfig.json repository_after/tsconfig.json
+--- repository_before/tsconfig.json	2026-01-15 18:55:03.000000000 +0300
++++ repository_after/tsconfig.json	2026-01-15 19:12:12.618996958 +0300
+@@ -17,4 +17,3 @@
+   "include": ["./**/*.ts"],
+   "exclude": ["node_modules", "dist"]
+ }
+-
