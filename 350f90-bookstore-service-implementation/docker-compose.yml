@@ -6,6 +6,7 @@ services:
       - .:/app
       # Anonymous volume for target dir to prevent host sync slowness and mismatch
       - /app/repository_after/bookstore_backend/target
+      - /app/repository_before/bookstore_backend/target
     environment:
       - REPO_PATH=repository_after
 
@@ -13,7 +14,16 @@ services:
     build: .
     command: >
       bash -c "export REPO_PATH=repository_after &&
-               python3 -m pytest tests/test_bookstore.py -v"
+               python3 -m pytest tests/test_bookstore.py -v --tb=no"
     volumes:
       - .:/app
       - /app/repository_after/bookstore_backend/target
+
+  test-before:
+    build: .
+    command: >
+      bash -c "export REPO_PATH=repository_before &&
+               python3 -m pytest tests/test_bookstore.py -v --tb=no"
+    volumes:
+      - .:/app
+      - /app/repository_before/bookstore_backend/target

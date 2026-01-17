@@ -151,7 +151,8 @@ def build_and_start_server(repo_path: Path):
             
         if not ready:
             stop_server(process)
-            return None, {"success": False, "output": "Server failed to respond to connection check"}
+            stdout, stderr = process.communicate()
+            return None, {"success": False, "output": f"Server failed to respond to connection check. Stderr: {stderr.decode('utf-8') if stderr else 'None'}"}
             
         return process, {"success": True, "output": "Build and start successful"}
         
@@ -308,6 +309,13 @@ def run_evaluation():
     project_root = Path(__file__).parent.parent
     tests_dir = project_root / "tests"
 
+    # Run tests with BEFORE implementation
+    before_results = run_pytest_with_pythonpath(
+        project_root / "repository_before",
+        tests_dir,
+        "before (repository_before)"
+    )
+
     # Run tests with AFTER implementation
     after_results = run_pytest_with_pythonpath(
         project_root / "repository_after",
@@ -317,6 +325,9 @@ def run_evaluation():
 
     # Build comparison
     comparison = {
+        "before_total": before_results.get("summary", {}).get("total", 0),
+        "before_passed": before_results.get("summary", {}).get("passed", 0),
+        "before_failed": before_results.get("summary", {}).get("failed", 0),
         "after_total": after_results.get("summary", {}).get("total", 0),
         "after_passed": after_results.get("summary", {}).get("passed", 0),
         "after_failed": after_results.get("summary", {}).get("failed", 0),
@@ -326,11 +337,16 @@ def run_evaluation():
     print("EVALUATION SUMMARY")
     print(f"{'=' * 60}")
     
+    print(f"\nBefore Implementation:")
+    print(f"  Overall: {'PASSED' if before_results.get('success') else 'FAILED'}")
+    print(f"  Tests: {comparison['before_passed']}/{comparison['before_total']} passed")
+
     print(f"\nAfter Implementation:")
     print(f"  Overall: {'PASSED' if after_results.get('success') else 'FAILED'}")
     print(f"  Tests: {comparison['after_passed']}/{comparison['after_total']} passed")
 
     return {
+        "before": before_results,
         "after": after_results,
         "comparison": comparison,
     }

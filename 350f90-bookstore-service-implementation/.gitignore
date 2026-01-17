@@ -3,3 +3,4 @@ evaluation/reports/*
 # Rust build output
 repository_after/bookstore_backend/target/
 evaluation/reports
+target
