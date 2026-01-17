@@ -2,11 +2,11 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY repository_before/package.json ./package.json
+COPY package*.json ./
 
 RUN npm install
 
-COPY repository_before/ ./
+COPY . .
 
-CMD ["npm", "start"]
+CMD ["node", "evaluation/evaluation.js"]
 
