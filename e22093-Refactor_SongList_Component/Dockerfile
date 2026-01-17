@@ -8,9 +8,6 @@ COPY . .
 # Install dependencies in repository_after
 RUN cd repository_after && npm install
 
-# Make shell scripts executable
-RUN chmod +x run_tests.sh build.sh runner.sh
-
 # Expose port
 EXPOSE 3000
 

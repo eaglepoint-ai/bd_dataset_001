@@ -10,7 +10,7 @@ services:
 
   songlist-test:
     build: .
-    command: sh run_tests.sh
+    command: sh -c "cd repository_after && npm test"
     volumes:
       - ./evaluation:/workspace/evaluation
 

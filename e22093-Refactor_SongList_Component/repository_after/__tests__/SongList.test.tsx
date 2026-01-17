@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SongList from '@/components/SongList';
 import * as songService from '@/lib/songService';
@@ -46,7 +46,9 @@ describe('SongList Component - All Requirements', () => {
     await waitFor(() => screen.getByText('Retry'));
     
     const retryButton = screen.getByText('Retry');
-    await userEvent.click(retryButton);
+    await act(async () => {
+      await userEvent.click(retryButton);
+    });
     
     await waitFor(() => expect(screen.getByText('Song 1')).toBeInTheDocument());
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -86,7 +88,9 @@ describe('SongList Component - All Requirements', () => {
     await waitFor(() => screen.getByText('Refresh'));
     
     const refreshButton = screen.getByText('Refresh');
-    await userEvent.click(refreshButton);
+    await act(async () => {
+      await userEvent.click(refreshButton);
+    });
     
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
