@@ -1,4 +1,4 @@
-import { CacheManager } from './types';
+import { CacheManager } from '../types/types';
 
 export const range = <T>(count: number, mapFn: (index: number) => T): T[] => {
   return Array.from({ length: count }, (_, i) => mapFn(i));

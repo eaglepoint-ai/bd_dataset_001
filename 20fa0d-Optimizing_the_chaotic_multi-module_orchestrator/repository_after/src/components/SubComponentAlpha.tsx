@@ -4,9 +4,9 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef, memo, useContext } from 'react';
-import { ThemeContext, SyncContext } from '../contexts';
-import { AlphaProps, ProcessedDataItem } from '../types';
-import { stringHash, reverseMap, cloneWithoutPrivateKeys } from '../utils';
+import { ThemeContext, SyncContext } from '../contexts/contexts';
+import { AlphaProps, ProcessedDataItem } from '../types/types';
+import { stringHash, reverseMap, cloneWithoutPrivateKeys } from '../utils/utils';
 
 const DEBOUNCE_DELAY = 300;
 

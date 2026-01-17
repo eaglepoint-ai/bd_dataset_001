@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import ChaoticComponent from "./ChaoticComponent";
-import "./style.css";
+import ChaoticComponent from "./components/ChaoticComponent";
+import "./styles/style.css";
 
 function App() {
   const [activeMode, setActiveMode] = useState<

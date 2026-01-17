@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef, memo } from 'react';
-import { GammaProps, PipelineState, PipelineStage } from '../types';
+import { GammaProps, PipelineState, PipelineStage } from '..';
 
 export const SubComponentGamma = memo<GammaProps>(({ 
   source, 

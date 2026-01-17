@@ -27,6 +27,6 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["*.ts", "*.tsx", "components/SubComponentBeta.tsx", "components/SubComponentGamma.tsx", "components/SubComponentDelta.tsx", "components/SubComponentAlpha.tsx"],
+  "include": ["*.ts", "*.tsx", "src/components/SubComponentBeta.tsx", "src/components/SubComponentGamma.tsx", "src/components/SubComponentDelta.tsx", "src/components/SubComponentAlpha.tsx", "src/main.tsx", "src/index.ts", "src/ChaoticComponent.tsx", "src/types/types.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { BetaProps, TreeItem } from '../types';
+import { BetaProps, TreeItem } from '..';
 
 const BATCH_SIZE = 5;
 const PROCESS_DELAY = 0;

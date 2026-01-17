@@ -4,13 +4,13 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { ThemeContext, SyncContext } from './contexts';
-import { SubComponentAlpha } from './components/SubComponentAlpha';
-import { SubComponentBeta } from './components/SubComponentBeta';
-import { SubComponentGamma } from './components/SubComponentGamma';
-import { SubComponentDelta } from './components/SubComponentDelta';
-import { ChaoticComponentProps, InternalState, ModeConfig, MainComponentRef } from './types';
-import { range, createCache } from './utils';
+import { ThemeContext, SyncContext } from '../contexts/contexts';
+import { SubComponentAlpha } from './SubComponentAlpha';
+import { SubComponentBeta } from './SubComponentBeta';
+import { SubComponentGamma } from './SubComponentGamma';
+import { SubComponentDelta } from './SubComponentDelta';
+import { ChaoticComponentProps, InternalState, ModeConfig, MainComponentRef } from '..';
+import { range, createCache } from '../utils/utils';
 
 const SYNC_INTERVAL = 5000;
 const globalCache = createCache();

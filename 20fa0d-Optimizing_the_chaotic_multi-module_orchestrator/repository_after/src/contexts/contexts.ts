@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeContextValue, SyncContextValue } from './types';
+import { ThemeContextValue, SyncContextValue } from '../types/types';
 
 export const ThemeContext = React.createContext<ThemeContextValue>({
   borderColor: '#e2e8f0',

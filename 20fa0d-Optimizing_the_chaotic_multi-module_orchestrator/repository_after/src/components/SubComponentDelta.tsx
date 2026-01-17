@@ -4,8 +4,8 @@
  */
 
 import React, { useReducer, useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { DeltaProps, DeltaState, DeltaAction, FieldSchema } from '../types';
-import { setNestedValue, deleteNestedValue, getNestedValue } from '../utils';
+import { DeltaProps, DeltaState, DeltaAction, FieldSchema } from '..';
+import { setNestedValue, deleteNestedValue, getNestedValue } from '../utils/utils';
 
 const VALIDATION_DEBOUNCE = 300;
 
