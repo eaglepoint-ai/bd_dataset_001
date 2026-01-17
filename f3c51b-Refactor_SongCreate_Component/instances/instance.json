@@ -1,0 +1,8 @@
+{
+    "instance_id": "f3c51b",
+    "problem_statement": "The existing CreateForm component requires a refactor because it contains significant functional, UX, and architectural shortcomings that make it unreliable and unsuitable for production use. It lacks client-side validation, allowing empty or whitespace-only submissions, does not trim input values before sending them to the API, and provides no protection against duplicate submissions. API errors are only logged to the console instead of being displayed to users, there is no visible loading indicator, and success messages are not properly reset when the form is edited. The component also fails to support request cancellation, which can lead to memory leaks and unsafe state updates. Architecturally, it violates best practices by directly using axios within the component instead of a reusable service layer, relying on a CommonJS require import, duplicating nearly identical input handlers, and omitting proper TypeScript types for API requests and responses. Together, these issues result in poor user experience, weak error handling, and unmaintainable code, making a structured refactor necessary to deliver a clean, accessible, and production-ready implementation.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/f3c51b-Refactor_SongCreate_Component",
+    "environment_setup": "Dockerfile"
+}  
