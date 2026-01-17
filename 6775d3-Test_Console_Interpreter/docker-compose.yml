@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    environment:
+      - PYTHONPATH=/app/repository_after
+    command: python -m pytest -q repository_after/test_console.py
+    volumes:
+      - .:/app

@@ -1,0 +1,8 @@
+{
+    "instance_id": "6775d3",
+    "problem_statement": "The HBNBCommand console application is responsible for creating, updating, retrieving, and deleting application objects through user commands. Because it directly manipulates stored data and relies on strict input formats, any defect in its behavior could lead to incorrect data handling, application crashes, or inconsistent system state. Manual verification of all possible command combinations and error cases is unreliable and inefficient. Automated unittests are therefore necessary to ensure that every command behaves as expected, that invalid input is properly handled, and that future code changes do not introduce regressions. A reliable test suite guarantees stability, correctness, and maintainability of the command interpreter.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/6775d3-Test_Console_Interpreter",
+    "environment_setup": "Dockerfile"
+}  
