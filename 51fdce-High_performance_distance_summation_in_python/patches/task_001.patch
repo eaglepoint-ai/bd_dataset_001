@@ -1,0 +1,32 @@
+diff --git a/repository_after/__init__.py b/repository_after/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/repository_after/__pycache__/__init__.cpython-311.pyc b/repository_after/__pycache__/__init__.cpython-311.pyc
+new file mode 100644
+index 0000000..4ae189f
+Binary files /dev/null and b/repository_after/__pycache__/__init__.cpython-311.pyc differ
+diff --git a/repository_before/__pycache__/calculate_distances.cpython-311.pyc b/repository_after/__pycache__/calculate_distances.cpython-311.pyc
+index 41040e8..ebc71ea 100644
+Binary files a/repository_before/__pycache__/calculate_distances.cpython-311.pyc and b/repository_after/__pycache__/calculate_distances.cpython-311.pyc differ
+diff --git a/repository_before/calculate_distances.py b/repository_after/calculate_distances.py
+index 4ffb84c..90fb3d6 100644
+--- a/repository_before/calculate_distances.py
++++ b/repository_after/calculate_distances.py
+@@ -1,13 +1,11 @@
+ import math
+ 
+ class Point:
++    __slots__ = ('x', 'y')
+     def __init__(self, x, y):
+         self.x = x
+         self.y = y
+ 
+ def calculate_distances(points_list):
+-    distances = []
+-    for p in points_list:
+-        dist = math.sqrt(p.x**2 + p.y**2)
+-        distances.append(dist)
+-    return sum(distances)
+\ No newline at end of file
++    sqrt = math.sqrt
++    return sum(sqrt(p.x*p.x + p.y*p.y) for p in points_list)
