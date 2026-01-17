@@ -1,0 +1,8 @@
+{
+  "instance_id": "e1dbff",
+  "problem_statement": "Refactor a frequently invoked Node.js telemetry logging function to maximize performance and runtime stability in a high-throughput trading environment while preserving correctness and readability",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/e1dbff-High_throughput_nodejs_telemetry_logger_refactor",
+  "environment_setup": "Dockerfile"
+}
