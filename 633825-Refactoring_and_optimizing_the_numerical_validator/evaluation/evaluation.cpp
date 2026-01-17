@@ -344,19 +344,8 @@ int main(int argc, char *argv[]) {
     if (argc > 2 && std::string(argv[1]) == "--output") {
         output_path = argv[2];
     } else {
-        std::string date_str = get_date_str();
-        std::string time_str = get_time_str();
-#ifdef _WIN32
-        std::string dir = "evaluation\\" + date_str + "\\" + time_str;
-#else
-        std::string dir = "evaluation/" + date_str + "/" + time_str;
-#endif
-        create_directories(dir);
-#ifdef _WIN32
-        output_path = dir + "\\report.json";
-#else
-        output_path = dir + "/report.json";
-#endif
+        // Always write to root directory for Docker compatibility
+        output_path = "report.json";
     }
 
     std::cout << "MECHANICAL REFACTOR EVALUATION\n";
