@@ -21,7 +21,7 @@ This makes the application unusable for large enterprise teams.
 
 ---
 
-## ⚠️ Current (Problematic) Implementation
+## Current (Problematic) Implementation
 
 ```jsx
 // Naive implementation – renders ALL items
