@@ -19,3 +19,5 @@ class DebouncedSearch {
         clearTimeout(this.timeout);
     }
 }
+
+module.exports = DebouncedSearch;

@@ -1,6 +1,16 @@
 services:
-  app:
+  test_before:
     build: .
-    command: pytest -q tests
     volumes:
       - .:/app
+    command: npm run test
+  test_after:
+    build: .
+    volumes:
+      - .:/app
+    command: npm run test
+  evaluation:
+    build: .
+    volumes:
+      - .:/app
+    command: npm run evaluation
