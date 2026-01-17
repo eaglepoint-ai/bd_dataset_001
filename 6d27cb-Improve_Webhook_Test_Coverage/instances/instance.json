@@ -1,0 +1,8 @@
+{
+    "instance_id": "6d27cb",
+    "problem_statement": "The current test suite for the Flask webhook endpoint provides basic coverage of core functionality such as successful requests, invalid signatures, and replay attack prevention. However, the existing tests do not fully exercise many important execution paths in the implementation. Several edge cases—including malformed JSON payloads, missing required fields, incorrect header formats, database failures, and unexpected runtime exceptions—are either untested or only partially validated. Without tests for these scenarios, regressions can be introduced unknowingly, error handling behavior may change, and overall system reliability is reduced. To ensure the webhook service is robust, deterministic, and maintainable, the test suite must be expanded to cover all meaningful branches and failure modes of the endpoint logic.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/6d27cb-Improve_Webhook_Test_Coverage",
+    "environment_setup": "Dockerfile"
+}  
