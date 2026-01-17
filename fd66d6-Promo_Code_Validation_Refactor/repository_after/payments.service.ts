@@ -3,7 +3,6 @@ import {
   BadRequestException,
   InternalServerErrorException,
   ForbiddenException,
-  UnauthorizedException,
   Logger,
   NotFoundException,
   HttpException,
@@ -100,7 +99,6 @@ export class PaymentsService {
   }
 
   async createPortalSession(customerId: string, userId: string) {
-    // Added userId for verification
     if (!customerId) {
       throw new BadRequestException('Customer ID is required');
     }
@@ -109,7 +107,6 @@ export class PaymentsService {
       throw new InternalServerErrorException('Supabase client not available');
     }
 
-    // Verify customer ownership
     const { data: parent, error: fetchError } = await client
       .from('parents')
       .select('stripe_customer_id')
@@ -147,12 +144,9 @@ export class PaymentsService {
       throw new InternalServerErrorException('Supabase client not available');
     }
 
-    this.logger.log('dto.returnUrl=', dto.returnUrl);
-    this.logger.log('BASE_URL=', this.configService.get('BASE_URL'));
     const baseReturnUrl = dto.returnUrl
       ? `${this.configService.get('BASE_URL')}${dto.returnUrl}`
       : `${this.configService.get('BASE_URL')}/parent/settings/subscription`;
-    this.logger.log('baseReturnUrl=', baseReturnUrl);
     const cancelBaseUrl = dto.returnUrl
       ? `${this.configService.get('BASE_URL')}${dto.returnUrl}`
       : `${this.configService.get('BASE_URL')}`;
@@ -176,8 +170,8 @@ export class PaymentsService {
     const countryCode = data?.countries?.country_code;
     const locale = countryCode ? countryLocaleMap[countryCode] || countryLocaleMap.DEFAULT : countryLocaleMap.DEFAULT;
 
-    // Build Stripe checkout session config
-    const sessionConfig: any = {
+    // Build Stripe checkout session with promotion codes enabled
+    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       customer: dto.customer_id,
       success_url: successUrl.toString(),
       cancel_url: cancelUrl.toString(),
@@ -209,6 +203,7 @@ export class PaymentsService {
           : []),
       ],
       mode: 'subscription',
+      allow_promotion_codes: true, // Let Stripe handle promo codes
       metadata: {
         students: JSON.stringify(dto.students),
         user_id: dto.user_id,
@@ -234,11 +229,6 @@ export class PaymentsService {
       },
       locale,
     };
-
-    // Apply promo code if provided
-    if (dto.promo_code_api_id) {
-      sessionConfig.discounts = [{ promotion_code: dto.promo_code_api_id }];
-    }
 
     try {
       const session = await this.stripe.checkout.sessions.create(sessionConfig);

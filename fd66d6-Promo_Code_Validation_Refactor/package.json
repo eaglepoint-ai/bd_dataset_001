@@ -1,0 +1,32 @@
+{
+  "name": "promo-code-validation-refactor",
+  "version": "1.0.0",
+  "description": "Migrate promo code validation from frontend to Stripe Checkout",
+  "scripts": {
+    "test:before": "node tests/runner.new.js repository_before",
+    "test:after": "node tests/runner.new.js repository_after",
+    "test:structural:before": "node tests/runner.new.js structural repository_before",
+    "test:structural:after": "node tests/runner.new.js structural repository_after",
+    "test:functional:before": "node tests/runner.new.js functional repository_before",
+    "test:functional:after": "node tests/runner.new.js functional repository_after",
+    "test:comparison": "node tests/runner.new.js",
+    "test": "npm run test:comparison",
+    "evaluate": "npx ts-node evaluation/evaluation.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.0.0",
+    "@supabase/supabase-js": "^2.0.0",
+    "nuxt": "^3.8.0",
+    "stripe": "^14.0.0",
+    "vue": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  }
+}

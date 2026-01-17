@@ -1,1 +1,10 @@
 evaluation/2025-12-21/
+node_modules/
+*.log
+npm-debug.log*
+.env
+.env.local
+dist/
+build/
+.DS_Store
+coverage/

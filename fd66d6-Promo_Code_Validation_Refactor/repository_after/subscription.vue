@@ -126,8 +126,8 @@ const openChooseChildernBottomSheet = async () => {
 };
 
 const loading = ref(false);
-// Handle subscription activation with promo code support
-const handleActivation = async (selectedKids: { student_id: string; promo_code_api_id?: string }) => {
+// Handle subscription activation (promo codes handled by Stripe)
+const handleActivation = async (selectedKids: { student_id: string }) => {
   if (!selectedPlan.value) return;
   const user = useSupabaseUser();
   loading.value = true;
@@ -153,7 +153,6 @@ const handleActivation = async (selectedKids: { student_id: string; promo_code_a
         return;
       }
     }
-    // Build subscription payload with promo code
     const subscribePayload: PaymentsSubscribePayload = {
       customer_id: parentData.value.stripe_customer_id,
       price: selectedPrice.id,
@@ -162,7 +161,6 @@ const handleActivation = async (selectedKids: { student_id: string; promo_code_a
       returnUrl: '/parent/settings/my-plan',
       plan_type: billingPeriod.value,
       user_id: user.value.id,
-      promo_code_api_id: selectedKids.promo_code_api_id,
       currency: selectedPrice.currency,
     };
 
@@ -236,7 +234,6 @@ parentData.value = await fetchUserData();
 
 onMounted(async () => {
   if (parentData.value?.uuid) {
-    // @ts-ignore
     myKids.value = await fetchMyKids(parentData.value.uuid);
   }
 });
@@ -257,7 +254,6 @@ onMounted(() => {
   features.value = [];
 
   availablePlanTypes.forEach((planType) => {
-    // Your original switch logic
     switch (planType) {
       case PLAN_NAMES.BASIC:
         selectedPlan.value = basicPlan.value;
@@ -363,7 +359,7 @@ const goToPortal = async () => {
   try {
     const session = await paymentsApi.createPortalSession(parentData.value.stripe_customer_id);
     if (session?.url) {
-      window.location.href = session.url; // Redirect to the Stripe portal
+      window.location.href = session.url;
     }
   } catch (error) {
     console.error('Error creating portal session:', error);

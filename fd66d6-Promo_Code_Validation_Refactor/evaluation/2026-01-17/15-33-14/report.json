@@ -1,0 +1,92 @@
+{
+  "run_id": "05op7l9r",
+  "started_at": "2026-01-17T12:33:14.012Z",
+  "finished_at": "2026-01-17T12:33:14.083Z",
+  "duration_seconds": 0.071,
+  "success": true,
+  "error": null,
+  "environment": {
+    "node_version": "v22.18.0",
+    "platform": "win32",
+    "os": "Windows_NT",
+    "os_release": "10.0.26200",
+    "architecture": "x64",
+    "hostname": "PC-Eyoba",
+    "git_commit": "6fbb804f",
+    "git_branch": "feature/nuxt-nest-payment-migration"
+  },
+  "results": {
+    "before": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "repository_before::promo_code_parameter",
+          "name": "Promo code parameter validation",
+          "outcome": "passed",
+          "message": "Parameter validation correct"
+        },
+        {
+          "nodeid": "repository_before::stripe_promotion_codes",
+          "name": "Stripe promotion codes enabled",
+          "outcome": "passed",
+          "message": "Stripe config correct"
+        },
+        {
+          "nodeid": "repository_before::manual_discount_logic",
+          "name": "Manual discount logic validation",
+          "outcome": "passed",
+          "message": "Manual discount logic correct"
+        }
+      ],
+      "summary": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "repository_after::promo_code_parameter",
+          "name": "Promo code parameter validation",
+          "outcome": "passed",
+          "message": "Parameter validation correct"
+        },
+        {
+          "nodeid": "repository_after::stripe_promotion_codes",
+          "name": "Stripe promotion codes enabled",
+          "outcome": "passed",
+          "message": "Stripe config correct"
+        },
+        {
+          "nodeid": "repository_after::manual_discount_logic",
+          "name": "Manual discount logic validation",
+          "outcome": "passed",
+          "message": "Manual discount logic correct"
+        }
+      ],
+      "summary": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "comparison": {
+      "before_tests_passed": true,
+      "after_tests_passed": true,
+      "before_total": 3,
+      "before_passed": 3,
+      "before_failed": 0,
+      "after_total": 3,
+      "after_passed": 3,
+      "after_failed": 0
+    }
+  }
+}
