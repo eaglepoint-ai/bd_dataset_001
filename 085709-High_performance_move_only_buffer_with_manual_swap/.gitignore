@@ -1,0 +1,7 @@
+evaluation/report
+temp/
+tests/test_fastbuffer
+*.o
+*.a
+*.so
+*.dylib

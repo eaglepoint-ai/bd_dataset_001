@@ -135,6 +135,6 @@ docker compose run --rm -e REPO_PATH=repository_after app make -C tests run
 
 ### Run evaluation
 ```bash
-docker compose run --rm app sh -c "g++ -std=c++20 -o evaluation/evaluation evaluation/evaluation.cpp && ./evaluation/evaluation"
+docker compose run --rm app sh -c "mkdir -p temp && g++ -std=c++20 -o temp/eval evaluation/evaluation.cpp && ./temp/eval"
 ```
 
