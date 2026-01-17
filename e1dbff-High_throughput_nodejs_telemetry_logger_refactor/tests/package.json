@@ -1,0 +1,9 @@
+{
+  "name": "e1dbff-tests",
+  "private": true,
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node testRunner.js"
+  }
+}

@@ -1,0 +1,24 @@
+--- repository_before/logger.js	2026-01-17 12:02:30.168221153 +0300
++++ repository_after/logger.js	2026-01-17 12:16:24.261220011 +0300
+@@ -2,16 +2,11 @@
+     console.log("Processing trade: " + tradeData.id);
+ 
+     const metadata = { timestamp: Date.now(), ...tradeData };
+-
+-    function sanitize(obj) {
+-        if (obj.isPrivate) {
+-            delete obj.userId;
+-        }
+-        return obj;
++    if (metadata.isPrivate) {
++        delete metadata.userId;
+     }
+ 
+-    const finalData = sanitize(metadata);
+-    return JSON.stringify(finalData);
++    return JSON.stringify(metadata);
+ }
+ 
+-module.exports = { logTrade };
+\ No newline at end of file
++module.exports = { logTrade };
