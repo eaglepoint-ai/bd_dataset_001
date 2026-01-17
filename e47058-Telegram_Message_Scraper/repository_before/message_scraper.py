@@ -108,8 +108,7 @@ async def extract_messages():
                             else None
                         reactions = sum(reaction.count
                                         for reaction in
-                                        message.reactions.results) if
-                        message.reactions else None
+                                        message.reactions.results) if message.reactions else None
 
                         writer.writerow([
                             channel,
