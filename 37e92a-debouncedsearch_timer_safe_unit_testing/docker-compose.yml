@@ -1,0 +1,16 @@
+services:
+  test_before:
+    build: .
+    volumes:
+      - .:/app
+    command: npm run test
+  test_after:
+    build: .
+    volumes:
+      - .:/app
+    command: npm run test
+  evaluation:
+    build: .
+    volumes:
+      - .:/app
+    command: npm run evaluation

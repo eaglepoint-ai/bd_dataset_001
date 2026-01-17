@@ -1,0 +1,8 @@
+{
+  "instance_id": "37e92a",
+  "problem_statement": "You are given a DebouncedSearch class that delays execution of a callback using setTimeout. The goal is to write a comprehensive unit test suite that guarantees correct debounce behavior, ensures proper cleanup of timers on destruction, and achieves 100% branch coverage, including all timer-related paths.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/37e92a-debouncedsearch_timer_safe_unit_testing",
+  "environment_setup": "Dockerfile"
+}

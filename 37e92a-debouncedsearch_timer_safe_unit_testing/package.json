@@ -1,0 +1,18 @@
+{
+  "name": "37e92a-debouncedsearch_timer_safe_unit_testing",
+  "version": "1.0.0",
+  "description": "Starter scaffold for bd dataset task.",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "npx jest",
+    "evaluation": "node ./evaluation/evaluation.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^30.2.0"
+  }
+}
