@@ -38,7 +38,7 @@ func TestWorkerPool_Execution(t *testing.T) {
 }
 
 // -------------------------------------------------------------------
-// REQUIREMENT 3: Stop() must wait for in-flight tasks
+//Stop() must wait for in-flight tasks
 // -------------------------------------------------------------------
 
 func TestGracefulShutdown(t *testing.T) {
@@ -67,7 +67,7 @@ func TestGracefulShutdown(t *testing.T) {
 }
 
 // -------------------------------------------------------------------
-// REQUIREMENT 4: Multiple Stop() calls must not panic
+// Stop() must be idempotent and not panic on multiple calls
 // -------------------------------------------------------------------
 
 func TestIdempotentStop(t *testing.T) {
@@ -95,7 +95,7 @@ func TestIdempotentStop(t *testing.T) {
 }
 
 // -------------------------------------------------------------------
-// REQUIREMENT 5 & 6: Resource Cleanup & No Memory Leaks
+//Resource Cleanup & No Memory Leaks
 // -------------------------------------------------------------------
 
 func TestGoroutineLeak(t *testing.T) {
@@ -128,7 +128,7 @@ func TestGoroutineLeak(t *testing.T) {
 }
 
 // -------------------------------------------------------------------
-// REQUIREMENT 7: Workers respect Context Cancellation immediately
+// Workers respect Context Cancellation immediately
 // -------------------------------------------------------------------
 
 func TestContextCancellation(t *testing.T) {
@@ -152,7 +152,7 @@ func TestContextCancellation(t *testing.T) {
 }
 
 // -------------------------------------------------------------------
-// REQUIREMENT 8: Submit with 0 workers must return error
+//  Submit with 0 workers must return error
 // -------------------------------------------------------------------
 
 func TestZeroWorkers(t *testing.T) {
@@ -180,7 +180,7 @@ func TestZeroWorkers(t *testing.T) {
 }
 
 // -------------------------------------------------------------------
-// REQUIREMENT 11: Submit() after Stop() must return error
+// Submit() after Stop() must return error
 // -------------------------------------------------------------------
 
 func TestSubmitAfterStop(t *testing.T) {
@@ -202,7 +202,7 @@ func TestSubmitAfterStop(t *testing.T) {
 }
 
 // -------------------------------------------------------------------
-// REQUIREMENT 12: Submit(nil) must return error
+// Submit(nil) must return error
 // -------------------------------------------------------------------
 
 func TestSubmitNilTask(t *testing.T) {
@@ -357,7 +357,7 @@ func TestNegativeWorkers(t *testing.T) {
 }
 
 // -------------------------------------------------------------------
-// CRITERION 10: Results Immutability
+// Results Immutability Test
 // -------------------------------------------------------------------
 
 func TestResultsImmutability(t *testing.T) {
@@ -397,7 +397,7 @@ func TestResultsImmutability(t *testing.T) {
 }
 
 // -------------------------------------------------------------------
-// CRITERION 9: Concurrent Submit + GetResults (Read/Write Race)
+//  Concurrent Submit + GetResults (Read/Write Race)
 // -------------------------------------------------------------------
 
 func TestRaceCondition_ReadWhileWrite(t *testing.T) {
