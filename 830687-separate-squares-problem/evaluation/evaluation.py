@@ -267,6 +267,61 @@ def run_evaluation():
     }
 
 
+def write_error_report(run_id, start_time, error_msg):
+    """
+    Write a minimal error report when evaluation fails catastrophically.
+    
+    This ensures report.json always exists, even if evaluation crashes.
+    """
+    try:
+        REPORTS.mkdir(parents=True, exist_ok=True)
+        end_time = datetime.utcnow()
+        
+        error_report = {
+            "run_id": run_id,
+            "started_at": start_time.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+            "finished_at": end_time.strftime("%Y-%m-%dT%H:%M:%S.%f"),
+            "duration_seconds": (end_time - start_time).total_seconds(),
+            "success": False,
+            "error": str(error_msg),
+            "environment": environment_info(),
+            "results": {
+                "before": {
+                    "success": False,
+                    "exit_code": -1,
+                    "tests": [],
+                    "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
+                    "stdout": "",
+                    "stderr": ""
+                },
+                "after": {
+                    "success": False,
+                    "exit_code": -1,
+                    "tests": [],
+                    "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
+                    "stdout": "",
+                    "stderr": ""
+                },
+                "comparison": {
+                    "before_tests_passed": False,
+                    "after_tests_passed": False,
+                    "before_total": 0,
+                    "before_passed": 0,
+                    "before_failed": 0,
+                    "after_total": 0,
+                    "after_passed": 0,
+                    "after_failed": 0
+                }
+            }
+        }
+        
+        output_path = REPORTS / "report.json"
+        output_path.write_text(json.dumps(error_report, indent=2))
+        print(f"[ERROR_REPORT] Written to {output_path}")
+    except Exception as e:
+        print(f"[CRITICAL] Failed to write error report: {e}")
+
+
 def main():
     """
     Main entry point for evaluation.
@@ -290,6 +345,7 @@ def main():
     success = False
     error_message = None
     
+    # Wrap everything in try-except to ensure report is always written
     try:
         # Run evaluation
         evaluation_results = run_evaluation()
@@ -376,4 +432,22 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception as e:
+        # Last resort error handling
+        print(f"[FATAL] Uncaught exception: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Try to write error report
+        try:
+            write_error_report(
+                str(uuid.uuid4())[:8],
+                datetime.utcnow(),
+                f"Fatal error: {str(e)}"
+            )
+        except Exception:
+            pass
+        
+        sys.exit(1)

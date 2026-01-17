@@ -9,8 +9,7 @@ services:
       - PYTHONPATH=/app/repository_before
     command: pytest tests -v --tb=short
     volumes:
-      - ./repository_before:/app/repository_before:ro
-      - ./tests:/app/tests:ro
+      - ./:/app
 
   # Run tests on repository_after
   test-after:
@@ -20,10 +19,9 @@ services:
       - PYTHONPATH=/app/repository_after
     command: pytest tests -v --tb=short
     volumes:
-      - ./repository_after:/app/repository_after:ro
-      - ./tests:/app/tests:ro
+      - ./:/app
 
-  # Run full evaluation
+  # Run full evaluation (main service)
   evaluate:
     build: .
     container_name: square-split-evaluate

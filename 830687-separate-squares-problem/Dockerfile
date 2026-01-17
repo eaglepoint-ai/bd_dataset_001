@@ -3,14 +3,17 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Copy all project files
-COPY . /app
+# Copy requirements first for better caching
+COPY requirements.txt /app/
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Set Python path to include both repositories
-ENV PYTHONPATH=/app/repository_after:/app/repository_before:$PYTHONPATH
+# Copy all project files
+COPY . /app
 
-# Default command: run tests
-CMD ["pytest", "tests", "-v", "--tb=short"]
+# Ensure evaluation/reports directory exists
+RUN mkdir -p /app/evaluation/reports
+
+# Default command: run evaluation
+CMD ["python", "evaluation/evaluation.py"]
