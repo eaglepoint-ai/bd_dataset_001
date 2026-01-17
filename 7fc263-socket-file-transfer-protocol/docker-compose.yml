@@ -1,6 +1,59 @@
 services:
-  app:
+  # Test Basic Implementation (repository_before)
+  test-before:
     build: .
-    command: pytest -q tests
+    command: python evaluation/quick_eval.py --implementation=before
     volumes:
-      - .:/app
+      - ./evaluation:/app/evaluation
+      - ./repository_before:/app/repository_before
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+      - ./server_files:/app/server_files
+      - ./client_downloads:/app/client_downloads
+    environment:
+      - PYTHONUNBUFFERED=1
+      - EVAL_MODE=before
+      - EVAL_PORT=18998
+    networks:
+      - file-transfer-net
+
+  # Test Robust Implementation (repository_after)
+  test-after:
+    build: .
+    command: python evaluation/quick_eval.py --implementation=after
+    volumes:
+      - ./evaluation:/app/evaluation
+      - ./repository_after:/app/repository_after
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+      - ./server_files:/app/server_files
+      - ./client_downloads:/app/client_downloads
+    environment:
+      - PYTHONUNBUFFERED=1
+      - EVAL_MODE=after
+      - EVAL_PORT=18999
+    networks:
+      - file-transfer-net
+
+  # Comprehensive Test & Report
+  test-report:
+    build: .
+    command: python evaluation/evaluation.py
+    volumes:
+      - ./evaluation:/app/evaluation
+      - ./repository_before:/app/repository_before
+      - ./repository_after:/app/repository_after
+      - ./tests:/app/tests
+      - ./logs:/app/logs
+      - ./server_files:/app/server_files
+      - ./client_downloads:/app/client_downloads
+    environment:
+      - PYTHONUNBUFFERED=1
+      - EVAL_MODE=comprehensive
+      - EVAL_PORT=18999
+    networks:
+      - file-transfer-net
+
+networks:
+  file-transfer-net:
+    driver: bridge

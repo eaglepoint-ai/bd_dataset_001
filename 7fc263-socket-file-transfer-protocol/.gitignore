@@ -12,6 +12,7 @@ build/
 server_files/
 client_downloads/
 logs/
+evaluation/reports/
 
 # IDE
 .vscode/
