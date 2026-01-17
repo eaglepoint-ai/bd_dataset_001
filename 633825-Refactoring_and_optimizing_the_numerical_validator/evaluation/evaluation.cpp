@@ -165,8 +165,10 @@ TestResult run_test(const std::string &test_name, const std::string &label) {
 
 #ifdef _WIN32
     std::string test_exe = "test.exe";
+    std::string temp_file = "temp_output.txt";
 #else
     std::string test_exe = "./test";
+    std::string temp_file = "/tmp/temp_output.txt";
 #endif
 
     // Check if test executable exists
@@ -178,14 +180,21 @@ TestResult run_test(const std::string &test_name, const std::string &label) {
     }
     test_check.close();
 
-    // Create temporary output file
-    std::string temp_file = "temp_output.txt";
+    // Create command with output redirection
+#ifdef _WIN32
     std::string cmd = test_exe + " " + test_name + " > " + temp_file + " 2>&1";
+#else
+    std::string cmd = test_exe + " " + test_name + " > " + temp_file + " 2>&1";
+#endif
     std::cout << "Executing: " << cmd << "\n";
     std::cout.flush();
     
     int exit_code = std::system(cmd.c_str());
+#ifdef _WIN32
+    result.exit_code = exit_code;
+#else
     result.exit_code = WEXITSTATUS(exit_code);
+#endif
     result.success = (result.exit_code == 0);
     
     // Read the output file
@@ -219,6 +228,9 @@ TestResult run_test(const std::string &test_name, const std::string &label) {
             }
         }
         output_file.close();
+    } else {
+        std::cerr << "ERROR: Could not read output file: " << temp_file << "\n";
+        result.stdout_output = "ERROR: Could not capture test output";
     }
     
     // Clean up temp file
