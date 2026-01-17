@@ -1,0 +1,8 @@
+{
+    "instance_id": "7fd121",
+    "problem_statement": "The current webhook endpoint implementation contains several performance, security, and robustness weaknesses that make it unsuitable for high-traffic production environments. It performs repeated environment variable lookups, inefficient string concatenations, and unnecessary datetime conversions on every request, all of which increase CPU and memory usage. The signature verification logic is fragile and relies on implicit dictionary ordering, which can lead to inconsistent behavior and potential vulnerabilities. Additionally, error handling exposes internal details, timestamp validation is not timezone-safe, and the code lacks defensive input validation, making it vulnerable to malformed payloads and replay attacks. These issues collectively create scalability risks, security gaps, and operational instability, making optimization and hardening essential to ensure reliable, secure, and efficient processing of webhook requests under real-world load.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/7fd121-Flask_Webhook_Performance_Hardening",
+    "environment_setup": "Dockerfile"
+}  

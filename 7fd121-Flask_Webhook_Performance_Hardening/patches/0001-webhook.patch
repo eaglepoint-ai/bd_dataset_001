@@ -1,0 +1,96 @@
+diff --git a/repository_before/__pycache__/__init__.cpython-311.pyc b/repository_after/__pycache__/__init__.cpython-311.pyc
+index 671b64e..0f12753 100644
+Binary files a/repository_before/__pycache__/__init__.cpython-311.pyc and b/repository_after/__pycache__/__init__.cpython-311.pyc differ
+diff --git a/repository_before/api/__pycache__/webhook.cpython-311.pyc b/repository_after/api/__pycache__/webhook.cpython-311.pyc
+index 6c528c5..ecb42ac 100644
+Binary files a/repository_before/api/__pycache__/webhook.cpython-311.pyc and b/repository_after/api/__pycache__/webhook.cpython-311.pyc differ
+diff --git a/repository_before/api/webhook.py b/repository_after/api/webhook.py
+index 285af8e..ff538aa 100644
+--- a/repository_before/api/webhook.py
++++ b/repository_after/api/webhook.py
+@@ -5,22 +5,27 @@ API endpoint to handle incoming webhooks and verify their authenticity.
+ import hmac
+ import hashlib
+ import os
+-import datetime
++import time
+ from flask import Blueprint, request, jsonify
+ from sqlalchemy.exc import SQLAlchemyError
+ from models.db import get_session, Transaction
+ 
+ webhook_blueprint = Blueprint('webhook', __name__)
+ 
++WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET')
+ 
+-def verify_signature(payload, received_signature, secret_key):
++if not WEBHOOK_SECRET:
++    raise EnvironmentError(
++        'WEBHOOK_SECRET environment variable is not set.')
++
++
++def verify_signature(raw_body: bytes, received_signature: str) -> bool:
+     """
+     Verify the HMAC SHA256 signature of the incoming payload.
+     """
+-    signed_payload = ''.join(str(payload[key]) for key in payload)
+     expected_signature = hmac.new(
+-            secret_key.encode(),
+-            signed_payload.encode(),
++            WEBHOOK_SECRET.encode(),
++            raw_body,
+             hashlib.sha256).hexdigest()
+     return hmac.compare_digest(expected_signature, received_signature)
+ 
+@@ -32,8 +37,10 @@ def webhook():
+     checking for replay attacks, and storing the data if valid.
+     """
+     try:
+-        request_data = request.get_json()
+-        if request_data is None:
++        raw_body = request.get_data()
++        request_data = request.get_json(silent=True)
++
++        if not isinstance(request_data, dict):
+             return jsonify({'error': 'Invalid JSON payload'}), 400
+ 
+         signature = request.headers.get('YAYA-SIGNATURE')
+@@ -41,30 +48,23 @@ def webhook():
+             return jsonify({'error': 'Missing signature header'}), 400
+ 
+         timestamp = request_data.get('timestamp')
+-        if timestamp is None:
++        if not isinstance(timestamp, int):
+             return jsonify({'error': 'Missing timestamp in payload'}), 400
+ 
+-        # Check for replay attacks
+-        time_difference = datetime.datetime.utcnow() - \
+-            datetime.datetime.fromtimestamp(timestamp)
+-        if time_difference > datetime.timedelta(minutes=5):
++        current_ts = int(time.time())
++        if abs(current_ts - timestamp) > 300:
+             return jsonify({'status': 'Replay attack detected'}), 400
+ 
+-        secret_key = os.getenv('WEBHOOK_SECRET', '')
+-        if not verify_signature(request_data, signature, secret_key):
++        if not verify_signature(raw_body, signature):
+             return jsonify({'status': 'Invalid signature'}), 403
+ 
+-        # Store the payload in the database
+         with get_session() as session:
+             transaction = Transaction(**request_data)
+             session.add(transaction)
+             session.commit()
++
+         return jsonify({'message': 'Transaction recorded successfully'}), 200
+-    except (TypeError, ValueError) as e:
+-        return jsonify({'error': f'Invalid data: {str(e)}'}), 400
+-    except SQLAlchemyError as e:
+-        return jsonify(
+-            {'erro': 'Database error occurred', 'details': str(e)}), 500
+-    except Exception as e:
+-        return jsonify(
+-            {'error': 'An unexpected error occurred', 'details': str(e)}), 500
++    except SQLAlchemyError:
++        return jsonify({'error': 'Database error occurred'}), 500
++    except Exception:
++        return jsonify({'error': 'An unexpected error occurred'}), 500
