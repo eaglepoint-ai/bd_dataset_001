@@ -1,0 +1,70 @@
+{
+  "run_id": "jqbv6u7e",
+  "started_at": "2026-01-17T15:31:27.634Z",
+  "finished_at": "2026-01-17T15:31:31.425Z",
+  "duration_seconds": 3.791,
+  "success": true,
+  "error": null,
+  "environment": {
+    "node_version": "v24.3.0",
+    "platform": "linux",
+    "os": "Linux",
+    "os_release": "6.17.12-300.fc43.x86_64",
+    "architecture": "x64",
+    "hostname": "f05034f2c722",
+    "git_commit": "unknown",
+    "git_branch": "unknown"
+  },
+  "results": {
+    "unit_tests": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "/app/src/components/CreateSongs.test.tsx::CreateSongsForm renders correctly with initial state",
+          "name": "renders correctly with initial state",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/src/components/CreateSongs.test.tsx::CreateSongsForm handles input changes",
+          "name": "handles input changes",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/src/components/CreateSongs.test.tsx::CreateSongsForm shows validation errors when submitting empty form",
+          "name": "shows validation errors when submitting empty form",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/src/components/CreateSongs.test.tsx::CreateSongsForm validates fields on blur",
+          "name": "validates fields on blur",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/src/components/CreateSongs.test.tsx::CreateSongsForm submits the form successfully with trimmed data",
+          "name": "submits the form successfully with trimmed data",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/src/components/CreateSongs.test.tsx::CreateSongsForm handles API errors gracefully",
+          "name": "handles API errors gracefully",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/src/components/CreateSongs.test.tsx::CreateSongsForm disables button while loading",
+          "name": "disables button while loading",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "{\n  \"numTotalTestSuites\": 2,\n  \"numPassedTestSuites\": 2,\n  \"numFailedTestSuites\": 0,\n  \"numPendingTestSuites\": 0,\n  \"numTotalTests\": 7,\n  \"numPassedTests\": 7,\n  \"numFailedTests\": 0,\n  \"numPendingTests\": 0,\n  \"numTodoTests\": 0,\n  \"snapshot\": {\n    \"added\": 0,\n    \"failure\": false,\n    \"filesAdded\": 0,\n    \"filesRemoved\": 0,\n    \"filesRemovedList\": [],\n    \"filesUnmatched\": 0,\n    \"filesUpdated\": 0,\n    \"matched\": 0,\n    \"total\": 0,\n    \"unchecked\": 0,\n    \"uncheckedKeysByFile\": [],\n    \"unmatched\": 0,\n    \"updated\": 0,\n    \"didUpdate\": false\n  },\n  \"startTime\": 1768663888268,\n  \"success\": true,\n  \"testResults\": [\n    {\n      \"assertionResults\": [\n        {\n          \"ancestorTitles\": [\n            \"CreateSongsForm\"\n          ],\n          \"fullName\": \"CreateSongsForm renders correctly with initial state\",\n          \"status\": \"passed\",\n          \"title\": \"renders correctly with initial state\",\n          \"duration\": 196.54067699999996,\n          \"failureMessages\": [],\n          \"meta\": {}\n        },\n        {\n          \"ancestorTitles\": [\n            \"CreateSongsForm\"\n          ],\n          \"fullName\": \"CreateSongsForm handles input changes\",\n          \"status\": \"passed\",\n          \"title\": \"handles input changes\",\n          \"duration\": 137.62331299999983,\n          \"failureMessages\": [],\n          \"meta\": {}\n        },\n        {\n          \"ancestorTitles\": [\n            \"CreateSongsForm\"\n          ],\n          \"fullName\": \"CreateSongsForm shows validation errors when submitting empty form\",\n          \"status\": \"passed\",\n          \"title\": \"shows validation errors when submitting empty form\",\n          \"duration\": 61.884219999999914,\n          \"failureMessages\": [],\n          \"meta\": {}\n        },\n        {\n          \"ancestorTitles\": [\n            \"CreateSongsForm\"\n          ],\n          \"fullName\": \"CreateSongsForm validates fields on blur\",\n          \"status\": \"passed\",\n          \"title\": \"validates fields on blur\",\n          \"duration\": 206.63618599999995,\n          \"failureMessages\": [],\n          \"meta\": {}\n        },\n        {\n          \"ancestorTitles\": [\n            \"CreateSongsForm\"\n          ],\n          \"fullName\": \"CreateSongsForm submits the form successfully with trimmed data\",\n          \"status\": \"passed\",\n          \"title\": \"submits the form successfully with trimmed data\",\n          \"duration\": 341.1385,\n          \"failureMessages\": [],\n          \"meta\": {}\n        },\n        {\n          \"ancestorTitles\": [\n            \"CreateSongsForm\"\n          ],\n          \"fullName\": \"CreateSongsForm handles API errors gracefully\",\n          \"status\": \"passed\",\n          \"title\": \"handles API errors gracefully\",\n          \"duration\": 280.1387709999999,\n          \"failureMessages\": [],\n          \"meta\": {}\n        },\n        {\n          \"ancestorTitles\": [\n            \"CreateSongsForm\"\n          ],\n          \"fullName\": \"CreateSongsForm disables button while loading\",\n          \"status\": \"passed\",\n          \"title\": \"disables button while loading\",\n          \"duration\": 329.3776560000001,\n          \"failureMessages\": [],\n          \"meta\": {}\n        }\n      ],\n      \"startTime\": 1768663889790,\n      \"endTime\": 1768663891344.3777,\n      \"status\": \"passed\",\n      \"message\": \"\",\n      \"name\": \"/app/src/components/CreateSongs.test.tsx\"\n    }\n  ]\n}",
+      "stderr": ""
+    }
+  }
+}
