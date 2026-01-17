@@ -1,0 +1,80 @@
+{
+  "run_id": "39342736",
+  "started_at": "2026-01-17T11:52:03.428143+00:00",
+  "finished_at": "2026-01-17T11:52:13.576609+00:00",
+  "duration_seconds": 10.148466,
+  "success": true,
+  "error": null,
+  "environment": {
+    "python_version": "3.12.12",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with",
+    "os": "Linux",
+    "os_release": "6.6.87.2-microsoft-standard-WSL2",
+    "architecture": "x86_64",
+    "hostname": "df782a2739d6",
+    "git_commit": "unknown",
+    "git_branch": "unknown",
+    "node_version": "v20.20.0"
+  },
+  "results": {
+    "before": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "repository_before::Resources/html/form.html",
+          "name": "check_Resources_html_form_html",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "repository_before::Resources/html/formdisplay.html",
+          "name": "check_Resources_html_formdisplay_html",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "repository_before::Resources/js/formgenerator.js",
+          "name": "check_Resources_js_formgenerator_js",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "repository_before::Resources/js/formdisplay.js",
+          "name": "check_Resources_js_formdisplay_js",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "All required files present in repository_before",
+      "stderr": ""
+    },
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [],
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\n",
+      "stderr": "PASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.946 s\nRan all test suites.\n"
+    },
+    "comparison": {
+      "before_tests_passed": true,
+      "after_tests_passed": true,
+      "before_total": 4,
+      "before_passed": 4,
+      "before_failed": 0,
+      "after_total": 0,
+      "after_passed": 0,
+      "after_failed": 0
+    }
+  }
+}

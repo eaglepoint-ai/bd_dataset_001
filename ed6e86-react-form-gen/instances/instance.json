@@ -1,9 +1,0 @@
-{
-    "instance_id": "ed6e86",
-    "problem_statement": "This is a form builder application that lets users create custom forms by adding various types of fields, such as text inputs, email, phone, URL, radio buttons, and checkboxes, and configure properties like labels, placeholders, and whether a field is required or optional. Users can build forms on one page and view or preview their saved forms on another page, with all data stored in the browser’s local storage. The task is to convert this application into a modern Next.js app using TypeScript and Tailwind CSS while keeping all existing functionality intact.",
-    "base_commit": "repository_before",
-    "test_patch": "tests/",
-    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/ed6e86-react-form-gen",
-    "environment_setup": "Dockerfile"
-  }
-  
