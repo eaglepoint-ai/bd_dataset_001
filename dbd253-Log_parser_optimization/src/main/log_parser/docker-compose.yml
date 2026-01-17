@@ -1,4 +1,0 @@
-services:
-  app:
-    build: .
-    command: java -cp bin com.logparser.Evaluation
