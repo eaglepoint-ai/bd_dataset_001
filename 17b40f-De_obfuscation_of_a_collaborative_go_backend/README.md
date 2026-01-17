@@ -15,26 +15,12 @@ Test the obfuscated code in `repository_before`:
 
 **PowerShell/Windows:**
 ```powershell
-# Step 1: Start database
-docker compose up -d db
-
-# Step 2: Clean database
-docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"
-
-# Step 3: Run tests
-docker compose run --rm tests sh -c "go mod tidy && go test -v ./..."
+docker compose up -d db; docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"; docker compose run --rm tests sh -c "go mod tidy && go test -v ./..."
 ```
 
 **Bash/Linux/macOS:**
 ```bash
-# Step 1: Start database
-docker compose up -d db
-
-# Step 2: Clean database
-docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"
-
-# Step 3: Run tests
-docker compose run --rm tests sh -c "go mod tidy && go test -v ./..."
+docker compose up -d db && docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})" && docker compose run --rm tests sh -c "go mod tidy && go test -v ./..."
 ```
 
 ### After Test Command
@@ -43,26 +29,12 @@ Test the de-obfuscated code in `repository_after`:
 
 **PowerShell/Windows:**
 ```powershell
-# Step 1: Start database
-docker compose up -d db
-
-# Step 2: Clean database
-docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"
-
-# Step 3: Run tests
-docker compose run --rm server go test -v .
+docker compose up -d db; docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"; docker compose run --rm server go test -v .
 ```
 
 **Bash/Linux/macOS:**
 ```bash
-# Step 1: Start database
-docker compose up -d db
-
-# Step 2: Clean database
-docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"
-
-# Step 3: Run tests
-docker compose run --rm server go test -v .
+docker compose up -d db && docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})" && docker compose run --rm server go test -v .
 ```
 
 ### Test & Report Command
@@ -77,48 +49,38 @@ docker compose run --rm tests sh -c "cd ../evaluation && go mod download && go r
 
 ## Quick Start
 
-### 1. Start the Services
-
-```bash
-docker compose up -d db
-```
-
-### 2. Run Tests for `repository_before`
+### 1. Run Tests for `repository_before` (Obfuscated Code)
 
 **PowerShell/Windows:**
 ```powershell
-docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"
-docker compose run --rm tests sh -c "go mod tidy && go test -v ./..."
+docker compose up -d db; docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"; docker compose run --rm tests sh -c "go mod tidy && go test -v ./..."
 ```
 
 **Bash/Linux/macOS:**
 ```bash
-docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"
-docker compose run --rm tests sh -c "go mod tidy && go test -v ./..."
+docker compose up -d db && docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})" && docker compose run --rm tests sh -c "go mod tidy && go test -v ./..."
 ```
 
-### 3. Run Tests for `repository_after`
+### 2. Run Tests for `repository_after` (De-obfuscated Code)
 
 **PowerShell/Windows:**
 ```powershell
-docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"
-docker compose run --rm server go test -v .
+docker compose up -d db; docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"; docker compose run --rm server go test -v .
 ```
 
 **Bash/Linux/macOS:**
 ```bash
-docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})"
-docker compose run --rm server go test -v .
+docker compose up -d db && docker compose exec db mongosh godoc --eval "db.users.deleteMany({}); db.documents.deleteMany({})" && docker compose run --rm server go test -v .
 ```
 
-### 4. Run Evaluations
+### 3. Run Evaluation (Compare Both Versions)
 
 **All Platforms:**
 ```bash
 docker compose run --rm tests sh -c "cd ../evaluation && go mod download && go run evaluation.go"
 ```
 
-### 5. Clean Up
+### 4. Clean Up
 
 ```bash
 docker compose down

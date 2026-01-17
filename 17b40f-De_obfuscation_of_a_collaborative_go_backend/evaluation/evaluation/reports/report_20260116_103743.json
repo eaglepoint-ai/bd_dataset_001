@@ -1,0 +1,42 @@
+{
+  "run_id": "5ad4021e-e714-41ff-abf8-3402c92a649f",
+  "started_at": "2026-01-16T10:37:00Z",
+  "finished_at": "2026-01-16T10:37:43Z",
+  "duration_seconds": 43.535677515,
+  "environment": {
+    "go_version": "go1.23.12",
+    "platform": "linux-amd64"
+  },
+  "before": {
+    "tests": {
+      "passed": false,
+      "return_code": 1,
+      "output": "go: downloading github.com/stretchr/objx v0.5.2\n# github.com/khallihub/godoc/tests [github.com/khallihub/godoc/tests.test]\ntests/server_test.go:112:28: unknown field Content in struct literal of type dto.DocumentData\ntests/server_test.go:118:3: undefined: documentCache\ntests/server_test.go:120:18: undefined: initializeDocumentCache\ntests/server_test.go:126:21: undefined: documentCache\ntests/server_test.go:142:28: unknown field Content in struct literal of type dto.DocumentData\ntests/server_test.go:146:3: undefined: documentCache\ntests/server_test.go:148:18: undefined: initializeDocumentCache\ntests/server_test.go:164:28: unknown field Content in struct literal of type dto.DocumentData\ntests/server_test.go:168:3: undefined: documentCache\ntests/server_test.go:170:31: unknown field Content in struct literal of type dto.DocumentData\ntests/server_test.go:170:31: too many errors\nFAIL\tgithub.com/khallihub/godoc/tests [build failed]\n=== RUN   Test01SignupEndpointsSuite\n=== RUN   Test01SignupEndpointsSuite/TestSignup\n    01_signup_test.go:75: Post \"http://server:8080/auth/signup\": dial tcp: lookup server on 127.0.0.11:53: no such host\n--- FAIL: Test01SignupEndpointsSuite (3.98s)\n    --- FAIL: Test01SignupEndpointsSuite/TestSignup (3.98s)\n=== RUN   Test02LoginEndpointsSuite\n=== RUN   Test02LoginEndpointsSuite/TestLogin\n    02_login_test.go:78: Post \"http://server:8080/auth/login\": dial tcp: lookup server on 127.0.0.11:53: no such host\n--- FAIL: Test02LoginEndpointsSuite (3.83s)\n    --- FAIL: Test02LoginEndpointsSuite/TestLogin (3.83s)\n=== RUN   Test03DocumentEndpointsSuite\n=== RUN   Test03DocumentEndpointsSuite/TestCreateDocument\n    03_document_test.go:252: Post \"http://server:8080/documents/createnew\": dial tcp: lookup server on 127.0.0.11:53: no such host\n=== RUN   Test03DocumentEndpointsSuite/TestDeleteDocument\n    03_document_test.go:635: Post \"http://server:8080/documents/createnew\": dial tcp: lookup server on 127.0.0.11:53: no such host\n=== RUN   Test03DocumentEndpointsSuite/TestGetAllDocuments\n    03_document_test.go:76: Post \"http://server:8080/documents/getall\": dial tcp: lookup server on 127.0.0.11:53: no such host\n=== RUN   Test03DocumentEndpointsSuite/TestGetOneDocument\n=== RUN   Test03DocumentEndpointsSuite/TestSearchDocuments\n    03_document_test.go:159: Post \"http://server:8080/documents/search\": dial tcp: lookup server on 127.0.0.11:53: no such host\n=== RUN   Test03DocumentEndpointsSuite/TestUpdateCollaborators\n    03_document_test.go:501: Post \"http://server:8080/documents/createnew\": dial tcp: lookup server on 127.0.0.11:53: no such host\n=== RUN   Test03DocumentEndpointsSuite/TestUpdateTitle\n    03_document_test.go:427: Post \"http://server:8080/documents/updatetitle\": dial tcp: lookup server on 127.0.0.11:53: no such host\n--- FAIL: Test03DocumentEndpointsSuite (23.05s)\n    --- FAIL: Test03DocumentEndpointsSuite/TestCreateDocument (3.83s)\n    --- FAIL: Test03DocumentEndpointsSuite/TestDeleteDocument (3.83s)\n    --- FAIL: Test03DocumentEndpointsSuite/TestGetAllDocuments (3.87s)\n    --- PASS: Test03DocumentEndpointsSuite/TestGetOneDocument (0.00s)\n    --- FAIL: Test03DocumentEndpointsSuite/TestSearchDocuments (3.83s)\n    --- FAIL: Test03DocumentEndpointsSuite/TestUpdateCollaborators (3.85s)\n    --- FAIL: Test03DocumentEndpointsSuite/TestUpdateTitle (3.83s)\nFAIL\nFAIL\tgithub.com/khallihub/godoc/tests/integration\t30.872s\n=== RUN   TestDocumentServiceSuite\n=== RUN   TestDocumentServiceSuite/TestCreateDocument\n=== RUN   TestDocumentServiceSuite/TestDeleteDocument\n=== RUN   TestDocumentServiceSuite/TestGetAllDocuments\n=== RUN   TestDocumentServiceSuite/TestGetDocumentByID\n=== RUN   TestDocumentServiceSuite/TestSearchDocuments\n=== RUN   TestDocumentServiceSuite/TestUpdateCollaborators\n=== RUN   TestDocumentServiceSuite/TestUpdateDocument\n=== RUN   TestDocumentServiceSuite/TestUpdateTitle\n--- PASS: TestDocumentServiceSuite (0.04s)\n    --- PASS: TestDocumentServiceSuite/TestCreateDocument (0.01s)\n    --- PASS: TestDocumentServiceSuite/TestDeleteDocument (0.00s)\n    --- PASS: TestDocumentServiceSuite/TestGetAllDocuments (0.00s)\n    --- PASS: TestDocumentServiceSuite/TestGetDocumentByID (0.00s)\n    --- PASS: TestDocumentServiceSuite/TestSearchDocuments (0.00s)\n    --- PASS: TestDocumentServiceSuite/TestUpdateCollaborators (0.00s)\n    --- PASS: TestDocumentServiceSuite/TestUpdateDocument (0.00s)\n    --- PASS: TestDocumentServiceSuite/TestUpdateTitle (0.00s)\n=== RUN   TestJWTServiceTestSuite\n=== RUN   TestJWTServiceTestSuite/TestGenerateToken\n=== RUN   TestJWTServiceTestSuite/TestValidateToken\n--- PASS: TestJWTServiceTestSuite (0.00s)\n    --- PASS: TestJWTServiceTestSuite/TestGenerateToken (0.00s)\n    --- PASS: TestJWTServiceTestSuite/TestValidateToken (0.00s)\n=== RUN   TestLoginServiceSuite\n=== RUN   TestLoginServiceSuite/TestLoginInvalidPassword\nLoginService.Login() called\nLoginService.Login() passwords don't match\n=== RUN   TestLoginServiceSuite/TestLoginInvalidUsername\nLoginService.Login() called\nLoginService.Login() error: mongo: no documents in result\n=== RUN   TestLoginServiceSuite/TestLoginValidCredentials\nLoginService.Login() called\n--- PASS: TestLoginServiceSuite (0.39s)\n    --- PASS: TestLoginServiceSuite/TestLoginInvalidPassword (0.17s)\n    --- PASS: TestLoginServiceSuite/TestLoginInvalidUsername (0.08s)\n    --- PASS: TestLoginServiceSuite/TestLoginValidCredentials (0.14s)\n=== RUN   TestSignupServiceSuite\n=== RUN   TestSignupServiceSuite/TestSignupDuplicateEmail\nSignupService.Signup called\nSignupService.Signup called\n=== RUN   TestSignupServiceSuite/TestSignupValidUser\nSignupService.Signup called\n--- PASS: TestSignupServiceSuite (0.14s)\n    --- PASS: TestSignupServiceSuite/TestSignupDuplicateEmail (0.07s)\n    --- PASS: TestSignupServiceSuite/TestSignupValidUser (0.07s)\nPASS\nok  \tgithub.com/khallihub/godoc/tests/unit\t0.582s\nFAIL\n"
+    },
+    "metrics": {
+      "build_success": 0,
+      "build_time_ms": -1,
+      "go_files_count": 26,
+      "lines_of_code": 2225
+    }
+  },
+  "after": {
+    "tests": {
+      "passed": true,
+      "return_code": 0,
+      "output": "=== RUN   TestHealthEndpoint\n--- PASS: TestHealthEndpoint (0.00s)\n=== RUN   TestDatabaseConstants\n--- PASS: TestDatabaseConstants (0.00s)\n=== RUN   TestWebSocketUpgraderConfiguration\n--- PASS: TestWebSocketUpgraderConfiguration (0.00s)\nPASS\nok  \tgithub.com/khallihub/godoc\t0.005s\n"
+    },
+    "metrics": {
+      "build_success": 0,
+      "build_time_ms": -1,
+      "go_files_count": 27,
+      "lines_of_code": 2279
+    }
+  },
+  "comparison": {
+    "passed_gate": true,
+    "improvement_summary": "De-obfuscation successful: tests now pass after code cleanup"
+  },
+  "success": true,
+  "error": null
+}
