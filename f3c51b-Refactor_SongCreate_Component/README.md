@@ -27,14 +27,6 @@ docker-compose build
 docker-compose up --build tests --exit-code-from tests
 ```
 
-### Run application
-
-```bash
-docker-compose up --build client
-```
-
-This starts the full stack (Client + Server). Access at http://localhost:5173
-
 ### Run evaluation
 
 ```bash
