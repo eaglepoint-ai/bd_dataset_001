@@ -1,0 +1,7 @@
+{
+  "task_id": "3a55cf-URL_Shortener_Full_Stack",
+  "problem_statement": "Build a production-ready URL shortener for a startup expecting 10,000 URLs and 1M redirects/month. The application requires a React frontend with Vite for URL submission with optional custom codes and a table displaying all URLs with click counts. The Express backend needs CRUD endpoints, SQLite persistence with indexed lookups, URL validation, and custom code rules (4-20 chars, alphanumeric plus hyphens, no reserved words). Click counts must increment on each redirect, and all data must persist across server restarts.",
+  "repo": "bd_dataset_001",
+  "base_commit": "",
+  "github_url": ""
+}
