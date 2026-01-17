@@ -1,0 +1,8 @@
+{
+  "instance_id": "17b40f",
+  "problem_statement": "The source code is intentionally obfuscated using cryptic naming and redundant anonymous function wrappers, hiding the logic of a real-time collaborative editor. This 'syntactic noise' makes the system—which relies on delicate WebSocket synchronization, MongoDB persistence, and a thread-safe caching layer—extremely difficult to audit or maintain. The goal is to strip these layers and restore idiomatic Go readability without breaking the underlying concurrency model or database synchronization.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/17b40f-De_obfuscation_of_a_collaborative_go_backend",
+  "environment_setup": "Dockerfile"
+}

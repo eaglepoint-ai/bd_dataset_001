@@ -1,0 +1,42 @@
+{
+  "run_id": "cfca7452-bc9f-47f6-953d-f2261e32f1e1",
+  "started_at": "2026-01-16T07:17:06Z",
+  "finished_at": "2026-01-16T07:17:06Z",
+  "duration_seconds": 0.005008965,
+  "environment": {
+    "go_version": "go1.23.12",
+    "platform": "linux-amd64"
+  },
+  "before": {
+    "tests": {
+      "passed": false,
+      "return_code": 1,
+      "output": ""
+    },
+    "metrics": {
+      "build_success": 0,
+      "build_time_ms": -1,
+      "go_files_count": 0,
+      "lines_of_code": 0
+    }
+  },
+  "after": {
+    "tests": {
+      "passed": false,
+      "return_code": 1,
+      "output": ""
+    },
+    "metrics": {
+      "build_success": 0,
+      "build_time_ms": -1,
+      "go_files_count": 0,
+      "lines_of_code": 0
+    }
+  },
+  "comparison": {
+    "passed_gate": false,
+    "improvement_summary": "Both versions have test failures"
+  },
+  "success": false,
+  "error": null
+}

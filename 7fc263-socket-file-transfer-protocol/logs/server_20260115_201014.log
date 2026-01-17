@@ -1,0 +1,27 @@
+2026-01-15 20:10:14,249 - MainThread - INFO - Server initialized on 0.0.0.0:9999
+2026-01-15 20:10:14,253 - MainThread - INFO - Server listening on 0.0.0.0:9999
+2026-01-15 20:10:33,327 - Thread-1 (handle_client) - INFO - New connection from ('127.0.0.1', 58648)
+2026-01-15 20:10:33,328 - Thread-1 (handle_client) - INFO - Client ('127.0.0.1', 58648) requested file: small.txt
+2026-01-15 20:10:33,329 - Thread-1 (handle_client) - INFO - Sending file 'small.txt' (95 bytes) to ('127.0.0.1', 58648)
+2026-01-15 20:10:33,376 - Thread-1 (handle_client) - INFO - Progress to ('127.0.0.1', 58648): 100% (95/95 bytes)
+2026-01-15 20:10:33,377 - Thread-1 (handle_client) - INFO - File 'small.txt' sent successfully to ('127.0.0.1', 58648)
+2026-01-15 20:10:33,377 - Thread-1 (handle_client) - INFO - Connection closed with ('127.0.0.1', 58648)
+2026-01-15 20:10:56,023 - Thread-2 (handle_client) - INFO - New connection from ('127.0.0.1', 54146)
+2026-01-15 20:10:56,024 - Thread-2 (handle_client) - INFO - Client ('127.0.0.1', 54146) requested file: large.bin
+2026-01-15 20:10:56,025 - Thread-2 (handle_client) - INFO - Sending file 'large.bin' (1048576 bytes) to ('127.0.0.1', 54146)
+2026-01-15 20:10:56,058 - Thread-2 (handle_client) - INFO - Progress to ('127.0.0.1', 54146): 10% (106496/1048576 bytes)
+2026-01-15 20:10:56,059 - Thread-2 (handle_client) - INFO - Progress to ('127.0.0.1', 54146): 20% (212992/1048576 bytes)
+2026-01-15 20:10:56,068 - Thread-2 (handle_client) - INFO - Progress to ('127.0.0.1', 54146): 30% (315392/1048576 bytes)
+2026-01-15 20:10:56,070 - Thread-2 (handle_client) - INFO - Progress to ('127.0.0.1', 54146): 40% (421888/1048576 bytes)
+2026-01-15 20:10:56,075 - Thread-2 (handle_client) - INFO - Progress to ('127.0.0.1', 54146): 50% (524288/1048576 bytes)
+2026-01-15 20:10:56,077 - Thread-2 (handle_client) - INFO - Progress to ('127.0.0.1', 54146): 60% (630784/1048576 bytes)
+2026-01-15 20:10:56,087 - Thread-2 (handle_client) - INFO - Progress to ('127.0.0.1', 54146): 70% (737280/1048576 bytes)
+2026-01-15 20:10:56,092 - Thread-2 (handle_client) - INFO - Progress to ('127.0.0.1', 54146): 80% (839680/1048576 bytes)
+2026-01-15 20:10:56,096 - Thread-2 (handle_client) - INFO - Progress to ('127.0.0.1', 54146): 90% (946176/1048576 bytes)
+2026-01-15 20:10:56,106 - Thread-2 (handle_client) - INFO - Progress to ('127.0.0.1', 54146): 100% (1048576/1048576 bytes)
+2026-01-15 20:10:56,107 - Thread-2 (handle_client) - INFO - File 'large.bin' sent successfully to ('127.0.0.1', 54146)
+2026-01-15 20:10:56,107 - Thread-2 (handle_client) - INFO - Connection closed with ('127.0.0.1', 54146)
+2026-01-15 20:11:57,875 - Thread-3 (handle_client) - INFO - New connection from ('127.0.0.1', 56143)
+2026-01-15 20:11:57,875 - Thread-3 (handle_client) - INFO - Client ('127.0.0.1', 56143) requested file: nonexistent.txt
+2026-01-15 20:11:57,876 - Thread-3 (handle_client) - WARNING - File 'nonexistent.txt' not found for ('127.0.0.1', 56143)
+2026-01-15 20:11:57,876 - Thread-3 (handle_client) - INFO - Connection closed with ('127.0.0.1', 56143)

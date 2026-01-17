@@ -1,0 +1,42 @@
+{
+  "run_id": "cd1e1184-be28-4b1f-89e9-c5dcbde74fea",
+  "started_at": "2026-01-16T07:48:39Z",
+  "finished_at": "2026-01-16T07:48:47Z",
+  "duration_seconds": 8.351113984,
+  "environment": {
+    "go_version": "go1.23.12",
+    "platform": "linux-amd64"
+  },
+  "before": {
+    "tests": {
+      "passed": false,
+      "return_code": 1,
+      "output": "tests/test_equivalence.go:1:1: expected 'package', found 'EOF'\n"
+    },
+    "metrics": {
+      "build_success": 0,
+      "build_time_ms": -1,
+      "go_files_count": 26,
+      "lines_of_code": 2224
+    }
+  },
+  "after": {
+    "tests": {
+      "passed": true,
+      "return_code": 0,
+      "output": "=== RUN   TestHealthEndpoint\n--- PASS: TestHealthEndpoint (0.00s)\n=== RUN   TestDatabaseConstants\n--- PASS: TestDatabaseConstants (0.00s)\n=== RUN   TestWebSocketUpgraderConfiguration\n--- PASS: TestWebSocketUpgraderConfiguration (0.00s)\nPASS\nok  \tgithub.com/khallihub/godoc\t0.004s\n"
+    },
+    "metrics": {
+      "build_success": 0,
+      "build_time_ms": -1,
+      "go_files_count": 27,
+      "lines_of_code": 2279
+    }
+  },
+  "comparison": {
+    "passed_gate": true,
+    "improvement_summary": "De-obfuscation successful: tests now pass after code cleanup"
+  },
+  "success": true,
+  "error": null
+}

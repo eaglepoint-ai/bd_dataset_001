@@ -1,0 +1,8 @@
+2026-01-15 20:10:56,010 - INFO - Client initialized for localhost:9999
+2026-01-15 20:10:56,011 - INFO - Connection attempt 1/5 to localhost:9999
+2026-01-15 20:10:56,022 - INFO - Successfully connected to localhost:9999
+2026-01-15 20:10:56,023 - INFO - Requested file: large.bin
+2026-01-15 20:10:56,056 - INFO - Receiving: large.bin (1048576 bytes)
+2026-01-15 20:10:56,057 - INFO - Expected checksum: 0069e5c9433a2d9beeded501366734a1
+2026-01-15 20:10:56,150 - INFO - File integrity verified: 0069e5c9433a2d9beeded501366734a1
+2026-01-15 20:10:56,151 - INFO - Connection closed

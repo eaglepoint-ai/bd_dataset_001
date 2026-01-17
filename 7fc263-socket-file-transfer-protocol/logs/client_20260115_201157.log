@@ -1,0 +1,6 @@
+2026-01-15 20:11:57,865 - INFO - Client initialized for localhost:9999
+2026-01-15 20:11:57,866 - INFO - Connection attempt 1/5 to localhost:9999
+2026-01-15 20:11:57,874 - INFO - Successfully connected to localhost:9999
+2026-01-15 20:11:57,875 - INFO - Requested file: nonexistent.txt
+2026-01-15 20:11:57,876 - ERROR - Server error: File 'nonexistent.txt' not found on server
+2026-01-15 20:11:57,877 - INFO - Connection closed

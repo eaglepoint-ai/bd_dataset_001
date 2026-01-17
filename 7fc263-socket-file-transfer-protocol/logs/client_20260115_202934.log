@@ -1,0 +1,8 @@
+2026-01-15 20:29:34,240 - INFO - Client initialized for localhost:9999
+2026-01-15 20:29:34,240 - INFO - Connection attempt 1/5 to localhost:9999
+2026-01-15 20:29:34,248 - INFO - Successfully connected to localhost:9999
+2026-01-15 20:29:34,248 - INFO - Requested file: small.txt
+2026-01-15 20:29:34,254 - INFO - Receiving: small.txt (95 bytes)
+2026-01-15 20:29:34,255 - INFO - Expected checksum: 1f350b789b59112c083a185c2c71fbf5
+2026-01-15 20:29:34,260 - INFO - File integrity verified: 1f350b789b59112c083a185c2c71fbf5
+2026-01-15 20:29:34,261 - INFO - Connection closed
