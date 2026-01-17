@@ -1,0 +1,8 @@
+{
+  "instance_id": "99cd28",
+  "problem_statement": "The component suffers from a ghost state bug caused by asynchronous side effects and independent boolean flags. When an upload fails and the user retries quickly, stale timers or outdated async completions can clear errors or trigger success for a previous attempt, resulting in incorrect UI state.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/99cd28-Eliminating_ghost_state_in_asynchronous_react_upload_flow",
+  "environment_setup": "Dockerfile"
+}
