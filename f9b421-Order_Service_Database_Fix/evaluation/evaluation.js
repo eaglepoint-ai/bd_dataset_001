@@ -156,13 +156,7 @@ function generateReportPath() {
   const dateStr = now.toISOString().split("T")[0];
   const timeStr = now.toTimeString().split(" ")[0].replace(/:/g, "-");
 
-  const reportDir = path.join(
-    ROOT_DIR,
-    "evaluation",
-    "reports",
-    dateStr,
-    timeStr
-  );
+  const reportDir = path.join(ROOT_DIR, "evaluation");
   fs.mkdirSync(reportDir, { recursive: true });
 
   return path.join(reportDir, "report.json");
