@@ -26,10 +26,8 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  // ========================================================================
-  // REQUIREMENT #1: Four-sub-module architecture (MUST BE MAINTAINED)
-  // ========================================================================
-  test('Req #1: All four modules render in full mode', async ({ page }) => {
+  // Four-sub-module architecture (MUST BE MAINTAINED)
+  test('All four modules render in full mode', async ({ page }) => {
     await page.click(SELECTORS.modeButton('full'));
     await page.waitForTimeout(500);
 
@@ -42,11 +40,9 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
     expect(hasBeta).toBeTruthy();
     expect(hasGamma).toBeTruthy();
     expect(hasDelta).toBeTruthy();
-
-    console.log('✓ AFTER: All four modules preserved');
   });
 
-  test('Req #1: Mode switching works correctly', async ({ page }) => {
+  test('Mode switching works correctly', async ({ page }) => {
     // Test alpha mode
     await page.click(SELECTORS.modeButton('alpha'));
     await page.waitForTimeout(300);
@@ -66,14 +62,10 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
     await page.click(SELECTORS.modeButton('delta'));
     await page.waitForTimeout(300);
     expect(await page.locator(SELECTORS.deltaSection).count()).toBeGreaterThan(0);
-
-    console.log('✓ AFTER: Mode switching functional');
   });
 
-  // ========================================================================
-  // REQUIREMENT #2: Two Context providers work correctly (PRESERVED)
-  // ========================================================================
-  test('Req #2: Sync counter increments over time', async ({ page }) => {
+  // Two Context providers work correctly (PRESERVED)
+  test('Sync counter increments over time', async ({ page }) => {
     await page.click(SELECTORS.modeButton('full'));
     const initialSync = await getSyncCounter(page);
 
@@ -82,11 +74,9 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
 
     const finalSync = await getSyncCounter(page);
     expect(finalSync).toBeGreaterThan(initialSync);
-
-    console.log('✓ AFTER: Context providers working');
   });
 
-  test('Req #2: Theme context provides border colors', async ({ page }) => {
+  test('Theme context provides border colors', async ({ page }) => {
     await page.click(SELECTORS.modeButton('alpha'));
     await page.waitForTimeout(500);
 
@@ -97,14 +87,10 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
       );
       expect(borderStyle).toBeTruthy();
     }
-
-    console.log('✓ AFTER: Theme context preserved');
   });
 
-  // ========================================================================
-  // REQUIREMENT #3: mainRef tracking (MUST WORK)
-  // ========================================================================
-  test('Req #3: Render count increases with interactions', async ({ page }) => {
+  // mainRef tracking
+  test('Render count increases with interactions', async ({ page }) => {
     await page.click(SELECTORS.modeButton('alpha'));
     const initialRenderCount = await getRenderCount(page);
 
@@ -117,14 +103,10 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
     const finalRenderCount = await getRenderCount(page);
     expect(finalRenderCount).toBeGreaterThanOrEqual(initialRenderCount);
     expect(finalRenderCount).toBeGreaterThan(0);
-
-    console.log('✓ AFTER: mainRef tracking functional');
   });
 
-  // ========================================================================
-  // REQUIREMENT #4: Memory leaks ELIMINATED (SHOULD PASS)
-  // ========================================================================
-  test('Req #4: No memory leaks detected', async ({ page }) => {
+  // Memory leaks ELIMINATED (SHOULD PASS)
+  test('No memory leaks detected', async ({ page }) => {
     await page.goto(BASE_URL + '?mode=full');
 
     // Baseline memory
@@ -142,32 +124,30 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
     expect(growth).toBeLessThan(TEST_CONFIG.MEMORY_LEAK_THRESHOLD_MB);
   });
 
-  // ========================================================================
-  // REQUIREMENT #5: JSON.parse/stringify REPLACED (SHOULD NOT EXIST)
-  // ========================================================================
-  test('Req #5: No JSON.parse/stringify in critical paths', async () => {
+
+  // JSON.parse/stringify REPLACED (SHOULD NOT EXIST)
+
+  test('No JSON.parse/stringify in critical paths', async () => {
     // Check main component
     const hasJSONParse = await checkSourceCode(
-      '../repository_after/ChaoticComponent.tsx',
+      '../repository_after/src/components/ChaoticComponent.tsx',
       /JSON\.parse\(JSON\.stringify/
     );
 
     // Check utils for immutable updates
     const hasImmutableUtils = await checkSourceCode(
-      '../repository_after/utils.ts',
+      '../repository_after/src/utils/utils.ts',
       /setNestedValue|deleteNestedValue|deepMerge/
     );
 
     expect(hasJSONParse).toBeFalsy();
     expect(hasImmutableUtils).toBeTruthy();
-
-    console.log('✓ AFTER: Uses efficient immutable updates');
   });
 
-  // ========================================================================
-  // REQUIREMENT #6: Gamma pipeline cancellation WORKS
-  // ========================================================================
-  test('Req #6: Pipeline cancels on mode switch', async ({ page }) => {
+
+  // Gamma pipeline cancellation WORKS
+
+  test('Pipeline cancels on mode switch', async ({ page }) => {
     const consoleLogs = [];
     page.on('console', msg => consoleLogs.push(msg.text()));
 
@@ -187,35 +167,29 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
 
     // Should NOT complete (properly cancelled)
     expect(pipelineCompleted).toBeFalsy();
-
-    console.log('✓ AFTER: Pipeline properly cancels with AbortController');
   });
 
-  // ========================================================================
-  // REQUIREMENT #7: Debounce timing FIXED (300ms, not 0ms)
-  // ========================================================================
-  test('Req #7: Proper 300ms debounce implemented', async () => {
+
+  // Debounce timing FIXED (300ms, not 0ms)
+  test('Proper 300ms debounce implemented', async () => {
     const hasProperDebounce = await checkSourceCode(
-      '../repository_after/components/SubComponentAlpha.tsx',
+      '../repository_after/src/components/SubComponentAlpha.tsx',
       /300/
     );
 
     const hasZeroTimeout = await checkSourceCode(
-      '../repository_after/components/SubComponentAlpha.tsx',
+      '../repository_after/src/components/SubComponentAlpha.tsx',
       /setTimeout\([^,]+,\s*0\)/
     );
 
     expect(hasProperDebounce).toBeTruthy();
     expect(hasZeroTimeout).toBeFalsy();
-
-    console.log('✓ AFTER: Uses proper 300ms debounce');
   });
 
-    // ========================================================================
-  // REQUIREMENT #8: Beta batch processing OPTIMIZED
+  
+  // Beta batch processing OPTIMIZED
   // Tests that tree rendering works efficiently with batch processing
-  // ========================================================================
-  test('Req #8: Tree renders efficiently with optimization', async ({ page }) => {
+  test('Tree renders efficiently with optimization', async ({ page }) => {
     await page.click(SELECTORS.modeButton('beta'));
     await page.waitForTimeout(1500); // Wait for tree to render
     
@@ -244,10 +218,6 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
       const renderTime = endTime - startTime;
       const nodeChange = Math.abs(finalNodes - initialNodes);
       
-      console.log('✓ AFTER: Tree interaction time: ' + renderTime + 'ms');
-      console.log('  Initial nodes: ' + initialNodes + ', Final nodes: ' + finalNodes);
-      console.log('  Node change: ' + nodeChange + ' (expand/collapse worked)');
-      
       // Verify efficient rendering (< 1 second for tree operation)
       expect(renderTime).toBeLessThan(1000);
     } else {
@@ -257,10 +227,9 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
   });
 
 
-  // ========================================================================
-  // REQUIREMENT #9: Delta deep updates with history MAINTAINED
-  // ========================================================================
-  test('Req #9: Form updates track history with immutability', async ({ page }) => {
+
+  // Delta deep updates with history MAINTAINED
+  test('Form updates track history with immutability', async ({ page }) => {
     await page.click(SELECTORS.modeButton('delta'));
     await page.waitForTimeout(500);
 
@@ -275,44 +244,36 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
 
       // Verify immutable updates in source
       const hasImmutableUpdates = await checkSourceCode(
-        '../repository_after/components/SubComponentDelta.tsx',
+        '../repository_after/src/components/SubComponentDelta.tsx',
         /setNestedValue|deleteNestedValue/
       );
       expect(hasImmutableUpdates).toBeTruthy();
-
-      console.log('✓ AFTER: Form history with immutable updates');
     }
   });
 
-  // ========================================================================
-  // REQUIREMENT #10: Utility functions RENAMED (clear names)
-  // ========================================================================
-  test('Req #10: Utility functions have clear names', async () => {
+  // Utility functions RENAMED (clear names)
+  test('Utility functions have clear names', async () => {
     const hasClearNames = await checkSourceCode(
-      '../repository_after/utils.ts',
+      '../repository_after/src/utils/utils.ts',
       /export\s+(const|function)\s+(range|stringHash|reverseMap|createCache)/
     );
 
     const hasObfuscated = await checkSourceCode(
-      '../repository_after/utils.ts',
+      '../repository_after/src/utils/utils.ts',
       /const\s+(_r|_h|_m|_z)\s*=/
     );
 
     expect(hasClearNames).toBeTruthy();
     expect(hasObfuscated).toBeFalsy();
-
-    console.log('✓ AFTER: Utility functions renamed (range, stringHash, etc.)');
   });
 
-  // ========================================================================
-  // REQUIREMENT #11: TypeScript STRICT MODE
-  // ========================================================================
+  // TypeScript STRICT MODE
   test('Req #11: TypeScript strict mode enabled', async () => {
     const fs = await import('fs/promises');
 
     // Check for .tsx files
     try {
-      await fs.access('../repository_after/ChaoticComponent.tsx');
+      await fs.access('../repository_after/src/components/ChaoticComponent.tsx');
       console.log('✓ AFTER: Uses .tsx files');
     } catch {
       throw new Error('ChaoticComponent.tsx not found');
@@ -326,13 +287,9 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
     expect(tsconfig.compilerOptions.strict).toBeTruthy();
     expect(tsconfig.compilerOptions.noImplicitAny).toBeTruthy();
     expect(tsconfig.compilerOptions.strictNullChecks).toBeTruthy();
-
-    console.log('✓ AFTER: TypeScript strict mode enabled');
   });
 
-  // ========================================================================
-  // REQUIREMENT #12: Self-contained (no external state libs)
-  // ========================================================================
+  // Self-contained (no external state libs)
   test('Req #12: Remains self-contained', async () => {
     const fs = await import('fs/promises');
     const packageJson = JSON.parse(
@@ -351,13 +308,9 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
     expect(hasRedux).toBeFalsy();
     expect(hasMobX).toBeFalsy();
     expect(hasZustand).toBeFalsy();
-
-    console.log('✓ AFTER: Self-contained (no external state libs)');
   });
 
-  // ========================================================================
   // INTEGRATION TEST: Full workflow with performance verification
-  // ========================================================================
   test('Integration: Complete user workflow with performance check', async ({ page }) => {
     const startRenderCount = await getRenderCount(page);
 
@@ -399,9 +352,7 @@ test.describe('ChaoticComponent AFTER - Improvement Verification', () => {
     expect(renderDelta).toBeLessThan(20); // Should be efficient
   });
 
-  // ========================================================================
   // PERFORMANCE COMPARISON
-  // ========================================================================
   test('Performance: Verify optimized rendering', async ({ page }) => {
     await page.click(SELECTORS.modeButton('alpha'));
 

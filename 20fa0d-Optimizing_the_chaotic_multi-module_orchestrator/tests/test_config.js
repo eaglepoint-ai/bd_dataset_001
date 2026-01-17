@@ -5,8 +5,8 @@
 
 export const TEST_CONFIG = {
   // Server URLs
-  BEFORE_URL: 'http://localhost:5173',
-  AFTER_URL: 'http://localhost:5174',
+  BEFORE_URL: 'http://localhost:5174',
+  AFTER_URL: 'http://localhost:5173',
 
   // Timeouts
   TIMEOUT_SHORT: 3000,
