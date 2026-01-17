@@ -23,6 +23,7 @@ services:
     depends_on:
       - db
     volumes:
+      - .:/app
       - ./repository_before:/app/repository_before
       - ./tests:/app/repository_before/tests
       - ./evaluation:/app/evaluation

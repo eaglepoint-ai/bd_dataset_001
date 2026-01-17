@@ -291,7 +291,7 @@ func main() {
 	}
 	
 	// Write report.json to root level for CI/CD pipeline
-	rootReportPath := "report.json"
+	rootReportPath := "../report.json"
 	err = os.WriteFile(rootReportPath, reportJSON, 0644)
 	if err != nil {
 		fmt.Printf("Error writing root report.json: %v\n", err)
