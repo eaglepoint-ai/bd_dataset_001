@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/
+coverage.xml
+
+# Environment
+.env
+venv/
+env/
+
+# IDEs
+.vscode/
+.idea/
+
+# Project specific
+evaluation/*/
+!evaluation/evaluation.py
+report.json
