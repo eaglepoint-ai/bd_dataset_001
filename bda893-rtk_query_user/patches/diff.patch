@@ -1,9 +1,9 @@
-diff -u repository_before/WeatherComponent.tsx repository_after/WeatherComponent.tsx
---- repository_before/WeatherComponent.tsx	2026-01-13 15:03:31.000000000 +0300
-+++ repository_after/WeatherComponent.tsx	2026-01-13 16:03:41.000000000 +0300
+diff -ur repository_before/WeatherComponent.tsx repository_after/WeatherComponent.tsx
+--- repository_before/WeatherComponent.tsx	2026-01-17 17:59:57.000000000 +0300
++++ repository_after/WeatherComponent.tsx	2026-01-17 18:13:22.000000000 +0300
 @@ -1,28 +1,33 @@
 -import React, { useState, useEffect } from 'react';
-+import { use, useMemo } from 'react';
++import React, { use, useMemo } from 'react';
  
 -const WeatherComponent = () => {
 -  const [weather, setWeather] = useState(null);
@@ -36,7 +36,7 @@ diff -u repository_before/WeatherComponent.tsx repository_after/WeatherComponent
 +  
 +  const data = await response.json();
 +  
-+  if (!data || typeof data.temperature !== 'number') {
++  if (!data || typeof data.temperature !== 'number' || isNaN(data.temperature) || !isFinite(data.temperature)) {
 +    throw new Error('Invalid weather data received from API');
 +  }
 +  
@@ -44,7 +44,7 @@ diff -u repository_before/WeatherComponent.tsx repository_after/WeatherComponent
 +};
  
 -    fetchWeather();
-+const WeatherComponent = (): JSX.Element => {
++const WeatherComponent = (): React.JSX.Element => {
 +  // Memoize promise to prevent re-creation on every render
 +  const weatherPromise = useMemo(() => {
 +    return fetchWeather();
