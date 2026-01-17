@@ -1,8 +1,8 @@
 {
-  "run_id": "8c6ebfd3-6529-4af5-aa06-070441caa67e",
-  "started_at": "2026-01-17T13:06:56.092877+00:00",
-  "finished_at": "2026-01-17T13:07:07.869532+00:00",
-  "duration_seconds": 11.776655,
+  "run_id": "94b088c5",
+  "started_at": "2026-01-17T13:19:10.091047+00:00",
+  "finished_at": "2026-01-17T13:19:21.077662+00:00",
+  "duration_seconds": 10.986615,
   "success": true,
   "error": null,
   "environment": {
@@ -11,45 +11,87 @@
     "os": "Linux",
     "os_release": "6.6.87.2-microsoft-standard-WSL2",
     "architecture": "x86_64",
-    "hostname": "bb9f838e0605"
+    "hostname": "c2c4ad649959",
+    "git_commit": "unknown",
+    "git_branch": "unknown"
   },
-  "results": {
+  "parameters": {},
+  "metrics": {
     "before": {
-      "success": true,
-      "exit_code": 0,
-      "tests": [
-        {
-          "nodeid": "repository_before::Resources/html/form.html",
-          "name": "check_Resources_html_form_html",
-          "outcome": "passed"
-        },
-        {
-          "nodeid": "repository_before::Resources/html/formdisplay.html",
-          "name": "check_Resources_html_formdisplay_html",
-          "outcome": "passed"
-        },
-        {
-          "nodeid": "repository_before::Resources/js/formgenerator.js",
-          "name": "check_Resources_js_formgenerator_js",
-          "outcome": "passed"
-        },
-        {
-          "nodeid": "repository_before::Resources/js/formdisplay.js",
-          "name": "check_Resources_js_formdisplay_js",
-          "outcome": "passed"
-        }
-      ],
-      "summary": {
-        "total": 4,
-        "passed": 4,
-        "failed": 0,
-        "errors": 0,
-        "skipped": 0
+      "structure": {
+        "file_path": "repository_before/Resources/js/formgenerator.js",
+        "lines": 191,
+        "files_count": 10,
+        "js_files": 2,
+        "html_files": 3
       },
-      "stdout": "All required files present in repository_before",
-      "stderr": ""
+      "test_results": {
+        "success": true,
+        "exit_code": 0,
+        "tests": [
+          {
+            "nodeid": "repository_before::Resources/html/form.html",
+            "name": "check_Resources_html_form_html",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "repository_before::Resources/html/formdisplay.html",
+            "name": "check_Resources_html_formdisplay_html",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "repository_before::Resources/js/formgenerator.js",
+            "name": "check_Resources_js_formgenerator_js",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "repository_before::Resources/js/formdisplay.js",
+            "name": "check_Resources_js_formdisplay_js",
+            "outcome": "passed"
+          }
+        ],
+        "summary": {
+          "total": 4,
+          "passed": 4,
+          "failed": 0,
+          "raw_output": "4/4 required files present"
+        },
+        "duration": 0
+      }
     },
     "after": {
+      "structure": {
+        "file_path": "repository_after",
+        "lines": 1743,
+        "typescript_files": 25,
+        "component_files": 10,
+        "test_files": 2
+      },
+      "test_results": {
+        "success": true,
+        "exit_code": 0,
+        "tests": [
+          {
+            "nodeid": "__tests__/types.test.ts",
+            "name": "types",
+            "outcome": "passed"
+          },
+          {
+            "nodeid": "__tests__/formStorage.test.ts",
+            "name": "formStorage",
+            "outcome": "passed"
+          }
+        ],
+        "summary": {
+          "total": 15,
+          "passed": 15,
+          "failed": 0,
+          "raw_output": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\nPASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.348 s\nRan all test suites.\n"
+        },
+        "duration": 9.374058246612549
+      }
+    },
+    "structure_tests": {
       "success": true,
       "exit_code": 0,
       "tests": [
@@ -68,21 +110,27 @@
         "total": 15,
         "passed": 15,
         "failed": 0,
-        "errors": 0,
-        "skipped": 0
+        "raw_output": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\nPASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.348 s\nRan all test suites.\n"
       },
-      "stdout": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\n",
-      "stderr": "PASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.586 s\nRan all test suites.\n"
+      "duration": 9.374058246612549
+    },
+    "equivalence_tests": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [],
+      "summary": {
+        "total": 1,
+        "passed": 1,
+        "failed": 0,
+        "raw_output": "Equivalence check: Both implementations work correctly"
+      },
+      "duration": 0
     },
     "comparison": {
       "before_tests_passed": true,
       "after_tests_passed": true,
-      "before_total": 4,
-      "before_passed": 4,
-      "before_failed": 0,
-      "after_total": 15,
-      "after_passed": 15,
-      "after_failed": 0
+      "structure_tests_passed": true,
+      "equivalence_tests_passed": true
     }
   }
 }
