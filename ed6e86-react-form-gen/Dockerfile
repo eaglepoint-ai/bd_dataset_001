@@ -47,6 +47,18 @@ RUN test -d node_modules/@next/swc-linux-x64-musl || \
 # Verify npm installation
 RUN npm --version && node --version
 
+# Create test scripts (npm commands are in Dockerfile, not in docker-compose or commands)
+# Create scripts in /usr/local/bin (not /app/bin because volume mount overrides /app)
+RUN printf '#!/bin/sh\ncd /app/repository_after && npm run type-check && npm test -- --passWithNoTests --ci\n' > /usr/local/bin/run-tests-after.sh && \
+    chmod +x /usr/local/bin/run-tests-after.sh && \
+    printf '#!/bin/sh\ncd /app/repository_after && npm run type-check\n' > /usr/local/bin/run-type-check.sh && \
+    chmod +x /usr/local/bin/run-type-check.sh && \
+    printf '#!/bin/sh\ncd /app/repository_after && npm test -- --ci\n' > /usr/local/bin/run-test-only.sh && \
+    chmod +x /usr/local/bin/run-test-only.sh
+
+# Verify scripts were created
+RUN ls -la /usr/local/bin/run-*.sh && test -f /usr/local/bin/run-tests-after.sh
+
 # Return to root
 WORKDIR /app
 

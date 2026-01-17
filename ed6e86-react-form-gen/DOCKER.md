@@ -21,10 +21,10 @@ docker compose run --rm app python check_before.py
 
 ### AFTER TEST COMMAND
 ```bash
-docker compose run --rm app sh -c "cd repository_after && npm run type-check && npm test -- --passWithNoTests --ci"
+docker compose run --rm app sh /usr/local/bin/run-tests-after.sh
 ```
 
-**What it does:** Runs TypeScript type checking and Jest tests on the `repository_after` implementation.
+**What it does:** Runs TypeScript type checking and Jest tests on the `repository_after` implementation. (npm commands are in Dockerfile, not in commands)
 
 ### TEST & REPORT COMMAND
 ```bash
@@ -34,8 +34,8 @@ docker compose run --rm app python evaluation/evaluation.py
 **What it does:** Runs the complete evaluation which:
 - Tests both `repository_before` and `repository_after`
 - Compares results
-- Generates `report.json` in the project root (required by evaluator)
-- Also creates timestamped reports in `evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json`
+- Generates `report.json` in `evaluation/reports/report.json` (required by evaluator)
+- Also creates `latest.json` in `evaluation/reports/latest.json`
 
 ## Run Evaluation (Complete Test)
 
@@ -55,31 +55,33 @@ docker compose run --rm app python check_before.py
 
 ### Test 2: Run Tests on repository_after
 
-This runs type checking and Jest tests (dependencies are already installed in Dockerfile):
+This runs type checking and Jest tests (dependencies and npm commands are in Dockerfile):
 
 ```bash
-docker compose run --rm app sh -c "cd repository_after && npm run type-check && npm test -- --passWithNoTests --ci"
+docker compose run --rm app sh /usr/local/bin/run-tests-after.sh
 ```
 
 ### Test 3: Type Check Only
 
 ```bash
-docker compose run --rm app sh -c "cd repository_after && npm run type-check"
+docker compose run --rm app sh /usr/local/bin/run-type-check.sh
 ```
 
 ### Test 4: Run Tests Only
-  
-  docker compose run test
-  
+
 ```bash
-docker compose run --rm app sh -c "cd repository_after && npm test -- --ci"
+docker compose run --rm app sh /usr/local/bin/run-test-only.sh
 ```
 
 ## View Reports
 
-After running the evaluation, view the latest report:
+After running the evaluation, view the reports:
 
 ```bash
+# View the main report (required by evaluator)
+docker compose run --rm app cat evaluation/reports/report.json
+
+# View the latest report
 docker compose run --rm app cat evaluation/reports/latest.json
 ```
 
