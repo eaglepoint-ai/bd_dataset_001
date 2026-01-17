@@ -2,6 +2,7 @@
 """
 Evaluation runner for React Form Generator.
 Runs tests on both repository_before and repository_after.
+Compatible with both standard and advanced evaluator formats.
 """
 import os
 import sys
@@ -11,6 +12,7 @@ import platform
 import subprocess
 import re
 import socket
+import time
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -78,16 +80,9 @@ def run_tests_before():
     
     if not repo_path.exists():
         return {
-            "success": False,
-            "exit_code": 1,
-            "tests": [],
-            "summary": {
-                "total": 0,
-                "passed": 0,
-                "failed": 1,
-                "raw_output": "repository_before directory not found"
-            },
-            "duration": 0
+            "passed": False,
+            "return_code": 1,
+            "output": "repository_before directory not found"
         }
     
     required_files = [
@@ -97,47 +92,42 @@ def run_tests_before():
         "Resources/js/formdisplay.js"
     ]
     
-    tests = []
+    missing_files = []
     for file_path in required_files:
-        exists = (repo_path / file_path).exists()
-        test_name = f"check_{file_path.replace('/', '_').replace('.', '_')}"
-        tests.append({
-            "nodeid": f"repository_before::{file_path}",
-            "name": test_name,
-            "outcome": "passed" if exists else "failed"
-        })
+        if not (repo_path / file_path).exists():
+            missing_files.append(file_path)
     
-    passed_count = sum(1 for t in tests if t["outcome"] == "passed")
+    if missing_files:
+        return {
+            "passed": False,
+            "return_code": 1,
+            "output": f"Missing required files: {', '.join(missing_files)}"
+        }
     
     return {
-        "success": passed_count == len(required_files),
-        "exit_code": 0 if passed_count == len(required_files) else 1,
-        "tests": tests,
-        "summary": {
-            "total": len(required_files),
-            "passed": passed_count,
-            "failed": len(required_files) - passed_count,
-            "raw_output": f"{passed_count}/{len(required_files)} required files present"
-        },
-        "duration": 0
+        "passed": True,
+        "return_code": 0,
+        "output": "All required files present in repository_before"
     }
 
 
 def run_tests_after():
     """Test repository_after - Next.js app tests."""
-    import time
     repo_path = ROOT / "repository_after"
     
     if not repo_path.exists():
         return {
-            "success": False,
-            "exit_code": 1,
-            "tests": [],
-            "summary": {"total": 0, "passed": 0, "failed": 0, "raw_output": ""},
-            "duration": 0
+            "passed": False,
+            "return_code": 1,
+            "output": "repository_after directory not found"
         }
     
-    start_time = time.time()
+    if not (repo_path / "package.json").exists():
+        return {
+            "passed": False,
+            "return_code": 1,
+            "output": "package.json not found in repository_after"
+        }
     
     try:
         # Type check
@@ -150,12 +140,11 @@ def run_tests_after():
         )
         
         if type_check.returncode != 0:
+            output = (type_check.stdout + type_check.stderr)[:8000]
             return {
-                "success": False,
-                "exit_code": type_check.returncode,
-                "tests": [],
-                "summary": {"total": 0, "passed": 0, "failed": 0, "raw_output": type_check.stderr[:1000]},
-                "duration": time.time() - start_time
+                "passed": False,
+                "return_code": type_check.returncode,
+                "output": output
             }
         
         # Run Jest tests
@@ -170,79 +159,125 @@ def run_tests_after():
             env=env
         )
         
-        full_output = test_result.stdout + test_result.stderr
-        
-        # Parse test results
-        tests = []
-        test_pattern = r'(PASS|FAIL)\s+([^\s\n]+)'
-        matches = re.findall(test_pattern, full_output)
-        
-        for status, test_file in matches:
-            test_name = test_file.replace('__tests__/', '').replace('.test.ts', '')
-            tests.append({
-                "nodeid": test_file,
-                "name": test_name,
-                "outcome": "passed" if status == "PASS" else "failed"
-            })
-        
-        # Extract test count
-        test_count_match = re.search(r'Tests:\s+(\d+)\s+passed', full_output)
-        if test_count_match:
-            passed_count = int(test_count_match.group(1))
-        else:
-            passed_count = len([t for t in tests if t["outcome"] == "passed"])
-        
-        duration = time.time() - start_time
+        output = (test_result.stdout + test_result.stderr)[:8000]
         
         return {
-            "success": test_result.returncode == 0,
-            "exit_code": test_result.returncode,
-            "tests": tests,
-            "summary": {
-                "total": passed_count,
-                "passed": passed_count,
-                "failed": 0 if test_result.returncode == 0 else 1,
-                "raw_output": full_output[:1000]
-            },
-            "duration": duration
+            "passed": test_result.returncode == 0,
+            "return_code": test_result.returncode,
+            "output": output
         }
         
+    except subprocess.TimeoutExpired:
+        return {
+            "passed": False,
+            "return_code": -1,
+            "output": "Test execution timeout"
+        }
     except Exception as e:
         return {
-            "success": False,
-            "exit_code": -1,
-            "tests": [],
-            "summary": {"total": 0, "passed": 0, "failed": 1, "raw_output": str(e)},
-            "duration": time.time() - start_time
+            "passed": False,
+            "return_code": -1,
+            "output": f"Error running tests: {str(e)}"
         }
+
+
+def run_metrics(repo_path: Path):
+    """Collect optional metrics."""
+    metrics = {}
+    
+    if not repo_path.exists():
+        return metrics
+    
+    try:
+        if (repo_path / "package.json").exists():
+            package_json = json.loads((repo_path / "package.json").read_text())
+            metrics["dependencies_count"] = len(package_json.get("dependencies", {}))
+            metrics["dev_dependencies_count"] = len(package_json.get("devDependencies", {}))
+        
+        ts_files = list(repo_path.rglob("*.ts"))
+        tsx_files = list(repo_path.rglob("*.tsx"))
+        metrics["typescript_files"] = len(ts_files) + len(tsx_files)
+        
+        test_files = list((repo_path / "__tests__").rglob("*.test.ts")) if (repo_path / "__tests__").exists() else []
+        metrics["test_files"] = len(test_files)
+        
+    except Exception:
+        pass
+    
+    return metrics
+
+
+def evaluate(repo_name: str):
+    """Evaluate a repository."""
+    repo_path = ROOT / repo_name
+    
+    if repo_name == "repository_before":
+        tests = run_tests_before()
+    else:
+        tests = run_tests_after()
+    
+    metrics = run_metrics(repo_path)
+    
+    return {
+        "tests": tests,
+        "metrics": metrics
+    }
 
 
 def run_evaluation():
     """Run the complete evaluation and return report dict."""
-    run_id = str(uuid.uuid4())[:8]
+    run_id = str(uuid.uuid4())
     start = datetime.now(timezone.utc)
     
     try:
-        # Run tests
-        before_tests = run_tests_before()
-        after_tests = run_tests_after()
+        # Run tests using standard format
+        before_eval = evaluate("repository_before")
+        after_eval = evaluate("repository_after")
         
-        # Analyze structure
+        before_passed = before_eval["tests"]["passed"]
+        after_passed = after_eval["tests"]["passed"]
+        
+        # Standard comparison
+        passed_gate = after_passed
+        if passed_gate:
+            improvement_summary = "After implementation passed correctness tests"
+        else:
+            improvement_summary = "After implementation failed correctness tests"
+        
+        # Analyze structure for advanced format
         before_structure = analyze_structure("repository_before")
         after_structure = analyze_structure("repository_after")
         
-        # Determine success
-        before_passed = before_tests["success"]
-        after_passed = after_tests["success"]
+        # Convert to advanced format test_results
+        before_test_results = {
+            "success": before_passed,
+            "exit_code": before_eval["tests"]["return_code"],
+            "tests": [],
+            "summary": {
+                "raw_output": before_eval["tests"]["output"][:1000]
+            },
+            "duration": 0
+        }
         
-        # For this project, structure_tests and equivalence_tests are the same as after_tests
-        # since we're testing functional equivalence and proper structure
+        after_test_results = {
+            "success": after_passed,
+            "exit_code": after_eval["tests"]["return_code"],
+            "tests": [],
+            "summary": {
+                "raw_output": after_eval["tests"]["output"][:1000]
+            },
+            "duration": 0
+        }
+        
+        # Structure and equivalence tests (same as after for this project)
         structure_tests = {
             "success": after_passed,
-            "exit_code": after_tests["exit_code"],
-            "tests": after_tests.get("tests", []),
-            "summary": after_tests.get("summary", {}),
-            "duration": after_tests.get("duration", 0)
+            "exit_code": after_eval["tests"]["return_code"],
+            "tests": [],
+            "summary": {
+                "raw_output": after_eval["tests"]["output"][:1000] if after_passed else "Structure tests failed"
+            },
+            "duration": 0
         }
         
         equivalence_tests = {
@@ -250,9 +285,6 @@ def run_evaluation():
             "exit_code": 0 if (after_passed and before_passed) else 1,
             "tests": [],
             "summary": {
-                "total": 1,
-                "passed": 1 if (after_passed and before_passed) else 0,
-                "failed": 0 if (after_passed and before_passed) else 1,
                 "raw_output": "Equivalence check: Both implementations work correctly" if (after_passed and before_passed) else "Equivalence check failed"
             },
             "duration": 0
@@ -260,23 +292,32 @@ def run_evaluation():
         
         end = datetime.now(timezone.utc)
         
-        return {
+        # Build hybrid report with BOTH formats
+        report = {
             "run_id": run_id,
             "started_at": start.isoformat(),
             "finished_at": end.isoformat(),
             "duration_seconds": (end - start).total_seconds(),
-            "success": after_passed and structure_tests["success"] and equivalence_tests["success"],
-            "error": None if (after_passed and structure_tests["success"] and equivalence_tests["success"]) else "Some tests failed or evaluation incomplete",
             "environment": environment_info(),
+            # STANDARD FORMAT (documentation)
+            "before": before_eval,
+            "after": after_eval,
+            "comparison": {
+                "passed_gate": passed_gate,
+                "improvement_summary": improvement_summary
+            },
+            "success": passed_gate,
+            "error": None,
+            # ADVANCED FORMAT (evaluator expects)
             "parameters": {},
             "metrics": {
                 "before": {
                     "structure": before_structure,
-                    "test_results": before_tests
+                    "test_results": before_test_results
                 },
                 "after": {
                     "structure": after_structure,
-                    "test_results": after_tests
+                    "test_results": after_test_results
                 },
                 "structure_tests": structure_tests,
                 "equivalence_tests": equivalence_tests,
@@ -288,16 +329,25 @@ def run_evaluation():
                 }
             }
         }
+        
+        return report
+        
     except Exception as e:
         end = datetime.now(timezone.utc)
         import traceback
         traceback.print_exc()
         
-        error_result = {
+        error_test = {
+            "passed": False,
+            "return_code": -1,
+            "output": str(e)
+        }
+        
+        error_test_results = {
             "success": False,
             "exit_code": -1,
             "tests": [],
-            "summary": {"total": 0, "passed": 0, "failed": 0, "raw_output": str(e)},
+            "summary": {"raw_output": str(e)},
             "duration": 0
         }
         
@@ -306,21 +356,33 @@ def run_evaluation():
             "started_at": start.isoformat(),
             "finished_at": end.isoformat(),
             "duration_seconds": (end - start).total_seconds(),
-            "success": False,
-            "error": f"Evaluation error: {str(e)}",
             "environment": environment_info(),
+            "before": {
+                "tests": error_test,
+                "metrics": {}
+            },
+            "after": {
+                "tests": error_test,
+                "metrics": {}
+            },
+            "comparison": {
+                "passed_gate": False,
+                "improvement_summary": "Evaluation crashed"
+            },
+            "success": False,
+            "error": str(e),
             "parameters": {},
             "metrics": {
                 "before": {
                     "structure": {},
-                    "test_results": error_result
+                    "test_results": error_test_results
                 },
                 "after": {
                     "structure": {},
-                    "test_results": error_result
+                    "test_results": error_test_results
                 },
-                "structure_tests": error_result,
-                "equivalence_tests": error_result,
+                "structure_tests": error_test_results,
+                "equivalence_tests": error_test_results,
                 "comparison": {
                     "before_tests_passed": False,
                     "after_tests_passed": False,
