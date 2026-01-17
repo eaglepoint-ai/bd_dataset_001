@@ -1,0 +1,390 @@
+{
+  "run_id": "2fd1fd9f",
+  "started_at": "2026-01-17T16:06:42.044621",
+  "finished_at": "2026-01-17T16:08:04.794426",
+  "duration_seconds": 82.749805,
+  "success": true,
+  "error": null,
+  "environment": {
+    "python_version": "3.11.2",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.36",
+    "os": "Linux",
+    "os_release": "6.6.87.2-microsoft-standard-WSL2",
+    "architecture": "x86_64",
+    "hostname": "bf05b3a4681f",
+    "git_commit": "unknown",
+    "git_branch": "unknown",
+    "node_version": "v20.20.0"
+  },
+  "results": {
+    "before": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [],
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "",
+      "stderr": "npm warn exec The following package was not found and will be installed: jest@30.2.0\nnpm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.\nnpm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported\nNo tests found, exiting with code 0\nTest results written to: ../../tmp/tmpx2qs3kkm.json\n"
+    },
+    "after": {
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "/app/repository_after/src/utils/__tests__/hash.test.ts::hashString produces consistent hash for same input",
+          "name": "hashString produces consistent hash for same input",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/utils/__tests__/hash.test.ts::hashString produces different hash for different input",
+          "name": "hashString produces different hash for different input",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/utils/__tests__/hash.test.ts::hashString produces positive number",
+          "name": "hashString produces positive number",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/utils/__tests__/hash.test.ts::hashString handles empty string",
+          "name": "hashString handles empty string",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/utils/__tests__/hash.test.ts::hashString handles unicode",
+          "name": "hashString handles unicode",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/storageManager.test.ts::storageManager save saves mood to localStorage",
+          "name": "storageManager save saves mood to localStorage",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/storageManager.test.ts::storageManager save saves multiple moods",
+          "name": "storageManager save saves multiple moods",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/storageManager.test.ts::storageManager loadAll returns empty array when no data",
+          "name": "storageManager loadAll returns empty array when no data",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/storageManager.test.ts::storageManager loadAll loads saved moods",
+          "name": "storageManager loadAll loads saved moods",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/storageManager.test.ts::storageManager loadAll handles corrupted data gracefully",
+          "name": "storageManager loadAll handles corrupted data gracefully",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/storageManager.test.ts::storageManager loadAll handles non-array data",
+          "name": "storageManager loadAll handles non-array data",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/storageManager.test.ts::storageManager loadAll filters out invalid entries",
+          "name": "storageManager loadAll filters out invalid entries",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/storageManager.test.ts::storageManager clear clears all moods",
+          "name": "storageManager clear clears all moods",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/storageManager.test.ts::storageManager delete deletes specific mood by ID",
+          "name": "storageManager delete deletes specific mood by ID",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Determinism same mood produces identical properties",
+          "name": "moodToShape Determinism same mood produces identical properties",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Determinism different moods produce different properties",
+          "name": "moodToShape Determinism different moods produce different properties",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Determinism case sensitivity affects output",
+          "name": "moodToShape Determinism case sensitivity affects output",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Empty Input Validation (REQUIREMENT #3) throws on empty string",
+          "name": "moodToShape Empty Input Validation (REQUIREMENT #3) throws on empty string",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Empty Input Validation (REQUIREMENT #3) throws on whitespace-only string",
+          "name": "moodToShape Empty Input Validation (REQUIREMENT #3) throws on whitespace-only string",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Empty Input Validation (REQUIREMENT #3) throws on tab and newline",
+          "name": "moodToShape Empty Input Validation (REQUIREMENT #3) throws on tab and newline",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Long Input Handling handles exactly 100 characters",
+          "name": "moodToShape Long Input Handling handles exactly 100 characters",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Long Input Handling truncates input longer than 100 chars",
+          "name": "moodToShape Long Input Handling truncates input longer than 100 chars",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Long Input Handling handles very long mood gracefully",
+          "name": "moodToShape Long Input Handling handles very long mood gracefully",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Valid Shape Properties (REQUIREMENT #4) always produces valid shape type",
+          "name": "moodToShape Valid Shape Properties (REQUIREMENT #4) always produces valid shape type",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Valid Shape Properties (REQUIREMENT #4) always produces valid animation type",
+          "name": "moodToShape Valid Shape Properties (REQUIREMENT #4) always produces valid animation type",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Valid Shape Properties (REQUIREMENT #4) always produces valid pattern type",
+          "name": "moodToShape Valid Shape Properties (REQUIREMENT #4) always produces valid pattern type",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Valid Shape Properties (REQUIREMENT #4) always produces valid hex colors",
+          "name": "moodToShape Valid Shape Properties (REQUIREMENT #4) always produces valid hex colors",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Valid Shape Properties (REQUIREMENT #4) size is within bounds (80-200)",
+          "name": "moodToShape Valid Shape Properties (REQUIREMENT #4) size is within bounds (80-200)",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Valid Shape Properties (REQUIREMENT #4) speed is within bounds (1-10)",
+          "name": "moodToShape Valid Shape Properties (REQUIREMENT #4) speed is within bounds (1-10)",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Special Characters handles emoji in mood",
+          "name": "moodToShape Special Characters handles emoji in mood",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Special Characters handles special characters",
+          "name": "moodToShape Special Characters handles special characters",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Special Characters handles unicode characters",
+          "name": "moodToShape Special Characters handles unicode characters",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Sentiment Analysis positive mood uses warm colors",
+          "name": "moodToShape Sentiment Analysis positive mood uses warm colors",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Sentiment Analysis negative mood uses cool colors",
+          "name": "moodToShape Sentiment Analysis negative mood uses cool colors",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Sentiment Analysis neutral mood when no keywords",
+          "name": "moodToShape Sentiment Analysis neutral mood when no keywords",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Edge Cases single character mood",
+          "name": "moodToShape Edge Cases single character mood",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Edge Cases numeric mood",
+          "name": "moodToShape Edge Cases numeric mood",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/lib/__tests__/moodToShape.test.ts::moodToShape Edge Cases mood with only spaces and one char",
+          "name": "moodToShape Edge Cases mood with only spaces and one char",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodCard.test.tsx::MoodCard renders mood text",
+          "name": "MoodCard renders mood text",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodCard.test.tsx::MoodCard renders canvas with shape",
+          "name": "MoodCard renders canvas with shape",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodCard.test.tsx::MoodCard displays formatted date",
+          "name": "MoodCard displays formatted date",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodCard.test.tsx::MoodCard truncates long mood text visually",
+          "name": "MoodCard truncates long mood text visually",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/ShapeCanvas.test.tsx::ShapeCanvas renders canvas element",
+          "name": "ShapeCanvas renders canvas element",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/ShapeCanvas.test.tsx::ShapeCanvas sets canvas width and height",
+          "name": "ShapeCanvas sets canvas width and height",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/ShapeCanvas.test.tsx::ShapeCanvas uses default dimensions when not provided",
+          "name": "ShapeCanvas uses default dimensions when not provided",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/ShapeCanvas.test.tsx::ShapeCanvas cleans up animator on unmount",
+          "name": "ShapeCanvas cleans up animator on unmount",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/ShapeCanvas.test.tsx::ShapeCanvas re-creates animator when properties change",
+          "name": "ShapeCanvas re-creates animator when properties change",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/ErrorMessage.test.tsx::ErrorMessage displays error message when provided",
+          "name": "ErrorMessage displays error message when provided",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/ErrorMessage.test.tsx::ErrorMessage renders nothing when message is empty",
+          "name": "ErrorMessage renders nothing when message is empty",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/ErrorMessage.test.tsx::ErrorMessage has error styling",
+          "name": "ErrorMessage has error styling",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodInput.test.tsx::MoodInput renders input field",
+          "name": "MoodInput renders input field",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodInput.test.tsx::MoodInput renders submit button",
+          "name": "MoodInput renders submit button",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodInput.test.tsx::MoodInput updates input value on change",
+          "name": "MoodInput updates input value on change",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodInput.test.tsx::MoodInput calls onSubmit with mood text when valid",
+          "name": "MoodInput calls onSubmit with mood text when valid",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodInput.test.tsx::MoodInput Empty Input Validation (REQUIREMENT #3) shows error when submitting empty mood",
+          "name": "MoodInput Empty Input Validation (REQUIREMENT #3) shows error when submitting empty mood",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodInput.test.tsx::MoodInput Empty Input Validation (REQUIREMENT #3) shows error for whitespace-only input",
+          "name": "MoodInput Empty Input Validation (REQUIREMENT #3) shows error for whitespace-only input",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodInput.test.tsx::MoodInput Empty Input Validation (REQUIREMENT #3) does not call onSubmit when empty",
+          "name": "MoodInput Empty Input Validation (REQUIREMENT #3) does not call onSubmit when empty",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodInput.test.tsx::MoodInput clears error when user types after error",
+          "name": "MoodInput clears error when user types after error",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodInput.test.tsx::MoodInput respects maxLength of 100",
+          "name": "MoodInput respects maxLength of 100",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/components/__tests__/MoodInput.test.tsx::MoodInput shows character count",
+          "name": "MoodInput shows character count",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/__tests__/integration.test.tsx::Integration Tests Mood Creation Flow user can input mood and generate shape",
+          "name": "Integration Tests Mood Creation Flow user can input mood and generate shape",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/__tests__/integration.test.tsx::Integration Tests Mood Creation Flow user can save generated mood",
+          "name": "Integration Tests Mood Creation Flow user can save generated mood",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/__tests__/integration.test.tsx::Integration Tests Gallery Flow shows empty state when no moods saved",
+          "name": "Integration Tests Gallery Flow shows empty state when no moods saved",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/__tests__/integration.test.tsx::Integration Tests Gallery Flow displays saved moods",
+          "name": "Integration Tests Gallery Flow displays saved moods",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/__tests__/integration.test.tsx::Integration Tests Gallery Flow can clear all moods",
+          "name": "Integration Tests Gallery Flow can clear all moods",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "/app/repository_after/src/__tests__/integration.test.tsx::Integration Tests Persistence moods persist across page reloads",
+          "name": "Integration Tests Persistence moods persist across page reloads",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 66,
+        "passed": 66,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "",
+      "stderr": "PASS src/utils/__tests__/hash.test.ts\nPASS src/lib/__tests__/storageManager.test.ts\n  \u25cf Console\n\n    console.warn\n      Failed to load storage, clearing: SyntaxError: Unexpected token 'i', \"invalid json\" is not valid JSON\n          at JSON.parse (<anonymous>)\n          at Object.loadAll (/app/repository_after/src/lib/storageManager.ts:24:27)\n          at Object.<anonymous> (/app/repository_after/src/lib/__tests__/storageManager.test.ts:90:36)\n          at Promise.then.completed (/app/repository_after/node_modules/jest-circus/build/utils.js:298:28)\n          at new Promise (<anonymous>)\n          at callAsyncCircusFn (/app/repository_after/node_modules/jest-circus/build/utils.js:231:10)\n          at _callCircusTest (/app/repository_after/node_modules/jest-circus/build/run.js:316:40)\n          at processTicksAndRejections (node:internal/process/task_queues:95:5)\n          at _runTest (/app/repository_after/node_modules/jest-circus/build/run.js:252:3)\n          at _runTestsForDescribeBlock (/app/repository_after/node_modules/jest-circus/build/run.js:126:9)\n          at _runTestsForDescribeBlock (/app/repository_after/node_modules/jest-circus/build/run.js:121:9)\n          at _runTestsForDescribeBlock (/app/repository_after/node_modules/jest-circus/build/run.js:121:9)\n          at run (/app/repository_after/node_modules/jest-circus/build/run.js:71:3)\n          at runAndTransformResultsToJestFormat (/app/repository_after/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)\n          at jestAdapter (/app/repository_after/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)\n          at runTestInternal (/app/repository_after/node_modules/jest-runner/build/runTest.js:367:16)\n          at runTest (/app/repository_after/node_modules/jest-runner/build/runTest.js:444:34)\n          at Object.worker (/app/repository_after/node_modules/jest-runner/build/testWorker.js:106:12)\n\n    \u001b[0m \u001b[90m 39 |\u001b[39m       )\u001b[33m;\u001b[39m\n     \u001b[90m 40 |\u001b[39m     } \u001b[36mcatch\u001b[39m (error) {\n    \u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 41 |\u001b[39m       console\u001b[33m.\u001b[39mwarn(\u001b[32m'Failed to load storage, clearing:'\u001b[39m\u001b[33m,\u001b[39m error)\u001b[33m;\u001b[39m\n     \u001b[90m    |\u001b[39m               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n     \u001b[90m 42 |\u001b[39m       \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mclear()\u001b[33m;\u001b[39m\n     \u001b[90m 43 |\u001b[39m       \u001b[36mreturn\u001b[39m []\u001b[33m;\u001b[39m\n     \u001b[90m 44 |\u001b[39m     }\u001b[0m\n\n      at Object.loadAll (src/lib/storageManager.ts:41:15)\n      at Object.<anonymous> (src/lib/__tests__/storageManager.test.ts:90:36)\n\n    console.warn\n      Invalid storage data, clearing\n\n    \u001b[0m \u001b[90m 25 |\u001b[39m       \n     \u001b[90m 26 |\u001b[39m       \u001b[36mif\u001b[39m (\u001b[33m!\u001b[39m\u001b[33mArray\u001b[39m\u001b[33m.\u001b[39misArray(parsed)) {\n    \u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 27 |\u001b[39m         console\u001b[33m.\u001b[39mwarn(\u001b[32m'Invalid storage data, clearing'\u001b[39m)\u001b[33m;\u001b[39m\n     \u001b[90m    |\u001b[39m                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n     \u001b[90m 28 |\u001b[39m         \u001b[36mthis\u001b[39m\u001b[33m.\u001b[39mclear()\u001b[33m;\u001b[39m\n     \u001b[90m 29 |\u001b[39m         \u001b[36mreturn\u001b[39m []\u001b[33m;\u001b[39m\n     \u001b[90m 30 |\u001b[39m       }\u001b[0m\n\n      at Object.loadAll (src/lib/storageManager.ts:27:17)\n      at Object.<anonymous> (src/lib/__tests__/storageManager.test.ts:97:36)\n\nPASS src/lib/__tests__/moodToShape.test.ts\nPASS src/components/__tests__/MoodCard.test.tsx (5.218 s)\nPASS src/components/__tests__/ShapeCanvas.test.tsx (5.85 s)\nPASS src/components/__tests__/ErrorMessage.test.tsx\nPASS src/components/__tests__/MoodInput.test.tsx (6.389 s)\nPASS src/__tests__/integration.test.tsx (6.81 s)\n  \u25cf Console\n\n    console.warn\n      \u26a0\ufe0f React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.\n\n    \u001b[0m \u001b[90m 12 |\u001b[39m   describe(\u001b[32m'Mood Creation Flow'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n     \u001b[90m 13 |\u001b[39m     test(\u001b[32m'user can input mood and generate shape'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n    \u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 14 |\u001b[39m       render(\n     \u001b[90m    |\u001b[39m             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n     \u001b[90m 15 |\u001b[39m         \u001b[33m<\u001b[39m\u001b[33mBrowserRouter\u001b[39m\u001b[33m>\u001b[39m\n     \u001b[90m 16 |\u001b[39m           \u001b[33m<\u001b[39m\u001b[33mHomePage\u001b[39m \u001b[33m/\u001b[39m\u001b[33m>\u001b[39m\n     \u001b[90m 17 |\u001b[39m         \u001b[33m<\u001b[39m\u001b[33m/\u001b[39m\u001b[33mBrowserRouter\u001b[39m\u001b[33m>\u001b[39m\u001b[0m\n\n      at warn (node_modules/react-router/lib/deprecations.ts:9:13)\n      at warnOnce (node_modules/react-router/lib/deprecations.ts:14:3)\n      at Object.logDeprecation [as UNSAFE_logV6DeprecationWarnings] (node_modules/react-router/lib/deprecations.ts:26:5)\n      at logV6DeprecationWarnings (node_modules/react-router-dom/index.tsx:816:25)\n      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)\n      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)\n      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)\n      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)\n      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)\n      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)\n      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)\n      at node_modules/react-dom/cjs/react-dom.development.js:26808:9\n      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)\n      at act (node_modules/react/cjs/react.development.js:2582:11)\n      at node_modules/@testing-library/react/dist/act-compat.js:47:25\n      at renderRoot (node_modules/@testing-library/react/dist/pure.js:180:26)\n      at render (node_modules/@testing-library/react/dist/pure.js:271:10)\n      at Object.<anonymous> (src/__tests__/integration.test.tsx:14:13)\n\n    console.warn\n      \u26a0\ufe0f React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.\n\n    \u001b[0m \u001b[90m 12 |\u001b[39m   describe(\u001b[32m'Mood Creation Flow'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n     \u001b[90m 13 |\u001b[39m     test(\u001b[32m'user can input mood and generate shape'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n    \u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 14 |\u001b[39m       render(\n     \u001b[90m    |\u001b[39m             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n     \u001b[90m 15 |\u001b[39m         \u001b[33m<\u001b[39m\u001b[33mBrowserRouter\u001b[39m\u001b[33m>\u001b[39m\n     \u001b[90m 16 |\u001b[39m           \u001b[33m<\u001b[39m\u001b[33mHomePage\u001b[39m \u001b[33m/\u001b[39m\u001b[33m>\u001b[39m\n     \u001b[90m 17 |\u001b[39m         \u001b[33m<\u001b[39m\u001b[33m/\u001b[39m\u001b[33mBrowserRouter\u001b[39m\u001b[33m>\u001b[39m\u001b[0m\n\n      at warn (node_modules/react-router/lib/deprecations.ts:9:13)\n      at warnOnce (node_modules/react-router/lib/deprecations.ts:14:3)\n      at Object.logDeprecation [as UNSAFE_logV6DeprecationWarnings] (node_modules/react-router/lib/deprecations.ts:37:5)\n      at logV6DeprecationWarnings (node_modules/react-router-dom/index.tsx:816:25)\n      at commitHookEffectListMount (node_modules/react-dom/cjs/react-dom.development.js:23189:26)\n      at commitPassiveMountOnFiber (node_modules/react-dom/cjs/react-dom.development.js:24970:11)\n      at commitPassiveMountEffects_complete (node_modules/react-dom/cjs/react-dom.development.js:24930:9)\n      at commitPassiveMountEffects_begin (node_modules/react-dom/cjs/react-dom.development.js:24917:7)\n      at commitPassiveMountEffects (node_modules/react-dom/cjs/react-dom.development.js:24905:3)\n      at flushPassiveEffectsImpl (node_modules/react-dom/cjs/react-dom.development.js:27078:3)\n      at flushPassiveEffects (node_modules/react-dom/cjs/react-dom.development.js:27023:14)\n      at node_modules/react-dom/cjs/react-dom.development.js:26808:9\n      at flushActQueue (node_modules/react/cjs/react.development.js:2667:24)\n      at act (node_modules/react/cjs/react.development.js:2582:11)\n      at node_modules/@testing-library/react/dist/act-compat.js:47:25\n      at renderRoot (node_modules/@testing-library/react/dist/pure.js:180:26)\n      at render (node_modules/@testing-library/react/dist/pure.js:271:10)\n      at Object.<anonymous> (src/__tests__/integration.test.tsx:14:13)\n\n\nTest Suites: 8 passed, 8 total\nTests:       66 passed, 66 total\nSnapshots:   0 total\nTime:        13.029 s\nRan all test suites.\nTest results written to: ../../tmp/tmp2eqy0gjq.json\n"
+    },
+    "comparison": {
+      "before_tests_passed": true,
+      "after_tests_passed": true,
+      "before_total": 0,
+      "before_passed": 0,
+      "before_failed": 0,
+      "after_total": 66,
+      "after_passed": 66,
+      "after_failed": 0
+    }
+  }
+}

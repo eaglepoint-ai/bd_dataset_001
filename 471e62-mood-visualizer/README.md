@@ -17,15 +17,23 @@ Open http://localhost:3000
 ### Option 2: Docker
 
 ```bash
-# Run evaluation (tests + reports)
-docker-compose up
+# Build image
+docker compose build
 
-# Run frontend dev server
-docker-compose up frontend
+# Run tests (before - expected some failures)
+docker compose run --rm app sh /usr/local/bin/run-tests-before.sh
 
-# Run tests only
-docker-compose up test
+# Run tests (after - expected all pass)
+docker compose run --rm app sh /usr/local/bin/run-tests-after.sh
+
+# Run evaluation (compares both implementations)
+docker compose run --rm app python3 evaluation/evaluation.py
 ```
+
+This will:
+- Run tests for both before and after implementations
+- Run structure and equivalence tests
+- Generate a report at `evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json`
 
 ## Requirements
 
@@ -71,19 +79,16 @@ repository_after/
 - Jest + React Testing Library
 - Canvas API for animations
 
-## Docker Services
-
-- `evaluation` - Runs tests and generates reports
-- `frontend` - Dev server (port 3000)
-- `test` - Jest test suite
-- `build` - Production build
-
 ## Evaluation
 
-After running `docker-compose up`, check the report:
+After running the evaluation, check the report:
 
 ```bash
-cat evaluation/reports/latest.json
+# View the latest report
+docker compose run --rm app cat evaluation/reports/latest.json
+
+# View a specific timestamped report
+docker compose run --rm app cat evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
 ```
 
 Success means `"success": true` and all tests passed.
