@@ -1,0 +1,8 @@
+{
+  "instance_id": "085709",
+  "problem_statement": "Design and implement a C++20 class named FastBuffer that manages a heap-allocated integer array with maximum performance and minimal abstraction overhead. The class must rely solely on raw pointers and manual resource management while supporting safe and efficient move semantics. To stress low-level C++ knowledge, the implementation must avoid standard utility facilities, forbid conditional if statements, and require explicit control over object lifetimes, self-assignment safety, and rvalue casting—all while guaranteeing that moved-from objects remain destructible without memory leaks",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/085709-High_performance_move_only_buffer_with_manual_swap",
+  "environment_setup": "Dockerfile"
+}
