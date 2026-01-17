@@ -60,13 +60,17 @@ function getEnvironmentInfo() {
   };
 }
 
-async function runCommand(cmd, args, cwd) {
+async function runCommand(cmd, args, cwd = undefined) {
   return new Promise((resolve, reject) => {
     console.log(`\n${"=".repeat(60)}`);
     console.log(`RUNNING COMMAND: ${cmd} ${args.join(" ")}`);
     console.log(`${"=".repeat(60)}`);
 
-    const child = spawn(cmd, args, { cwd: cwd, shell: true });
+    const spawnOptions = { shell: true };
+    if (cwd) {
+      spawnOptions.cwd = cwd;
+    }
+    const child = spawn(cmd, args, spawnOptions);
 
     let stdout = "";
     let stderr = "";
@@ -177,22 +181,28 @@ async function main() {
 
   const projectRoot = path.resolve(__dirname, "..");
 
-  let cmd = "docker-compose";
-  let args = [
-    "run",
-    "--rm",
-    "tests",
-    "bun",
-    "x",
-    "vitest",
-    "run",
-    "--reporter=json",
-  ];
-  let cwd = projectRoot;
+  let cmd, args, cwd;
+
   if (process.env.RUNNING_IN_DOCKER) {
+    // When running inside Docker, use simple commands without paths.
+    // The working directory is set by WORKDIR in Dockerfile.
     cmd = "bun";
     args = ["x", "vitest", "run", "--reporter=json"];
-    cwd = "/app";
+    cwd = undefined; // Rely on Dockerfile's WORKDIR
+  } else {
+    // When running locally, use docker-compose
+    cmd = "docker-compose";
+    args = [
+      "run",
+      "--rm",
+      "tests",
+      "bun",
+      "x",
+      "vitest",
+      "run",
+      "--reporter=json",
+    ];
+    cwd = projectRoot;
   }
 
   let success = false;
