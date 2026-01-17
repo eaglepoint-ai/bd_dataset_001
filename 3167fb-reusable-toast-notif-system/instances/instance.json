@@ -1,0 +1,9 @@
+{
+    "instance_id": "3167fb",
+    "problem_statement": "A Vue 3 application requires a centralized, reusable toast notification system built with TypeScript and the Composition API, featuring a reactive global store to manage a queue of notifications and a `useToast` composable that exposes a type-safe API for triggering alerts from any component or store. The core rendering must be handled by a `ToastContainer` component that displays notifications in configurable screen positions, applying smooth enter/leave animations via Vue's Transition system. Each notification in the queue must support configurable properties like type, duration, and content, ensuring the system is non-invasive and provides automatic dismissal based on individual timing.",
+    "base_commit": "repository_before",
+    "test_patch": "tests/",
+    "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/3167fb-reusable-toast-notif-system",
+    "environment_setup": "Dockerfile"
+  }
+  
