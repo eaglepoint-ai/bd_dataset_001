@@ -1,0 +1,22 @@
+services:
+  run_before:
+    build: .
+    command: npx mocha tests/productSearch.before.test.js
+    volumes:
+      - .:/app:z
+    working_dir: /app
+
+  run_after:
+    build: .
+    command: npx mocha tests/productSearch.after.test.js
+    volumes:
+      - .:/app:z
+    working_dir: /app
+
+  evaluation:
+    build: .
+    command: node evaluation/evaluation.js
+    volumes:
+      - .:/app:z
+    working_dir: /app
+

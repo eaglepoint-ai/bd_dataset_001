@@ -1,0 +1,25 @@
+# Node/npm
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Test & coverage
+coverage/
+*.lcov
+
+# Build outputs
+dist/
+build/
+tmp/
+
+# Reports and evaluation outputs
+evaluation/reports/*
+!evaluation/reports/.gitignore
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
