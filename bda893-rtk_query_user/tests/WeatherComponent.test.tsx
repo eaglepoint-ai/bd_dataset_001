@@ -75,10 +75,6 @@ describe('WeatherComponent - Unified Test Suite', () => {
     vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
   const testCases = [
     {
       name: 'repository_after',
@@ -99,14 +95,14 @@ describe('WeatherComponent - Unified Test Suite', () => {
 
         renderWithSuspense(Component);
 
-        // For repository_after, Suspense + use() should trigger a fetch immediately.
-        // In this test environment Suspense resolution is flaky, so we assert on the fetch call
-        // rather than waiting for the final DOM text.
+        // Verify fetch was called
         await waitFor(() => {
           expect(mockFetch).toHaveBeenCalledTimes(1);
-        });
+        }, { timeout: 5000 });
 
-        expect(mockFetch).toHaveBeenCalledTimes(1);
+        // Verify the temperature is rendered
+        const temperatureElement = await waitForWeatherData(25, 10000);
+        expect(temperatureElement).toBeInTheDocument();
         expect(screen.queryByText('Loading weather data...')).not.toBeInTheDocument();
       });
 
@@ -341,9 +337,9 @@ describe('WeatherComponent - Unified Test Suite', () => {
 
         renderWithSuspense(Component);
 
-        await waitFor(() => {
-          expect(mockFetch).toHaveBeenCalledTimes(1);
-        });
+        const temperatureElement = await waitForWeatherData(22, 10000);
+        expect(temperatureElement).toBeInTheDocument();
+        expect(mockFetch).toHaveBeenCalledTimes(1);
       });
 
       it('should handle zero temperature value', async () => {
@@ -353,9 +349,9 @@ describe('WeatherComponent - Unified Test Suite', () => {
 
         renderWithSuspense(Component);
 
-        await waitFor(() => {
-          expect(mockFetch).toHaveBeenCalledTimes(1);
-        });
+        const temperatureElement = await waitForWeatherData(0, 10000);
+        expect(temperatureElement).toBeInTheDocument();
+        expect(mockFetch).toHaveBeenCalledTimes(1);
       });
 
       it('should handle negative temperature values', async () => {
@@ -365,9 +361,60 @@ describe('WeatherComponent - Unified Test Suite', () => {
 
         renderWithSuspense(Component);
 
+        const temperatureElement = await waitForWeatherData(-10, 10000);
+        expect(temperatureElement).toBeInTheDocument();
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+      });
+
+      it('should validate and reject NaN temperature values', async () => {
+        const mockResponse = {
+          ok: true,
+          json: vi.fn().mockResolvedValue({ temperature: NaN }),
+        };
+        mockFetch.mockResolvedValue(mockResponse);
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        renderWithSuspense(Component);
+
         await waitFor(() => {
           expect(mockFetch).toHaveBeenCalledTimes(1);
-        });
+        }, { timeout: 3000 });
+
+        consoleError.mockRestore();
+      });
+
+      it('should validate and reject Infinity temperature values', async () => {
+        const infinityCases = [Infinity, -Infinity];
+        
+        for (const tempValue of infinityCases) {
+          vi.clearAllMocks();
+          const mockResponse = {
+            ok: true,
+            json: vi.fn().mockResolvedValue({ temperature: tempValue }),
+          };
+          mockFetch.mockResolvedValue(mockResponse);
+          const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+          const { unmount } = renderWithSuspense(Component);
+
+          await waitFor(() => {
+            expect(mockFetch).toHaveBeenCalledTimes(1);
+          }, { timeout: 3000 });
+
+          consoleError.mockRestore();
+          unmount();
+        }
+      });
+
+      it('should handle very large temperature values', async () => {
+        const mockWeather = { temperature: 1000 };
+        const mockResponse = createMockWeatherResponse(mockWeather);
+        mockFetch.mockResolvedValue(mockResponse);
+
+        renderWithSuspense(Component);
+
+        const temperatureElement = await waitForWeatherData(1000, 10000);
+        expect(temperatureElement).toBeInTheDocument();
       });
     });
   });

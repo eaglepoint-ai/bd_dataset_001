@@ -14,7 +14,7 @@ const fetchWeather = async (): Promise<WeatherData> => {
   
   const data = await response.json();
   
-  if (!data || typeof data.temperature !== 'number') {
+  if (!data || typeof data.temperature !== 'number' || isNaN(data.temperature) || !isFinite(data.temperature)) {
     throw new Error('Invalid weather data received from API');
   }
   
