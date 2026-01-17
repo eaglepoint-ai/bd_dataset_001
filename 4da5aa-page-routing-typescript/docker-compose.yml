@@ -14,3 +14,11 @@ services:
     environment:
       - TS_NODE_PROJECT=tsconfig.before.json
     command: npm test
+
+  evaluation:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      - TS_NODE_PROJECT=tsconfig.after.json
+    command: npx ts-node evaluation/evaluation.ts

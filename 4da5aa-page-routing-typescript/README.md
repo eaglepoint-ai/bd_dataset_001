@@ -35,3 +35,10 @@ docker compose run --rm app-after npm test
 **Expected behavior:**
 - Functional tests: ✅ PASS (implementation complete)
 
+### Run evaluation
+```bash
+docker compose run --rm evaluation
+```
+
+**Expected behavior:**
+- Generates a comparison report in `evaluation/<date>/<time>/report.json`
