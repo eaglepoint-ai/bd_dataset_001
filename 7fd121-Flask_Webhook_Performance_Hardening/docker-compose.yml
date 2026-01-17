@@ -1,6 +1,29 @@
 services:
-  app:
+  test-before:
     build: .
-    command: pytest -q tests
+    container_name: test-before
+    environment:
+      - TARGET_REPOSITORY=repository_before
+      - WEBHOOK_SECRET=test-secret
+    command: pytest -v tests
+    volumes:
+      - .:/app
+
+  test-after:
+    build: .
+    container_name: test-after
+    environment:
+      - TARGET_REPOSITORY=repository_after
+      - WEBHOOK_SECRET=test-secret
+    command: pytest -v tests
+    volumes:
+      - .:/app
+
+  evaluation:
+    build: .
+    container_name: evaluation
+    environment:
+      - WEBHOOK_SECRET=test-secret
+    command: python evaluation/evaluation.py
     volumes:
       - .:/app
