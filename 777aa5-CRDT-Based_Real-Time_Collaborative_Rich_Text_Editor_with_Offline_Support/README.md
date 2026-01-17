@@ -231,10 +231,7 @@ docker-compose down
 docker-compose up -d
 ```
 
-## License
+## Report
+Reports are generated in evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json
 
-MIT
 
-## Contributing
-
-This is a ByteDance training benchmark. See `trajectory/trajectory.md` for implementation reasoning and learning objectives.

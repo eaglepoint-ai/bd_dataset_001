@@ -142,30 +142,66 @@ function runEvaluation() {
 }
 
 function main() {
-    const report = runEvaluation();
-    
-    // Generate reports in timestamped directory structure
-    const now = new Date();
-    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
-    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
-    const reportDir = path.join(__dirname, 'reports', dateStr, timeStr);
-    
-    fs.mkdirSync(reportDir, { recursive: true });
-    
-    const reportPath = path.join(reportDir, 'report.json');
-    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    
-    console.log(`\n📄 Report written to ${reportPath}`);
-    
-    // Print summary
-    console.log('\n' + '='.repeat(60));
-    console.log(`EVALUATION RESULT: ${report.success ? 'PASS' : 'FAIL'}`);
-    console.log('='.repeat(60));
-    console.log(`Success: ${report.success}`);
-    console.log(`Duration: ${report.duration_seconds.toFixed(2)}s`);
-    console.log('='.repeat(60) + '\n');
-    
-    return report.success ? 0 : 1;
+    try {
+        const report = runEvaluation();
+        
+        // Generate reports in timestamped directory structure
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+        const reportDir = path.join(__dirname, 'reports', dateStr, timeStr);
+        
+        fs.mkdirSync(reportDir, { recursive: true });
+        
+        const reportPath = path.join(reportDir, 'report.json');
+        fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+        
+        console.log(`\n📄 Report written to ${reportPath}`);
+        
+        // Print summary
+        console.log('\n' + '='.repeat(60));
+        console.log(`✅ Evaluation complete`);
+        console.log(`🎯 Success: ${report.success}`);
+        console.log(`⏱️  Duration: ${report.duration_seconds.toFixed(2)}s`);
+        console.log('='.repeat(60) + '\n');
+        
+        return report.success ? 0 : 1;
+    } catch (error) {
+        // Catastrophic failure - generate error report
+        console.error(`❌ Evaluation failed catastrophically: ${error.message}`);
+        console.error(error.stack);
+        
+        try {
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+            const reportDir = path.join(__dirname, 'reports', dateStr, timeStr);
+            
+            fs.mkdirSync(reportDir, { recursive: true });
+            
+            const errorReport = {
+                run_id: randomUUID(),
+                started_at: now.toISOString(),
+                finished_at: now.toISOString(),
+                duration_seconds: 0,
+                environment: environmentInfo(),
+                before: null,
+                after: null,
+                comparison: null,
+                success: false,
+                error: `Catastrophic failure: ${error.message}\n${error.stack}`
+            };
+            
+            const reportPath = path.join(reportDir, 'report.json');
+            fs.writeFileSync(reportPath, JSON.stringify(errorReport, null, 2));
+            
+            console.log(`\n📄 Error report written to ${reportPath}`);
+        } catch (writeError) {
+            console.error(`Failed to write error report: ${writeError.message}`);
+        }
+        
+        return 1;
+    }
 }
 
 if (require.main === module) {
