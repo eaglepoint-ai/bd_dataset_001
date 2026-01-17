@@ -1,10 +1,5 @@
 #!/usr/bin/env node
 
-/**
- * Evaluation runner for Order Service Refactor.
- * Clean version: No git errors, no real-time log clutter.
- */
-
 const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
@@ -13,15 +8,17 @@ const crypto = require("crypto");
 
 // --- CONFIGURATION ---
 const ROOT_DIR = path.resolve(__dirname, "..");
-const TEST_SUITE_PATH = path.join(ROOT_DIR, "tests", "test-suite.js");
 
+// FIX: Configuration now maps specific test files to specific scenarios
 const TARGETS = {
   before: {
-    path: path.join("..", "repository_before", "order.service.js"),
+    // Matches: tests/test-before-repository-suite.js
+    testFile: path.join(ROOT_DIR, "tests", "test-before-repository-suite.js"),
     label: "Before (Unoptimized)",
   },
   after: {
-    path: path.join("..", "repository_after", "order.service.js"),
+    // Matches: tests/test-after-repository-suite.js
+    testFile: path.join(ROOT_DIR, "tests", "test-after-repository-suite.js"),
     label: "After (Optimized)",
   },
 };
@@ -35,7 +32,6 @@ function generateRunId() {
 function getGitInfo() {
   const info = { commit: "unknown", branch: "unknown" };
   try {
-    // FIX: added { stdio: 'pipe' } to prevent "/bin/sh: git: not found" from printing
     info.commit = require("child_process")
       .execSync("git rev-parse HEAD", { timeout: 1000, stdio: "pipe" })
       .toString()
@@ -68,20 +64,20 @@ function getEnvironmentInfo() {
 }
 
 /**
- * Runs the test suite against a specific target file
+ * Runs the specific test suite file
  */
-function runTestSuite(targetLabel, targetPathRelative) {
+function runTestSuite(targetLabel, testFilePath) {
   return new Promise((resolve) => {
-    // We remove the console logs here to keep the output clean
-    // console.log(`Running: ${targetLabel}...`);
+    // FIX: Added logging so you can see progress immediately
+    console.log(`\n▶ Running: ${targetLabel}`);
+    console.log(`  File: ${path.relative(ROOT_DIR, testFilePath)}`);
 
     const startTime = Date.now();
 
-    const env = { ...process.env, TEST_TARGET: targetPathRelative };
-
-    const child = spawn("node", [TEST_SUITE_PATH], {
+    // Spawn the specific test file
+    const child = spawn("node", [testFilePath], {
       cwd: ROOT_DIR,
-      env: env,
+      env: process.env, // Pass current env
       stdio: "pipe",
     });
 
@@ -91,17 +87,26 @@ function runTestSuite(targetLabel, targetPathRelative) {
     child.stdout.on("data", (data) => {
       const str = data.toString();
       stdout += str;
-      // FIX: Removed process.stdout.write(str) so logs don't clutter the screen
+      // Optional: Uncomment the next line if you want to see test logs in real-time
+      // process.stdout.write(str);
     });
 
     child.stderr.on("data", (data) => {
       const str = data.toString();
       stderr += str;
-      // FIX: Removed process.stderr.write(str)
+      // FIX: Always print errors so you know if files are missing
+      process.stderr.write(str);
     });
 
     child.on("close", (code) => {
       const duration = (Date.now() - startTime) / 1000;
+
+      // If the process failed, we should know why immediately
+      if (code !== 0) {
+        console.log(`  ⚠️  Process exited with code ${code}`);
+        if (!stderr && !stdout) console.log("  ⚠️  No output received.");
+      }
+
       const results = parseTestOutput(stdout);
 
       resolve({
@@ -119,8 +124,9 @@ function runTestSuite(targetLabel, targetPathRelative) {
 function parseTestOutput(output) {
   const tests = [];
   const lines = output.split("\n");
-  const testLineRegex = /^(.*?)\s\.\.\.\s(✅ PASS|❌ FAIL)/;
-  const summaryRegex = /TEST SUMMARY: (\d+)\/(\d+) Passed/;
+  // Adjust these regexes depending on how your specific test files output data
+  const testLineRegex = /^(.*?)\s\.\.\.\s(✅ PASS|❌ FAIL|passed|failed)/i;
+  const summaryRegex = /TEST SUMMARY: (\d+)\/(\d+) Passed/i;
 
   let totalParsed = 0;
   let passedParsed = 0;
@@ -130,7 +136,7 @@ function parseTestOutput(output) {
     if (match) {
       tests.push({
         name: match[1].trim(),
-        outcome: match[2].includes("PASS") ? "passed" : "failed",
+        outcome: match[2].toLowerCase().includes("pass") ? "passed" : "failed",
       });
     }
 
@@ -139,6 +145,12 @@ function parseTestOutput(output) {
       passedParsed = parseInt(sumMatch[1], 10);
       totalParsed = parseInt(sumMatch[2], 10);
     }
+  }
+
+  // Fallback if regex didn't catch specific summary lines (common in custom test runners)
+  if (totalParsed === 0 && tests.length > 0) {
+    totalParsed = tests.length;
+    passedParsed = tests.filter((t) => t.outcome === "passed").length;
   }
 
   return {
@@ -157,7 +169,11 @@ function generateReportPath() {
   const timeStr = now.toTimeString().split(" ")[0].replace(/:/g, "-");
 
   const reportDir = path.join(ROOT_DIR, "evaluation");
-  fs.mkdirSync(reportDir, { recursive: true });
+
+  // Ensure directory exists
+  if (!fs.existsSync(reportDir)) {
+    fs.mkdirSync(reportDir, { recursive: true });
+  }
 
   return path.join(reportDir, "report.json");
 }
@@ -169,13 +185,16 @@ async function main() {
   const startedAt = new Date();
 
   try {
+    // Run Before Suite
     const beforeResult = await runTestSuite(
       TARGETS.before.label,
-      TARGETS.before.path
+      TARGETS.before.testFile
     );
+
+    // Run After Suite
     const afterResult = await runTestSuite(
       TARGETS.after.label,
-      TARGETS.after.path
+      TARGETS.after.testFile
     );
 
     const finishedAt = new Date();
@@ -210,9 +229,16 @@ async function main() {
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
     console.log("\n✅ Evaluation Completed successfully!");
-    console.log(`\n📄 Report saved to: ${reportPath}`);
+    console.log(`📄 Report saved to: ${reportPath}`);
 
-    process.exit(afterResult.success ? 0 : 1);
+    // Check if we actually ran tests
+    if (beforeResult.results.summary.total === 0) {
+      console.warn(
+        "\n⚠️  WARNING: No tests were detected in the 'Before' suite. Check file paths."
+      );
+    }
+
+    process.exit(afterResult.success && beforeResult.success ? 0 : 1);
   } catch (error) {
     console.error("\n❌ CRITICAL ERROR:", error);
     process.exit(1);

@@ -1,10 +1,4 @@
-const path = require("path");
-const servicePath = process.env.TEST_TARGET
-  ? path.resolve(__dirname, process.env.TEST_TARGET)
-  : "./order.service";
-
-console.log(`\n🔍 Testing Service: ${servicePath}\n`);
-const OrderService = require(servicePath);
+const OrderService = require("../repository_after/order.service");
 
 const assert = require("assert");
 const { performance } = require("perf_hooks");

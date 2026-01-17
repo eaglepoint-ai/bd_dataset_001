@@ -4,7 +4,3 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
-      - ./tests:/app/tests
-      - ./repository_before:/app/repository_before
-      - ./repository_after:/app/repository_after
-    command: ["node", "tests/test-suite.js"]
