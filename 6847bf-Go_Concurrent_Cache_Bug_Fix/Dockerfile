@@ -1,7 +1,6 @@
 FROM golang:1.21
 WORKDIR /app
-COPY repository_before/ .
+COPY ./ .
 RUN go mod tidy
-RUN go build -race -o cache_app .
-CMD ["./cache_app"]
+CMD [ "echo", "Go Concurrent Cache Bug Fix Docker Container" ]
 
