@@ -64,7 +64,7 @@ def test_list_todos(client):
     # Create a few todos first
     client.post("/todos", json={"title": "Todo 1"})
     client.post("/todos", json={"title": "Todo 2"})
-
+    
     response = client.get("/todos")
     assert response.status_code == 200
     todos = response.json()
@@ -77,7 +77,7 @@ def test_get_todo(client):
     # Create a todo
     create_response = client.post("/todos", json={"title": "Get Me"})
     todo_id = create_response.json()["id"]
-
+    
     # Get it
     response = client.get(f"/todos/{todo_id}")
     assert response.status_code == 200
@@ -97,7 +97,7 @@ def test_update_todo(client):
     # Create a todo
     create_response = client.post("/todos", json={"title": "Original"})
     todo_id = create_response.json()["id"]
-
+    
     # Update it
     response = client.put(
         f"/todos/{todo_id}", json={"title": "Updated", "completed": True}
@@ -113,14 +113,14 @@ def test_patch_todo(client):
     # Create a todo
     create_response = client.post("/todos", json={"title": "Original"})
     todo_id = create_response.json()["id"]
-
+    
     # Patch only completed
     response = client.patch(f"/todos/{todo_id}", json={"completed": True})
     assert response.status_code == 200
     data = response.json()
     assert data["title"] == "Original"
     assert data["completed"] is True
-
+    
     # Patch only title
     response = client.patch(f"/todos/{todo_id}", json={"title": "Patched Title"})
     assert response.status_code == 200
@@ -133,7 +133,7 @@ def test_patch_empty_body(client):
     """Test that PATCH with empty body fails."""
     create_response = client.post("/todos", json={"title": "Test"})
     todo_id = create_response.json()["id"]
-
+    
     response = client.patch(f"/todos/{todo_id}", json={})
     assert response.status_code == 400
 
@@ -143,11 +143,11 @@ def test_delete_todo(client):
     # Create a todo
     create_response = client.post("/todos", json={"title": "Delete Me"})
     todo_id = create_response.json()["id"]
-
+    
     # Delete it
     response = client.delete(f"/todos/{todo_id}")
     assert response.status_code == 204
-
+    
     # Verify it's gone
     get_response = client.get(f"/todos/{todo_id}")
     assert get_response.status_code == 404
@@ -164,7 +164,7 @@ def test_list_todos_pagination(client):
     # Create multiple todos
     for i in range(5):
         client.post("/todos", json={"title": f"Todo {i}"})
-
+    
     # Test offset and limit
     response = client.get("/todos?offset=2&limit=2")
     assert response.status_code == 200
