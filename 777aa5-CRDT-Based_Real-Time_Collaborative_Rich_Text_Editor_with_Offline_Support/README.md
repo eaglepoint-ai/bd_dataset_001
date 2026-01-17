@@ -95,7 +95,8 @@ docker-compose run --rm run_after
 
 ```bash
 # Run full evaluation (tests + performance gates)
-docker-compose run --rm evaluation
+docker-compose run --rm --build evaluation
+
 
 # Or locally
 cd repository_after
