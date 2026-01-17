@@ -1,0 +1,334 @@
+diff --git a/repository_after/__pycache__/__init__.cpython-311.pyc b/repository_after/__pycache__/__init__.cpython-311.pyc
+new file mode 100644
+index 0000000..f63f4bc
+Binary files /dev/null and b/repository_after/__pycache__/__init__.cpython-311.pyc differ
+diff --git a/repository_after/__pycache__/console.cpython-311.pyc b/repository_after/__pycache__/console.cpython-311.pyc
+new file mode 100644
+index 0000000..fdd3c1b
+Binary files /dev/null and b/repository_after/__pycache__/console.cpython-311.pyc differ
+diff --git a/repository_after/__pycache__/test_console.cpython-311-pytest-9.0.2.pyc b/repository_after/__pycache__/test_console.cpython-311-pytest-9.0.2.pyc
+new file mode 100644
+index 0000000..8922ee4
+Binary files /dev/null and b/repository_after/__pycache__/test_console.cpython-311-pytest-9.0.2.pyc differ
+diff --git a/repository_after/test_console.py b/repository_after/test_console.py
+new file mode 100644
+index 0000000..4d38254
+--- /dev/null
++++ b/repository_after/test_console.py
+@@ -0,0 +1,315 @@
++#!/usr/bin/python3
++"""
++Comprehensive unittest suite for HBNBCommand class
++"""
++import unittest
++from unittest.mock import patch, MagicMock
++import sys
++import io
++
++# Mock the models module before importing console
++sys.modules['models'] = MagicMock()
++sys.modules['models.base_model'] = MagicMock()
++sys.modules['models.amenity'] = MagicMock()
++sys.modules['models.city'] = MagicMock()
++sys.modules['models.place'] = MagicMock()
++sys.modules['models.review'] = MagicMock()
++sys.modules['models.state'] = MagicMock()
++sys.modules['models.user'] = MagicMock()
++
++# Create mock classes for the models
++class MockBaseModel:
++    def __init__(self):
++        self.id = "mock-id"
++    def save(self):
++        pass
++
++class MockUser:
++    def __init__(self):
++        self.id = "mock-id"
++    def save(self):
++        pass
++
++class MockState:
++    def __init__(self):
++        self.id = "mock-id"
++    def save(self):
++        pass
++
++class MockCity:
++    def __init__(self):
++        self.id = "mock-id"
++    def save(self):
++        pass
++
++class MockAmenity:
++    def __init__(self):
++        self.id = "mock-id"
++    def save(self):
++        pass
++
++class MockPlace:
++    def __init__(self):
++        self.id = "mock-id"
++    def save(self):
++        pass
++
++class MockReview:
++    def __init__(self):
++        self.id = "mock-id"
++    def save(self):
++        pass
++
++# Set up the mock models module
++sys.modules['models'].BaseModel = MockBaseModel
++sys.modules['models'].User = MockUser
++sys.modules['models'].State = MockState
++sys.modules['models'].City = MockCity
++sys.modules['models'].Amenity = MockAmenity
++sys.modules['models'].Place = MockPlace
++sys.modules['models'].Review = MockReview
++sys.modules['models'].storage = MagicMock()
++sys.modules['models.base_model'].BaseModel = MockBaseModel
++sys.modules['models.amenity'].Amenity = MockAmenity
++sys.modules['models.city'].City = MockCity
++sys.modules['models.place'].Place = MockPlace
++sys.modules['models.review'].Review = MockReview
++sys.modules['models.state'].State = MockState
++sys.modules['models.user'].User = MockUser
++
++from console import HBNBCommand
++
++
++class TestHBNBCommand(unittest.TestCase):
++    """Test suite for HBNBCommand class using Mocking"""
++
++    def setUp(self):
++        """Set up test fixtures before each test method"""
++        # We capture stdout for every test to avoid repeating the code
++        self.stdout_patcher = patch('sys.stdout', new_callable=io.StringIO)
++        self.mock_stdout = self.stdout_patcher.start()
++        
++        # We create an instance of the console
++        self.console = HBNBCommand()
++
++    def tearDown(self):
++        """Clean up after each test method"""
++        self.stdout_patcher.stop()
++
++    @patch('console.storage')
++    def test_do_quit(self, mock_storage):
++        """Test quit command returns True"""
++        self.assertTrue(self.console.do_quit(""))
++        self.assertTrue(self.console.do_quit("any arg"))
++
++    @patch('console.storage')
++    def test_do_EOF(self, mock_storage):
++        """Test EOF command prints newline and returns True"""
++        self.assertTrue(self.console.do_EOF(""))
++        self.assertEqual(self.mock_stdout.getvalue(), "\n")
++
++    @patch('console.storage')
++    def test_emptyline(self, mock_storage):
++        """Test emptyline does nothing"""
++        self.assertIsNone(self.console.emptyline())
++        self.assertEqual(self.mock_stdout.getvalue(), "")
++
++    @patch('console.storage')
++    def test_do_create_missing_class_name(self, mock_storage):
++        """Test create command with missing class name"""
++        self.console.do_create("")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "** class name missing **")
++
++    @patch('console.storage')
++    def test_do_create_invalid_class(self, mock_storage):
++        """Test create command with invalid class name"""
++        self.console.do_create("InvalidClass")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "** class doesn't exist **")
++
++    @patch('console.storage')
++    @patch('console.BaseModel')
++    def test_do_create_base_model_success(self, mock_base_model, mock_storage):
++        """Test create command successfully creates BaseModel instance"""
++        # Setup the mock instance that BaseModel() returns
++        mock_instance = MagicMock()
++        mock_instance.id = "test-id-123"
++        mock_base_model.return_value = mock_instance
++        
++        self.console.do_create("BaseModel")
++        
++        # Verify save was called and ID printed
++        mock_instance.save.assert_called_once()
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "test-id-123")
++
++    @patch('console.storage')
++    def test_do_show_missing_class_name(self, mock_storage):
++        """Test show command with missing class name"""
++        self.console.do_show("")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "** class name missing **")
++
++    @patch('console.storage')
++    def test_do_show_invalid_class(self, mock_storage):
++        """Test show command with invalid class name"""
++        self.console.do_show("InvalidClass")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "** class doesn't exist **")
++
++    @patch('console.storage')
++    def test_do_show_missing_id(self, mock_storage):
++        """Test show command with missing instance id"""
++        self.console.do_show("BaseModel")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "** instance id missing **")
++
++    @patch('console.storage')
++    def test_do_show_instance_not_found(self, mock_storage):
++        """Test show command when instance is not found"""
++        # Configure storage.all() to return empty dict
++        mock_storage.all.return_value = {}
++        
++        self.console.do_show("BaseModel 123")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "** no instance found **")
++
++    @patch('console.storage')
++    def test_do_show_success(self, mock_storage):
++        """Test show command successfully displays instance"""
++        mock_instance = MagicMock()
++        # Mock what str(instance) returns
++        mock_instance.__str__.return_value = "[BaseModel] (123) {'id': '123'}"
++        
++        # Configure storage to return our mock instance
++        mock_storage.all.return_value = {"BaseModel.123": mock_instance}
++        
++        self.console.do_show("BaseModel 123")
++        self.assertIn("[BaseModel] (123)", self.mock_stdout.getvalue().strip())
++
++    @patch('console.storage')
++    def test_do_destroy_missing_class_name(self, mock_storage):
++        self.console.do_destroy("")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "** class name missing **")
++
++    @patch('console.storage')
++    def test_do_destroy_invalid_class(self, mock_storage):
++        self.console.do_destroy("InvalidClass")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "** class doesn't exist **")
++
++    @patch('console.storage')
++    def test_do_destroy_missing_id(self, mock_storage):
++        self.console.do_destroy("BaseModel")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "** instance id missing **")
++
++    @patch('console.storage')
++    def test_do_destroy_instance_not_found(self, mock_storage):
++        mock_storage.all.return_value = {}
++        self.console.do_destroy("BaseModel 123")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "** no instance found **")
++
++    @patch('console.storage')
++    def test_do_destroy_success(self, mock_storage):
++        """Test destroy command successfully deletes instance"""
++        # Create a real dictionary for the return value so we can verify deletion
++        mock_data = {"BaseModel.123": MagicMock()}
++        mock_storage.all.return_value = mock_data
++        
++        self.console.do_destroy("BaseModel 123")
++        
++        # Verify item is gone from the dictionary provided by storage.all()
++        self.assertNotIn("BaseModel.123", mock_data)
++        # Verify storage.save() was called to persist changes
++        mock_storage.save.assert_called_once()
++
++    @patch('console.storage')
++    def test_do_all_no_args(self, mock_storage):
++        """Test all command with no arguments"""
++        mock_inst1 = MagicMock()
++        mock_inst1.__str__.return_value = "Instance1"
++        mock_inst2 = MagicMock()
++        mock_inst2.__str__.return_value = "Instance2"
++        
++        mock_storage.all.return_value = {
++            "BaseModel.1": mock_inst1,
++            "User.2": mock_inst2
++        }
++        
++        self.console.do_all("")
++        output = self.mock_stdout.getvalue().strip()
++        self.assertIn("Instance1", output)
++        self.assertIn("Instance2", output)
++
++    @patch('console.storage')
++    def test_do_all_with_filter(self, mock_storage):
++        """Test all command filtered by class"""
++        mock_inst1 = MagicMock()
++        mock_inst1.__str__.return_value = "BaseModelInstance"
++        mock_inst2 = MagicMock()
++        mock_inst2.__str__.return_value = "UserInstance"
++        
++        mock_storage.all.return_value = {
++            "BaseModel.1": mock_inst1,
++            "User.2": mock_inst2
++        }
++        
++        self.console.do_all("BaseModel")
++        output = self.mock_stdout.getvalue().strip()
++        self.assertIn("BaseModelInstance", output)
++        self.assertNotIn("UserInstance", output)
++
++   
++    @patch('console.storage')
++    def test_do_update_success(self, mock_storage):
++        """Test update success paths"""
++        mock_instance = MagicMock()
++        mock_storage.all.return_value = {"BaseModel.123": mock_instance}
++        
++        # Test string update
++        self.console.do_update('BaseModel 123 name "John"')
++        # setattr is built-in, so we check if storage.save called
++        mock_storage.save.assert_called()
++        
++        # Test int update
++        self.console.do_update("BaseModel 123 age 30")
++        mock_storage.save.assert_called()
++
++    @patch('console.storage')
++    def test_default_count(self, mock_storage):
++        """Test .count() syntax via default"""
++        mock_storage.all.return_value = {
++            "BaseModel.1": MagicMock(),
++            "BaseModel.2": MagicMock(),
++            "User.1": MagicMock()
++        }
++        
++        self.console.default("count BaseModel")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "2")
++        
++        self.mock_stdout.truncate(0); self.mock_stdout.seek(0)
++        
++        self.console.default("count User")
++        self.assertEqual(self.mock_stdout.getvalue().strip(), "1")
++
++    # TEST PARSELINE (Dot Syntax)
++    def test_parseline(self):
++        """Test the parsing of dot syntax"""        
++        # Show
++        ret = self.console.parseline('User.show("123")')
++        self.assertEqual(ret[0], 'show')
++        self.assertEqual(ret[1], 'User 123')
++        
++        # Destroy
++        ret = self.console.parseline('User.destroy("123")')
++        self.assertEqual(ret[0], 'destroy')
++        self.assertEqual(ret[1], 'User 123')
++        
++        # Update (Simple)
++        ret = self.console.parseline('User.update("123", "age", 89)')
++        self.assertEqual(ret[0], 'update')
++        self.assertTrue("User" in ret[1])
++        self.assertTrue("123" in ret[1])
++        self.assertTrue("age" in ret[1])
++        
++        # Update (Dict)
++        ret = self.console.parseline('User.update("123", {"age": 89})')
++        self.assertEqual(ret[0], 'update')
++        # The logic adds a '*' marker for dict updates
++        self.assertTrue("*" in ret[1]) 
++
++if __name__ == '__main__':
++    unittest.main()
+\ No newline at end of file

@@ -23,7 +23,7 @@ docker compose run --rm -e PYTHONPATH=/app/repository_after app python -m pytest
 ### Run tests (before – expected some failures)
 
 ```bash
-docker compose run --rm -e PYTHONPATH=/app/repository_before app python -m pytest -v tests/test_test_coverage.py
+
 ```
 
 **Expected behavior:**
