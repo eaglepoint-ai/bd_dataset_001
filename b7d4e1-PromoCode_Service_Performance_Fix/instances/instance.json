@@ -1,0 +1,8 @@
+{
+  "instance_id": "b7d4e1",
+  "problem_statement": "Optimize the promo code validation service experiencing 800-1200ms response times during flash sales. Fix memory leaks, N+1 queries, race conditions, and add proper MongoDB indexes to meet 100ms SLA.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/b7d4e1-PromoCode_Service_Performance_Fix",
+  "environment_setup": "Dockerfile"
+}

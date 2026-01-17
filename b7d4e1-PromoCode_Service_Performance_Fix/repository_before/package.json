@@ -1,0 +1,17 @@
+{
+  "name": "promocode-service",
+  "version": "1.0.0",
+  "description": "Promo code validation service for e-commerce",
+  "main": "promocode.service.js",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check promocode.service.js"
+  },
+  "dependencies": {
+    "mongodb": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
