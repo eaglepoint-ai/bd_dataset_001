@@ -1,0 +1,8 @@
+{
+  "instance_id": "b6b278",
+  "problem_statement": "Given a set of axis-aligned rectangles defined by their top-left coordinates, width, and height in a 2D coordinate system with origin at the top-left, design a Python function that computes the tight outer boundary (geometric union) of these rectangles. The solution must use an efficient approach such as a sweep-line or scanline algorithm with better-than-O(N²) complexity, correctly handle overlapping and perfectly adjacent rectangles, ignore rectangles with zero width or height, and eliminate redundant collinear points to produce minimal boundary paths. If the rectangles form multiple disconnected regions, the function should return a separate ordered boundary path for each region, and the behavior regarding internal holes (whether they are ignored or returned as separate paths) must be clearly defined.",
+  "base_commit": "repository_before",
+  "test_patch": "tests/",
+  "github_url": "https://github.com/eaglepoint-ai/bd_dataset_001/tree/main/b6b278-Union_boundary_of_overlapping_rectangles",
+  "environment_setup": "Dockerfile"
+}
