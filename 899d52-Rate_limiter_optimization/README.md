@@ -16,3 +16,13 @@ docker compose run --rm -e PYTHONPATH=/app/repository_before app pytest -v tests
 ```bash
 docker compose run --rm -e PYTHONPATH=/app/repository_after app pytest -v tests/
 ```
+
+### Run evaluation (compares both implementations)
+```bash
+docker compose run --rm app python evaluation/evaluation.py
+```
+
+### Run evaluation with custom output file
+```bash
+docker compose run --rm app python evaluation/evaluation.py --output /path/to/custom/report.json
+```
