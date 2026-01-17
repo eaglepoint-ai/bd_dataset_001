@@ -53,7 +53,9 @@ def main():
     # Run pytest
     env = os.environ.copy()
     env['PYTHONPATH'] = '/app/repository_after'  # Adjust if needed
-    result = subprocess.run([sys.executable, '-m', 'pytest', '-v', 'tests/'], capture_output=True, text=True, env=env, cwd=os.path.dirname(__file__))
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    tests_path = os.path.join(project_root, 'tests')
+    result = subprocess.run([sys.executable, '-m', 'pytest', '-v', tests_path], capture_output=True, text=True, env=env, cwd=project_root)
     
     finished_at = datetime.now()
     duration = (finished_at - started_at).total_seconds()

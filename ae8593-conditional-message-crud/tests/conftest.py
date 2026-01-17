@@ -54,12 +54,15 @@ if not settings.configured:
 django.setup()
 
 
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+    setattr(item, "rep_" + rep.when, rep)
+
 def pytest_sessionfinish(session, exitstatus):
     if exitstatus == 0:
-        passed = len([item for item in session.items if hasattr(item, 'rep_call') and item.rep_call and item.rep_call.passed])
-        print(f"{passed} tests passed")
-
-
-def pytest_sessionfinish(session, exitstatus):
-    passed = sum(1 for item in session.items if hasattr(item, 'rep_call') and item.rep_call and item.rep_call.passed)
-    print(f"{passed} tests passed")
+        passed_tests = [item for item in session.items if hasattr(item, 'rep_call') and item.rep_call.passed]
+        print(f"\n\n{len(passed_tests)} tests passed")
+        for item in passed_tests:
+            print(f"PASSED: {item.nodeid}")
