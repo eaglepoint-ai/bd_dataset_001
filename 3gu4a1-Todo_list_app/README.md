@@ -1,12 +1,13 @@
-# project template
+# Todo List App
 
-Starter scaffold for bd dataset task.
+## Docker Commands
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+```bash
+docker-compose build
+
+docker-compose run --rm test-before
+
+docker-compose run --rm test-after
+
+docker-compose run --rm evaluation
+```
