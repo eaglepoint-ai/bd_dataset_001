@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  url-shortener:
+    build: .
+    ports:
+      - "3001:3001"  # Backend API
+      - "5173:5173"  # Frontend dev server
+    volumes:
+      - ./repository_after/server/data:/workspace/repository_after/server/data
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - BASE_URL=http://localhost:3001
+    command: >
+      sh -c "
+        cd /workspace/repository_after/server && node src/index.js &
+        cd /workspace/repository_after/client && npm run dev -- --host 0.0.0.0 &
+        wait
+      "
+
+  # Service for running tests only
+  test:
+    build: .
+    command: sh -c "cd /workspace && node tests/test_all.js after"
+    profiles:
+      - test
