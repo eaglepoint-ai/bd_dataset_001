@@ -72,14 +72,11 @@ def simulated_annealing(func, bounds, n_iterations, initial_temp, cooling_rate, 
                 best_state = np.copy(current_state)
                 best_energy = current_energy
         
-        # Cooling schedule
         temperature = temperature * cooling_rate
         
-        # Logging progress periodically
         if i % (n_iterations // 10) == 0:
             print(f"Iter {i:4d} | Temp: {temperature:.4f} | Best Energy: {best_energy:.6f} | Curr Energy: {current_energy:.6f}")
 
-        # Stop if temperature is practically zero
         if temperature < 1e-8:
             print("Temperature dropped below threshold. Stopping early.")
             break
