@@ -4,6 +4,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app
+    network_mode: bridge
     command: >
       bash -c "
       javac -cp .:/opt/junit-platform-console-standalone.jar evaluation/Evaluation.java -d /tmp/classes &&
@@ -15,6 +16,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app
+    network_mode: bridge
     command: >
       bash -c "
       mkdir -p /tmp/before_wrapper &&
@@ -38,6 +40,7 @@ services:
     volumes:
       - .:/app
     working_dir: /app
+    network_mode: bridge
     command: >
       bash -c "
       javac -cp .:/opt/junit-platform-console-standalone.jar repository_after/FetchOptimization.java tests/FetchOptimizationTest.java -d /tmp/classes &&

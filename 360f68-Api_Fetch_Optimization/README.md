@@ -1,92 +1,55 @@
-# project template
+# API Fetch Optimization
 
-Starter scaffold for bd dataset task.
+This dataset task contains a production-style Java method for fetching items with performance issues and missing features.
+The objective is to **completely refactor** the implementation while preserving **exact public API compatibility** and fixing all critical issues.
 
-## Structure
-- repository_before/: baseline code (`__init__.py`)
-- repository_after/: optimized code (`__init__.py`)
-- tests/: test suite (`__init__.py`)
-- evaluation/: evaluation scripts (`evaluation.py`)
-- instances/: sample/problem instances (JSON)
-- patches/: patches for diffing
-- trajectory/: notes or write-up (Markdown)
+The existing Java method for fetching items simulates an API response but is not suitable for real-world usage because it removes duplicates inefficiently, leading to poor performance as data size grows, and provides no mechanism to limit or segment results for large datasets. In practical API scenarios, optimization is necessary to ensure scalable performance, pagination is required to control payload size and support client-side navigation through results, and input validation is essential to prevent invalid requests and unpredictable runtime failures. The goal is to refactor the method to address these limitations by improving time complexity, introducing optional pagination with clear and predictable behavior, and enforcing robust input validation, while preserving backward compatibility so that existing consumers of the method are not affected.
 
----
+## Folder Layout
 
-## Template Instructions
-> **Note:** The task gen team should delete this section after creating the task.
+- `repository_before/` - Original implementation with performance issues
+- `repository_after/` - Optimized implementation with fixes
+- `tests/` - Comprehensive test suite
+- `patches/` - Diff between before/after
+- `evaluation/` - Evaluation script and reports
 
-### Setup Steps
+## Run with Docker
 
-1. **Create a directory** with the format: `uuid-task_title`
-   - Task title words should be joined by underscores (`_`)
-   - UUID and task title should be joined with a dash (`-`)
-   - Example: `5g27e7-My_Task_Title`
-
-2. **Update `instances/instance.json`** — the following fields are empty by default; fill in appropriate values:
-   - `"instance_id"`
-   - `"problem_statement"`
-   - `"github_url"`
-
-3. **Update `.gitignore`** to reflect your language and library setup
-
-4. **Add `reports/` inside `evaluation/` to `.gitignore`**
-   - Each report run should be organized by date/time
-
----
-
-## Reports Generation
-> **Note:** The developer should delete this section after completing the task before pushing to GitHub.
-
-When the evaluation command is run, it should generate reports in the following structure:
-
-```
-evaluation/
-└── reports/
-    └── YYYY-MM-DD/
-        └── HH-MM-SS/
-            └── report.json
+### Build image
+```bash
+docker compose build
 ```
 
-### Report Schema
-
-```json
-{
-  "run_id": "uuid",
-  "started_at": "ISO-8601",
-  "finished_at": "ISO-8601",
-  "duration_seconds": 0.0,
-  "environment": {
-    "python_version": "3.x",
-    "platform": "os-arch"
-  },
-  "before": {
-    "tests": {},
-    "metrics": {}
-  },
-  "after": {
-    "tests": {},
-    "metrics": {}
-  },
-  "comparison": {},
-  "success": true,
-  "error": null
-}
+### Run tests (before – expected some failures)
+```bash
+docker compose run --rm test-before
 ```
 
-The developer should add any additional metrics and keys that reflect the runs (e.g., data seeded to test the code on before/after repository).
+**Expected behavior:**
+- Some tests: ❌ FAIL (expected - performance issues present in original implementation)
 
----
+### Run tests (after – expected all pass)
+```bash
+docker compose run --rm test-after
+```
 
-## Final README Contents
-> **Note:** Replace the template content above with the following sections before pushing:
+**Expected behavior:**
+- All tests: ✅ PASS (optimizations implemented, requirements met)
 
-1. **Problem Statement**
-2. **Prompt Used**
-3. **Requirements Specified**
-4. **Commands:**
-   - Commands to spin up the app and run tests on `repository_before`
-   - Commands to run tests on `repository_after`
-   - Commands to run `evaluation/evaluation.py` and generate reports
-   
-   > **Note:** For full-stack app tasks, the `repository_before` commands will be empty since there is no app initially.
+### Run evaluation (compares both implementations)
+```bash
+docker compose run --rm evaluation
+```
+
+This will:
+- Run tests for both before and after implementations
+- Compare results and verify improvements
+- Generate a report at `evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json`
+
+## Regenerate patch
+
+From repo root:
+
+```bash
+git diff --no-index repository_before repository_after > patches/api_fetch_optimization.patch
+```
