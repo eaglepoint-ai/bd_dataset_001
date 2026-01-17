@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+
+  test:
+    build: .
+    command: pytest -v tests
+
+  evaluate:
+    build: .
+    entrypoint: /bin/sh
+    command: ["-c", "python evaluation/evaluation.py --output /output/report_$(date +%Y%m%d_%H%M%S).json"]
+    volumes:
+      - ./evaluation/reports:/output:z
