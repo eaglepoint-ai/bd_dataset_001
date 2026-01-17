@@ -1,0 +1,22 @@
+{
+  "name": "promocode-service",
+  "version": "1.0.0",
+  "description": "Promo Code Service with Stackable Codes Feature",
+  "main": "promocode.service.js",
+  "scripts": {
+    "test": "jest --runInBand --forceExit",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "mongodb": "^5.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "@shelf/jest-mongodb": "^4.1.0"
+  },
+  "jest": {
+    "preset": "@shelf/jest-mongodb",
+    "testEnvironment": "node"
+  }
+}
+
