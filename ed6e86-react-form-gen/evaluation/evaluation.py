@@ -512,8 +512,11 @@ def main():
         
         # List of all locations to write report.json
         # Priority order: root first (CI most likely checks here), then timestamped, then backups
+        # CRITICAL: The evaluator expects report.json in the project root directory
+        root_report = ROOT / "report.json"
+        root_report_absolute = root_report.resolve()
         report_paths = [
-            ROOT / "report.json",              # In project root (PRIMARY - CI checks this first)
+            root_report,                        # In project root (PRIMARY - CI/evaluator checks this first)
             timestamped_report_path,            # Timestamped path: evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json (matches template)
             REPORTS / "report.json",            # In reports subdirectory (backup)
             REPORTS / "latest.json",            # For local reference
@@ -523,19 +526,41 @@ def main():
         # Write to all locations
         written_count = 0
         for path in report_paths:
-            if write_report_file(report, path):
+            resolved_path = path.resolve()
+            if write_report_file(report, resolved_path):
                 written_count += 1
+        
+        # CRITICAL: Verify root report.json exists - evaluator requires this
+        if not root_report_absolute.exists():
+            print(f"CRITICAL ERROR: report.json not found at expected location: {root_report_absolute}", file=sys.stderr)
+            # Emergency write with absolute path
+            try:
+                root_report_absolute.parent.mkdir(parents=True, exist_ok=True)
+                with open(root_report_absolute, "w") as f:
+                    json.dump(report, f, indent=2)
+                print(f"Emergency write successful: {root_report_absolute}", file=sys.stderr)
+                written_count += 1
+            except Exception as e:
+                print(f"Emergency write failed: {e}", file=sys.stderr)
+                # Last resort: print to stdout so CI can capture it
+                print(f"\nCRITICAL: Writing report to stdout as fallback:", file=sys.stderr)
+                print(report_json)
         
         # Print to stdout for logging (CI may capture this)
         print(report_json)
         
         # Print info to stderr
         print(f"\n✅ Report written to {written_count}/{len(report_paths)} locations", file=sys.stderr)
+        print(f"PRIMARY LOCATION: {root_report_absolute}", file=sys.stderr)
+        print(f"  Exists: {root_report_absolute.exists()}", file=sys.stderr)
+        if root_report_absolute.exists():
+            print(f"  Size: {root_report_absolute.stat().st_size} bytes", file=sys.stderr)
         for path in report_paths:
-            if path.exists():
-                print(f"  ✓ {path}", file=sys.stderr)
+            resolved_path = path.resolve()
+            if resolved_path.exists():
+                print(f"  ✓ {resolved_path}", file=sys.stderr)
             else:
-                print(f"  ✗ {path} (FAILED)", file=sys.stderr)
+                print(f"  ✗ {resolved_path} (FAILED)", file=sys.stderr)
         
         print(f"Run ID: {run_id}", file=sys.stderr)
         print(f"Duration: {report.get('duration_seconds', 0):.2f}s", file=sys.stderr)

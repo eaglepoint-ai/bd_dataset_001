@@ -8,6 +8,35 @@ All Docker commands for testing and evaluating the application.
 docker compose build
 ```
 
+## Commands for AQUILA Evaluator Interface
+
+Use these commands in the AQUILA evaluator interface:
+
+### BEFORE TEST COMMAND
+```bash
+docker compose run --rm app python check_before.py
+```
+
+**What it does:** Verifies that all required files exist in `repository_before` directory.
+
+### AFTER TEST COMMAND
+```bash
+docker compose run --rm app sh -c "cd repository_after && npm run type-check && npm test -- --passWithNoTests --ci"
+```
+
+**What it does:** Runs TypeScript type checking and Jest tests on the `repository_after` implementation.
+
+### TEST & REPORT COMMAND
+```bash
+docker compose run --rm app python evaluation/evaluation.py
+```
+
+**What it does:** Runs the complete evaluation which:
+- Tests both `repository_before` and `repository_after`
+- Compares results
+- Generates `report.json` in the project root (required by evaluator)
+- Also creates timestamped reports in `evaluation/reports/YYYY-MM-DD/HH-MM-SS/report.json`
+
 ## Run Evaluation (Complete Test)
 
 This runs the full evaluation which tests everything and generates a report:
@@ -21,7 +50,7 @@ docker compose run --rm app python evaluation/evaluation.py
 ### Test 1: Verify repository_before Files
 
 ```bash
-docker compose run --rm app python3 -c "import os; from pathlib import Path; root = Path('/app'); files = ['repository_before/Resources/html/form.html', 'repository_before/Resources/html/formdisplay.html', 'repository_before/Resources/js/formgenerator.js', 'repository_before/Resources/js/formdisplay.js']; missing = [f for f in files if not (root / f).exists()]; exit(0 if not missing else 1)"
+docker compose run --rm app python check_before.py
 ```
 
 ### Test 2: Run Tests on repository_after
