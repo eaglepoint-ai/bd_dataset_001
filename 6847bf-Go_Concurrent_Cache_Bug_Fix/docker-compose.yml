@@ -3,17 +3,23 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      - ./:/app
     command: go test -tags before  -v ./tests
 
   run_after:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      - ./:/app
     command: go test -tags after -race -v ./tests
 
   evaluation:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      - ./:/app
     command: go run evaluation/evaluation.go
 
