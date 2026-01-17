@@ -1,6 +1,22 @@
 services:
-  app:
+  test-before:
     build: .
-    command: pytest -q tests
+    environment:
+      - REPO_PATH=../repository_before
+    command: bash -c "cd tests && npm test"
     volumes:
-      - .:/app
+      - ./evaluation/reports:/app/evaluation/reports
+
+  test-after:
+    build: .
+    environment:
+      - REPO_PATH=../repository_after
+    command: bash -c "cd tests && npm test"
+    volumes:
+      - ./evaluation/reports:/app/evaluation/reports
+
+  evaluation:
+    build: .
+    command: bash -c "cd evaluation && npm run evaluate"
+    volumes:
+      - ./evaluation/reports:/app/evaluation/reports

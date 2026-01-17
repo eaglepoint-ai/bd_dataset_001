@@ -1,0 +1,73 @@
+--- repository_before/src/components/UploadManager.jsx	2026-01-17 08:55:00.000000000 +0000
++++ repository_after/src/components/UploadManager.jsx	2026-01-17 08:55:00.000000000 +0000
+@@ -1,4 +1,4 @@
+-import React, { useState } from "react";
++import React, { useState, useRef, useCallback } from "react";
+ import api from "../utils/api";
+ import UI from "./UI";
+ 
+@@ -6,19 +6,39 @@
+   const [loading, setLoading] = useState(false);
+   const [error, setError] = useState(null);
+   const [success, setSuccess] = useState(false);
++  const uploadIdRef = useRef(0);
++  const timeoutRef = useRef(null);
++
++  const clearTimers = useCallback(() => {
++    if (timeoutRef.current) {
++      clearTimeout(timeoutRef.current);
++      timeoutRef.current = null;
++    }
++  }, []);
+ 
+   const handleUpload = async () => {
++    clearTimers();
++    const currentUploadId = ++uploadIdRef.current;
+     setLoading(true);
++    setError(null);
++    setSuccess(false);
+     try {
+       await api.upload(file);
+-      setSuccess(true);
+-      setLoading(false);
+-      setTimeout(() => setSuccess(false), 3000);
++      if (currentUploadId === uploadIdRef.current) {
++        setSuccess(true);
++        setLoading(false);
++        timeoutRef.current = setTimeout(() => {
++          if (currentUploadId === uploadIdRef.current) setSuccess(false);
++        }, 3000);
++      }
+     } catch (e) {
+-      setError(e.message);
+-      setLoading(false);
++      if (currentUploadId === uploadIdRef.current) {
++        setError(e.message);
++        setLoading(false);
++      }
+     }
+   };
+ 
+   const cancel = () => {
++    clearTimers();
++    uploadIdRef.current++;
+     setLoading(false);
+-    setSuccess(false); // If called during the timeout, the timeout still fires!
++    setSuccess(false);
++    setError(null);
+   };
+ 
+-  return (
+-    <UI
+-      loading={loading}
+-      error={error}
+-      success={success}
+-      onUpload={handleUpload}
+-      onCancel={cancel}
+-    />
+-  );
++  return <UI loading={loading} error={error} success={success} onUpload={handleUpload} onCancel={cancel} />;
+ }
+ 
+ export default UploadManager;
+-

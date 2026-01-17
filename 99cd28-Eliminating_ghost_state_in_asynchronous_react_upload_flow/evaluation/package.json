@@ -1,0 +1,12 @@
+{
+  "name": "upload-manager-evaluation",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "evaluate": "node evaluation.js"
+  },
+  "dependencies": {
+    "jest": "^29.3.1",
+    "uuid": "^9.0.0"
+  }
+}

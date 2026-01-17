@@ -1,0 +1,12 @@
+{
+  "name": "upload-manager-tests",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node ghost-state-test.js"
+  },
+  "dependencies": {
+    "fs": "*",
+    "path": "*"
+  }
+}
