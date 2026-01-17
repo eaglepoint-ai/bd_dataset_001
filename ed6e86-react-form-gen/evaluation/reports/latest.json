@@ -1,109 +1,90 @@
 {
-  "run_id": "341c319c-20a9-4264-9781-cdf8107f6d43",
-  "started_at": "2026-01-17T13:46:44.475954+00:00",
-  "finished_at": "2026-01-17T13:46:57.976840+00:00",
-  "duration_seconds": 13.500886,
+  "run_id": "c42630ec",
+  "started_at": "2026-01-17T14:09:14.281632+00:00",
+  "finished_at": "2026-01-17T14:09:24.996979+00:00",
+  "duration_seconds": 10.715347,
+  "success": true,
+  "error": null,
   "environment": {
     "python_version": "3.12.12",
     "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with",
     "os": "Linux",
     "os_release": "6.6.87.2-microsoft-standard-WSL2",
     "architecture": "x86_64",
-    "hostname": "f8fb2a2d2fe0",
+    "hostname": "b4af3985c456",
     "git_commit": "unknown",
     "git_branch": "unknown"
   },
-  "before": {
-    "tests": {
-      "passed": true,
-      "return_code": 0,
-      "output": "All required files present in repository_before"
-    },
-    "metrics": {
-      "typescript_files": 0,
-      "test_files": 0
-    }
-  },
-  "after": {
-    "tests": {
-      "passed": true,
-      "return_code": 0,
-      "output": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\nPASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.686 s\nRan all test suites.\n"
-    },
-    "metrics": {
-      "dependencies_count": 3,
-      "dev_dependencies_count": 13,
-      "typescript_files": 2377,
-      "test_files": 2
-    }
-  },
-  "comparison": {
-    "passed_gate": true,
-    "improvement_summary": "After implementation passed correctness tests"
-  },
-  "success": true,
-  "error": null,
-  "parameters": {},
-  "metrics": {
+  "results": {
     "before": {
-      "structure": {
-        "file_path": "repository_before/Resources/js/formgenerator.js",
-        "lines": 191,
-        "files_count": 10,
-        "js_files": 2,
-        "html_files": 3
-      },
-      "test_results": {
-        "success": true,
-        "exit_code": 0,
-        "tests": [],
-        "summary": {
-          "raw_output": "All required files present in repository_before"
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "tests/test_before.py::check_Resources_html_form_html",
+          "name": "check_Resources_html_form_html",
+          "outcome": "passed"
         },
-        "duration": 0
-      }
+        {
+          "nodeid": "tests/test_before.py::check_Resources_html_formdisplay_html",
+          "name": "check_Resources_html_formdisplay_html",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_before.py::check_Resources_js_formgenerator_js",
+          "name": "check_Resources_js_formgenerator_js",
+          "outcome": "passed"
+        },
+        {
+          "nodeid": "tests/test_before.py::check_Resources_js_formdisplay_js",
+          "name": "check_Resources_js_formdisplay_js",
+          "outcome": "passed"
+        }
+      ],
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "stdout": "4/4 required files present in repository_before",
+      "stderr": ""
     },
     "after": {
-      "structure": {
-        "file_path": "repository_after",
-        "lines": 1743,
-        "typescript_files": 25,
-        "component_files": 10,
-        "test_files": 2
-      },
-      "test_results": {
-        "success": true,
-        "exit_code": 0,
-        "tests": [],
-        "summary": {
-          "raw_output": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\nPASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.686 s\nRan all test suites.\n"
+      "success": true,
+      "exit_code": 0,
+      "tests": [
+        {
+          "nodeid": "tests/types.py::test_types",
+          "name": "types",
+          "outcome": "passed"
         },
-        "duration": 0
-      }
-    },
-    "structure_tests": {
-      "success": true,
-      "exit_code": 0,
-      "tests": [],
+        {
+          "nodeid": "tests/formStorage.py::test_formStorage",
+          "name": "formStorage",
+          "outcome": "passed"
+        }
+      ],
       "summary": {
-        "raw_output": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\nPASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.686 s\nRan all test suites.\n"
+        "total": 15,
+        "passed": 15,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0
       },
-      "duration": 0
-    },
-    "equivalence_tests": {
-      "success": true,
-      "exit_code": 0,
-      "tests": [],
-      "summary": {
-        "raw_output": "Equivalence check: Both implementations work correctly"
-      },
-      "duration": 0
+      "stdout": "\n> form-builder-nextjs@1.0.0 test\n> jest --passWithNoTests --ci\n\n",
+      "stderr": "PASS __tests__/types.test.ts\nPASS __tests__/formStorage.test.ts\n\nTest Suites: 2 passed, 2 total\nTests:       15 passed, 15 total\nSnapshots:   0 total\nTime:        2.209 s\nRan all test suites.\n"
     },
     "comparison": {
       "before_tests_passed": true,
       "after_tests_passed": true,
-      "structure_tests_passed": true,
-      "equivalence_tests_passed": true
+      "before_total": 4,
+      "before_passed": 4,
+      "before_failed": 0,
+      "after_total": 15,
+      "after_passed": 15,
+      "after_failed": 0
     }
   }
 }

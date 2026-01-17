@@ -2,7 +2,7 @@
 """
 Evaluation runner for React Form Generator.
 Runs tests on both repository_before and repository_after.
-Compatible with both standard and advanced evaluator formats.
+Compatible with pytest-style report format.
 """
 import os
 import sys
@@ -34,44 +34,48 @@ def environment_info():
     }
 
 
-def analyze_structure(repo_name: str):
-    """Analyze repository structure."""
-    repo_path = ROOT / repo_name
+def parse_jest_output(output):
+    """Parse Jest test output to extract individual test results (pytest-style)."""
+    tests = []
     
-    # For repository_before (HTML/JS)
-    if repo_name == "repository_before":
-        main_file = repo_path / "Resources" / "js" / "formgenerator.js"
-        if main_file.exists():
-            lines = len(main_file.read_text().splitlines())
+    # Extract test file results: PASS __tests__/file.test.ts or FAIL __tests__/file.test.ts
+    test_pattern = r'(PASS|FAIL)\s+([^\s\n]+)'
+    matches = re.findall(test_pattern, output)
+    
+    for status, test_file in matches:
+        # Extract test name from file path
+        test_name = test_file.replace('__tests__/', '').replace('.test.ts', '').replace('.test.tsx', '')
+        outcome = "passed" if status == "PASS" else "failed"
+        
+        # Create pytest-style nodeid
+        nodeid = test_file.replace('__tests__/', 'tests/').replace('.test.ts', '.py').replace('.test.tsx', '.py')
+        # For Jest, we create a single test per test file
+        nodeid = f"{nodeid}::test_{test_name}"
+        
+        tests.append({
+            "nodeid": nodeid,
+            "name": test_name,
+            "outcome": outcome
+        })
+    
+    # Extract summary from Jest output
+    summary = {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0}
+    
+    # Pattern: "Tests: X passed, Y total"
+    test_match = re.search(r'Tests:\s+(\d+)\s+passed(?:,\s+(\d+)\s+total)?', output)
+    if test_match:
+        summary["passed"] = int(test_match.group(1))
+        if test_match.group(2):
+            summary["total"] = int(test_match.group(2))
         else:
-            lines = 0
-        
-        return {
-            "file_path": str(main_file.relative_to(ROOT)),
-            "lines": lines,
-            "files_count": len(list(repo_path.rglob("*.*"))),
-            "js_files": len(list(repo_path.rglob("*.js"))),
-            "html_files": len(list(repo_path.rglob("*.html")))
-        }
+            summary["total"] = summary["passed"]
     
-    # For repository_after (Next.js/TypeScript)
-    else:
-        ts_files = list(repo_path.rglob("*.ts")) + list(repo_path.rglob("*.tsx"))
-        total_lines = 0
-        for f in ts_files:
-            try:
-                if "node_modules" not in str(f):
-                    total_lines += len(f.read_text().splitlines())
-            except:
-                pass
-        
-        return {
-            "file_path": str(repo_path.relative_to(ROOT)),
-            "lines": total_lines,
-            "typescript_files": len([f for f in ts_files if "node_modules" not in str(f)]),
-            "component_files": len(list((repo_path / "components").rglob("*.tsx"))) if (repo_path / "components").exists() else 0,
-            "test_files": len(list((repo_path / "__tests__").rglob("*.test.ts"))) if (repo_path / "__tests__").exists() else 0
-        }
+    # Count failed tests
+    summary["failed"] = len([t for t in tests if t["outcome"] == "failed"])
+    if summary["total"] == 0 and tests:
+        summary["total"] = len(tests)
+    
+    return tests, summary
 
 
 def run_tests_before():
@@ -80,9 +84,12 @@ def run_tests_before():
     
     if not repo_path.exists():
         return {
-            "passed": False,
-            "return_code": 1,
-            "output": "repository_before directory not found"
+            "success": False,
+            "exit_code": 1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
+            "stdout": "",
+            "stderr": "repository_before directory not found"
         }
     
     required_files = [
@@ -92,22 +99,31 @@ def run_tests_before():
         "Resources/js/formdisplay.js"
     ]
     
-    missing_files = []
+    tests = []
     for file_path in required_files:
-        if not (repo_path / file_path).exists():
-            missing_files.append(file_path)
+        exists = (repo_path / file_path).exists()
+        test_name = f"check_{file_path.replace('/', '_').replace('.', '_')}"
+        tests.append({
+            "nodeid": f"tests/test_before.py::{test_name}",
+            "name": test_name,
+            "outcome": "passed" if exists else "failed"
+        })
     
-    if missing_files:
-        return {
-            "passed": False,
-            "return_code": 1,
-            "output": f"Missing required files: {', '.join(missing_files)}"
-        }
+    passed_count = sum(1 for t in tests if t["outcome"] == "passed")
     
     return {
-        "passed": True,
-        "return_code": 0,
-        "output": "All required files present in repository_before"
+        "success": passed_count == len(required_files),
+        "exit_code": 0 if passed_count == len(required_files) else 1,
+        "tests": tests,
+        "summary": {
+            "total": len(required_files),
+            "passed": passed_count,
+            "failed": len(required_files) - passed_count,
+            "errors": 0,
+            "skipped": 0
+        },
+        "stdout": f"{passed_count}/{len(required_files)} required files present in repository_before",
+        "stderr": ""
     }
 
 
@@ -117,16 +133,22 @@ def run_tests_after():
     
     if not repo_path.exists():
         return {
-            "passed": False,
-            "return_code": 1,
-            "output": "repository_after directory not found"
+            "success": False,
+            "exit_code": 1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
+            "stdout": "",
+            "stderr": "repository_after directory not found"
         }
     
     if not (repo_path / "package.json").exists():
         return {
-            "passed": False,
-            "return_code": 1,
-            "output": "package.json not found in repository_after"
+            "success": False,
+            "exit_code": 1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
+            "stdout": "",
+            "stderr": "package.json not found in repository_after"
         }
     
     try:
@@ -140,11 +162,15 @@ def run_tests_after():
         )
         
         if type_check.returncode != 0:
-            output = (type_check.stdout + type_check.stderr)[:8000]
+            stdout = type_check.stdout[:8000] if type_check.stdout else ""
+            stderr = type_check.stderr[:8000] if type_check.stderr else ""
             return {
-                "passed": False,
-                "return_code": type_check.returncode,
-                "output": output
+                "success": False,
+                "exit_code": type_check.returncode,
+                "tests": [],
+                "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+                "stdout": stdout,
+                "stderr": stderr
             }
         
         # Run Jest tests
@@ -159,25 +185,59 @@ def run_tests_after():
             env=env
         )
         
-        output = (test_result.stdout + test_result.stderr)[:8000]
+        stdout = test_result.stdout[:8000] if test_result.stdout else ""
+        stderr = test_result.stderr[:8000] if test_result.stderr else ""
+        full_output = stdout + stderr
+        
+        # Parse Jest output to extract test results
+        tests, summary = parse_jest_output(full_output)
+        
+        # If no tests parsed but tests passed, create summary from output
+        if not tests and test_result.returncode == 0:
+            # Try to extract test count
+            test_match = re.search(r'Tests:\s+(\d+)\s+passed', full_output)
+            if test_match:
+                passed_count = int(test_match.group(1))
+                summary = {
+                    "total": passed_count,
+                    "passed": passed_count,
+                    "failed": 0,
+                    "errors": 0,
+                    "skipped": 0
+                }
+                # Create a generic test entry
+                tests = [{
+                    "nodeid": "tests/test_after.py::test_all_tests",
+                    "name": "test_all_tests",
+                    "outcome": "passed"
+                }]
         
         return {
-            "passed": test_result.returncode == 0,
-            "return_code": test_result.returncode,
-            "output": output
+            "success": test_result.returncode == 0,
+            "exit_code": test_result.returncode,
+            "tests": tests,
+            "summary": summary,
+            "stdout": stdout,
+            "stderr": stderr
         }
         
     except subprocess.TimeoutExpired:
         return {
-            "passed": False,
-            "return_code": -1,
-            "output": "Test execution timeout"
+            "success": False,
+            "exit_code": -1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+            "stdout": "",
+            "stderr": "Test execution timeout"
         }
     except Exception as e:
         return {
-            "passed": False,
-            "return_code": -1,
-            "output": f"Error running tests: {str(e)}"
+            "success": False,
+            "exit_code": -1,
+            "tests": [],
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+            "stdout": "",
+            "stderr": f"Error running tests: {str(e)}"
         }
 
 
@@ -212,121 +272,64 @@ def evaluate(repo_name: str):
     repo_path = ROOT / repo_name
     
     if repo_name == "repository_before":
-        tests = run_tests_before()
+        test_results = run_tests_before()
     else:
-        tests = run_tests_after()
+        test_results = run_tests_after()
     
     metrics = run_metrics(repo_path)
     
     return {
-        "tests": tests,
+        "tests": test_results,
         "metrics": metrics
     }
 
 
 def run_evaluation():
     """Run the complete evaluation and return report dict."""
-    run_id = str(uuid.uuid4())
+    run_id = str(uuid.uuid4())[:8]
     start = datetime.now(timezone.utc)
     
     try:
-        # Run tests using standard format
+        # Run tests
         before_eval = evaluate("repository_before")
         after_eval = evaluate("repository_after")
         
-        before_passed = before_eval["tests"]["passed"]
-        after_passed = after_eval["tests"]["passed"]
+        before_tests = before_eval["tests"]
+        after_tests = after_eval["tests"]
         
-        # Standard comparison
-        passed_gate = after_passed
-        if passed_gate:
-            improvement_summary = "After implementation passed correctness tests"
-        else:
-            improvement_summary = "After implementation failed correctness tests"
+        before_passed = before_tests["success"]
+        after_passed = after_tests["success"]
         
-        # Analyze structure for advanced format
-        before_structure = analyze_structure("repository_before")
-        after_structure = analyze_structure("repository_after")
-        
-        # Convert to advanced format test_results
-        before_test_results = {
-            "success": before_passed,
-            "exit_code": before_eval["tests"]["return_code"],
-            "tests": [],
-            "summary": {
-                "raw_output": before_eval["tests"]["output"][:1000]
-            },
-            "duration": 0
+        # Build comparison
+        comparison = {
+            "before_tests_passed": before_passed,
+            "after_tests_passed": after_passed,
+            "before_total": before_tests.get("summary", {}).get("total", 0),
+            "before_passed": before_tests.get("summary", {}).get("passed", 0),
+            "before_failed": before_tests.get("summary", {}).get("failed", 0),
+            "after_total": after_tests.get("summary", {}).get("total", 0),
+            "after_passed": after_tests.get("summary", {}).get("passed", 0),
+            "after_failed": after_tests.get("summary", {}).get("failed", 0)
         }
         
-        after_test_results = {
-            "success": after_passed,
-            "exit_code": after_eval["tests"]["return_code"],
-            "tests": [],
-            "summary": {
-                "raw_output": after_eval["tests"]["output"][:1000]
-            },
-            "duration": 0
-        }
-        
-        # Structure and equivalence tests (same as after for this project)
-        structure_tests = {
-            "success": after_passed,
-            "exit_code": after_eval["tests"]["return_code"],
-            "tests": [],
-            "summary": {
-                "raw_output": after_eval["tests"]["output"][:1000] if after_passed else "Structure tests failed"
-            },
-            "duration": 0
-        }
-        
-        equivalence_tests = {
-            "success": after_passed and before_passed,
-            "exit_code": 0 if (after_passed and before_passed) else 1,
-            "tests": [],
-            "summary": {
-                "raw_output": "Equivalence check: Both implementations work correctly" if (after_passed and before_passed) else "Equivalence check failed"
-            },
-            "duration": 0
-        }
+        # Success rule: after tests must pass
+        success = after_passed
         
         end = datetime.now(timezone.utc)
         
-        # Build hybrid report with BOTH formats
+        # Build report matching the sample format
         report = {
             "run_id": run_id,
             "started_at": start.isoformat(),
             "finished_at": end.isoformat(),
             "duration_seconds": (end - start).total_seconds(),
-            "environment": environment_info(),
-            # STANDARD FORMAT (documentation)
-            "before": before_eval,
-            "after": after_eval,
-            "comparison": {
-                "passed_gate": passed_gate,
-                "improvement_summary": improvement_summary
-            },
-            "success": passed_gate,
+            "success": success,
             "error": None,
-            # ADVANCED FORMAT (evaluator expects)
-            "parameters": {},
-            "metrics": {
-                "before": {
-                    "structure": before_structure,
-                    "test_results": before_test_results
-                },
-                "after": {
-                    "structure": after_structure,
-                    "test_results": after_test_results
-                },
-                "structure_tests": structure_tests,
-                "equivalence_tests": equivalence_tests,
-                "comparison": {
-                    "before_tests_passed": before_passed,
-                    "after_tests_passed": after_passed,
-                    "structure_tests_passed": structure_tests["success"],
-                    "equivalence_tests_passed": equivalence_tests["success"]
-                }
+            "environment": environment_info(),
+            "results": {
+                "before": before_tests,
+                "after": after_tests,
+                "comparison": comparison
             }
         }
         
@@ -337,18 +340,13 @@ def run_evaluation():
         import traceback
         traceback.print_exc()
         
-        error_test = {
-            "passed": False,
-            "return_code": -1,
-            "output": str(e)
-        }
-        
-        error_test_results = {
+        error_result = {
             "success": False,
             "exit_code": -1,
             "tests": [],
-            "summary": {"raw_output": str(e)},
-            "duration": 0
+            "summary": {"total": 0, "passed": 0, "failed": 0, "errors": 1, "skipped": 0},
+            "stdout": "",
+            "stderr": str(e)
         }
         
         return {
@@ -356,38 +354,21 @@ def run_evaluation():
             "started_at": start.isoformat(),
             "finished_at": end.isoformat(),
             "duration_seconds": (end - start).total_seconds(),
-            "environment": environment_info(),
-            "before": {
-                "tests": error_test,
-                "metrics": {}
-            },
-            "after": {
-                "tests": error_test,
-                "metrics": {}
-            },
-            "comparison": {
-                "passed_gate": False,
-                "improvement_summary": "Evaluation crashed"
-            },
             "success": False,
             "error": str(e),
-            "parameters": {},
-            "metrics": {
-                "before": {
-                    "structure": {},
-                    "test_results": error_test_results
-                },
-                "after": {
-                    "structure": {},
-                    "test_results": error_test_results
-                },
-                "structure_tests": error_test_results,
-                "equivalence_tests": error_test_results,
+            "environment": environment_info(),
+            "results": {
+                "before": error_result,
+                "after": error_result,
                 "comparison": {
                     "before_tests_passed": False,
                     "after_tests_passed": False,
-                    "structure_tests_passed": False,
-                    "equivalence_tests_passed": False
+                    "before_total": 0,
+                    "before_passed": 0,
+                    "before_failed": 0,
+                    "after_total": 0,
+                    "after_passed": 0,
+                    "after_failed": 0
                 }
             }
         }
