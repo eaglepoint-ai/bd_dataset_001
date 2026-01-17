@@ -5,6 +5,7 @@ services:
     build: .
     volumes:
       - ./evaluation/reports:/app/evaluation/reports
+      - ./report.json:/app/report.json
     command: node evaluation/evaluation.js
 
   test-before:

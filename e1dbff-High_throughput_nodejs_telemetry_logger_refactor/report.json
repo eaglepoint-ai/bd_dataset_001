@@ -1,0 +1,40 @@
+{
+  "run_id": "1768641772557-vq8kvyx77",
+  "started_at": "2026-01-17T09:22:52.555Z",
+  "finished_at": "2026-01-17T09:22:52.557Z",
+  "environment": {
+    "node_version": "v18.20.8",
+    "platform": "linux-x64"
+  },
+  "before": {
+    "metrics": {
+      "logger_bytes": 388,
+      "logger_lines": 17,
+      "has_nested_sanitize": true
+    },
+    "tests": {
+      "passed": 4,
+      "failed": 1,
+      "total": 5,
+      "success": false
+    }
+  },
+  "after": {
+    "metrics": {
+      "logger_bytes": 578,
+      "logger_lines": 27,
+      "has_nested_sanitize": false
+    },
+    "tests": {
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "success": true
+    }
+  },
+  "comparison": {
+    "nested_sanitize_removed": true,
+    "logger_lines_delta": -10
+  },
+  "success": true
+}
