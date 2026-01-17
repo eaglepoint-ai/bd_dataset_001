@@ -13,3 +13,5 @@ function logTrade(tradeData) {
     const finalData = sanitize(metadata);
     return JSON.stringify(finalData);
 }
+
+module.exports = { logTrade };
